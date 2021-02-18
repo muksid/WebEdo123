@@ -459,7 +459,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
     Route::post('uw-clients-edit','UwClientsController@storeEdit');
     Route::post('uw-risk-edit','UwClientsController@riskEdit');
-    //Route::post('uw/postKatm','UwClientsController@postKatm');
     Route::post('/uw/cs-app-send', 'UwClientsController@csAppSend');
     Route::post('uw-client-files/upload', 'UwClientsController@fileUpload');
     Route::get('/uw/filePreView/{preViewFile}','UwClientsController@preViewPdf')->name('filePreView');
