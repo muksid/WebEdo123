@@ -5,7 +5,14 @@
 /public/FilesEDO
 /public/FilesEDO2
 /public/katm_files
+/public/admin-lte
+/public/ckeditor
+/public/ClientFiles
+/public/login_temp
 /public/uw*
+/public/js
+/public/images
+/public/css
 /storage/*.key
 /vendor
 /.idea
