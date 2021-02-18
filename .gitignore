@@ -1,0 +1,17 @@
+/node_modules
+/public/hot
+/public/storage
+/public/FilesFTP
+/public/FilesEDO
+/public/FilesEDO2
+/public/katm_files
+/public/uw*
+/storage/*.key
+/vendor
+/.idea
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.env
