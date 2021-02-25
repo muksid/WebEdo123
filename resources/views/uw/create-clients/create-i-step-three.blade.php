@@ -11,6 +11,15 @@
             <li class="active">Mijoz kiritish</li>
         </ol>
 
+        @if (Session::has('message'))
+            <div class="alert alert-{{ Session::get('status') }} alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h3><i class="icon fa fa-{{ Session::get('status') }}"></i> Message!</h3>
+                <h3>{{ Session::get('message') }}</h3>
+                <h2 class="text-maroon">{{ Session::get('data') }}</h2>
+            </div>
+        @endif
+
     </section>
 
     <!-- Main content -->

@@ -379,6 +379,8 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/edo/member-protocols', 'EdoManagementProtocolsController@memberProtocol');
 
+    Route::get('/edo/hr-member-protocols', 'EdoManagementProtocolsController@hrMemberProtocol');
+
     Route::post('/edo/store-protocol','EdoManagementProtocolsController@storeProtocol')->name('edo-store-protocol');
 
     Route::post('/edo/store-edo-protocol','EdoManagementProtocolsController@storeEditProtocol')->name('edo-store-edit-protocol');
@@ -413,6 +415,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('stf-number-post','EdoManagementProtocolsController@stfNumberPost')->name('stf-number-post');
 
     Route::post('stf-main-confirm','EdoManagementProtocolsController@stfMainConfirm')->name('stf-main-confirm');
+
+    Route::post('stf-main-cancel', 'EdoManagementProtocolsController@stfMainCancel')->name('stf-main-cancel');
 
     // my protocols emp
     Route::get('/edo/my-protocols', 'EdoManagementProtocolsController@myProtocol')->name('edo-my-protocols');

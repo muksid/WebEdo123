@@ -183,10 +183,12 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        @if($model->katm->katm_sc_ball > 199)
-                                            <p class="text-green text-bold"><i class="fa fa-arrow-circle-o-up"></i> {{ $model->katm->katm_sc_ball }}</p>
-                                        @else
-                                            <p class="text-maroon text-bold"><i class="fa fa-arrow-circle-o-down"></i> {{ $model->katm->katm_sc_ball }}</p>
+                                        @if($model->katm)
+                                            @if($model->katm->katm_sc_ball > 199)
+                                                <p class="text-green text-bold"><i class="fa fa-arrow-circle-o-up"></i> {{ $model->katm->katm_sc_ball }}</p>
+                                            @else
+                                                <p class="text-maroon text-bold"><i class="fa fa-arrow-circle-o-down"></i> {{ $model->katm->katm_sc_ball }}</p>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>{{ $model->filial->filial_code??'' }} - <span class="badge bg-red-active">{{ $model->filial->title??'' }}</span></td>

@@ -320,6 +320,7 @@ return [
     // Edo message
     'urgent'                    => 'Срочно',
     'limit_512'                 => 'ограничение по тексту 512 символов',
+    'limit_100'                 => 'Ограничение 100 символов',
     // editGiedeTask
     'forward_task'              => 'Переслать задачу',
     'search_executors'          => 'Поиск исполнителей',
@@ -406,6 +407,7 @@ return [
     'qr_mobile'                => 'Сот:',
     'qr_conf_sign'             => 'Подтверждение подписи',
     'qr_you_sign'              => 'Вы хотите подписать письмо?',
+    'qr_cancel'                => 'Вы действительно хотите отменить?',
     'qr_i_sign'                => 'Да, я согласен',
 
     // office department orders

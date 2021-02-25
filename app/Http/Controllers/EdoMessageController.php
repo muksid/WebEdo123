@@ -83,7 +83,7 @@ class EdoMessageController extends Controller
      */
     public function create()
     {
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         # If user kanc or helper
         switch($edoUsers->role_id){
             
@@ -103,7 +103,6 @@ class EdoMessageController extends Controller
                 ->orderBy('edo_users.sort', 'ASC')
                 ->get();
 
-            $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
 
             $role = EdoUserRoles::where('id', $edoUsers->role_id)->firstOrFail();
 
@@ -144,7 +143,7 @@ class EdoMessageController extends Controller
         $lastInsertId = EdoMessage::orderBy('id', 'DESC')->firstOrFail();
         $lastInsertId = $lastInsertId->id+1;
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         // model Message
         $model = new EdoMessage();
 
@@ -303,7 +302,7 @@ class EdoMessageController extends Controller
 
         $redirectTasks = EdoRedirectMessage::where('edo_message_id', $model->id)->where('status', 1)->get();
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->first();
 
         $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 
@@ -455,7 +454,7 @@ class EdoMessageController extends Controller
             ->orderBy('a.sort', 'ASC')
             ->get();
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->first();
 
         $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 
@@ -527,7 +526,7 @@ class EdoMessageController extends Controller
             ->orderBy('a.sort', 'ASC')
             ->get();
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->first();
 
         $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 
@@ -551,7 +550,7 @@ class EdoMessageController extends Controller
     {
         //
         $model = EdoMessage::where('message_hash', $id)->firstOrFail();
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         
         switch($edoUsers->role_id){
             case(1):
@@ -584,8 +583,6 @@ class EdoMessageController extends Controller
                     ->get();
 
                 $redirectTasks = EdoRedirectMessage::where('edo_message_id', $model->id)->where('status', 1)->get();
-
-                $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
 
                 $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 
@@ -1139,7 +1136,7 @@ class EdoMessageController extends Controller
             ->orderBy('a.sort', 'ASC')
             ->get();
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->first();
 
         $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 
@@ -1161,7 +1158,7 @@ class EdoMessageController extends Controller
     // view helper
     public function viewTaskProcess($id, $slug)
     {
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         # If user kanc or helper
         switch($edoUsers->role_id){
             case(1):
@@ -1184,8 +1181,6 @@ class EdoMessageController extends Controller
                     ->whereIn('r.role_code', ['guide', 'director_department'])
                     ->orderBy('a.sort', 'ASC')
                     ->get();
-
-                $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
 
                 $role = EdoUserRoles::where('id', $edoUsers->role_id)->first();
 

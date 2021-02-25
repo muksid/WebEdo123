@@ -90,6 +90,12 @@
                         <i class="glyphicon glyphicon-tasks"></i> <span>@lang('blade.tasks')</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols') }}"><i class="fa fa-reorder"></i>
+                        ОК @lang('blade.protocol_management')<span class="pull-right-container">
+                    </a>
+                </li>
                 <li>
                     <a href="{{ url('/edo/index-protocols') }}"><i class="fa fa-reorder"></i>
                         @lang('blade.protocol_management')<span class="pull-right-container">
@@ -129,6 +135,12 @@
                     <a href="{{ url('/edo/member-protocols') }}"><i class="fa fa-reorder"></i>
                         @lang('blade.protocol_management')<span class="pull-right-container">
                             <small class="label pull-right bg-green">new</small></span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols') }}"><i class="fa fa-reorder"></i>
+                        ОК @lang('blade.protocol_management')<span class="pull-right-container">
+                        <small class="label pull-right bg-red">{{ Auth::user()->countHRProtocols() }}</small></span>
                     </a>
                 </li>
                 <li>
@@ -269,9 +281,19 @@
                 @if(strpos( Auth::user()->roles, 'main_staff'))
                     <li>
                         <a href="{{ route('edo-staff-protocols') }}">
-                            <i class="fa fa-reorder"></i>Кадр @lang('blade.protocol_management')
+                            <i class="fa fa-reorder"></i>Новые @lang('blade.protocol_management')
+                            <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small></span>
                         </a>
                     </li>
+                @endif
+
+                @if(Auth::user()->protocolMember && !(strpos( Auth::user()->roles, 'main_staff')))
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols') }}"><i class="fa fa-reorder"></i>
+                        ОК @lang('blade.protocol_management')<span class="pull-right-container">
+                        <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small></span>
+                    </a>
+                </li>
                 @endif
                 <li>
                     <a href="{{ url('/edo/member-protocols') }}">
@@ -337,6 +359,24 @@
                         <i class="glyphicon glyphicon-forward"></i> <span>@lang('blade.forwarded_docs')</span>
                     </a>
                 </li>
+                @if(strpos( Auth::user()->roles, 'main_staff'))
+                    <li>
+                        <a href="{{ route('edo-staff-protocols') }}">
+                            <i class="fa fa-reorder"></i>Новые @lang('blade.protocol_management')
+                            <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small></span>
+                        </a>
+                    </li>
+                @endif
+
+                @if(Auth::user()->protocolMember && !(strpos( Auth::user()->roles, 'main_staff')))
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols') }}"><i class="fa fa-reorder"></i>
+                        ОК @lang('blade.protocol_management')<span class="pull-right-container">
+                        <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small></span>
+                    </a>
+                </li>
+                @endif
+
                 <li>
                     <a href="{{ url('/edo/member-protocols') }}">
                         <i class="fa fa-reorder"></i> @lang('blade.protocol_management')

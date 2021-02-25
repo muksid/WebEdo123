@@ -18,6 +18,7 @@ class EdoManagementProtocols extends Model
         'title',
         'text',
         'protocol_hash',
+        'comments',
         'status'
     ];
 

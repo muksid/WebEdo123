@@ -27,9 +27,8 @@ class EdoJournalController extends Controller
             case 17:
             case 18:
             case 19:
-                $user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
 
-                $models = EdoJournals::where('depart_id', $user->department_id)->orderBy('id', 'DESC')->get();
+                $models = EdoJournals::where('depart_id', $edoUsers->department_id)->orderBy('id', 'DESC')->get();
 
                 return view('edo.edo-journals.index',compact('models'));
 
@@ -45,7 +44,7 @@ class EdoJournalController extends Controller
 
     public function viewTasks($id)
     {
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
         # If user kanc or helper
         if($edoUsers->role_id === 2){
 
@@ -153,7 +152,7 @@ class EdoJournalController extends Controller
             'title' => 'required'
         ]);
 
-        $user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $user = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
 
         $model = new EdoJournals();
 
@@ -194,7 +193,7 @@ class EdoJournalController extends Controller
     public function edit($id)
     {
         //
-        $user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $user = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
 
         $model = EdoJournals::where('depart_id', $user->department_id)->where('id',$id)->first();
 
@@ -219,7 +218,7 @@ class EdoJournalController extends Controller
             'title' => 'required'
         ]);
 
-        $user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $user = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
 
         $model = EdoJournals::find($id);
 

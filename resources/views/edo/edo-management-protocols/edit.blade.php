@@ -55,7 +55,7 @@
                                 <div class="form-group {{ $errors->has('user_id') ? 'has-error' : '' }}">
                                     <label>User name <span class=""></span></label>
 
-                                    <select name="user_id" id="user_id" class="form-control select2" style="width: 100%;">
+                                    <select name="user_id" id="user_id" class="form-control select2" style="width: 100%;" required>
                                         <option value="{{ $model->user_id }}" selected="selected">{{ $model->user->lname.' '.$model->user->fname }}</option>
                                         @foreach($users as $key => $value)
                                             <option value="{{ $value->id }}">{{ $value->full_name }}</option>
@@ -69,8 +69,7 @@
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('qr_name') ? 'has-error' : '' }}">
                                     <label>QR Name<span class=""></span></label>
-                                    <input type="text" id="qr_name" name="qr_name"
-                                           class="form-control" value="{{ $model->qr_name }}">
+                                    <input type="text" id="qr_name" name="qr_name" class="form-control" value="{{ $model->qr_name }}" required>
                                     @if ($errors->has('qr_name'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('qr_name') }}</strong>
@@ -80,39 +79,11 @@
                                 </div>
                             </div>
                             <!-- /.box-header -->
-                            <div class="box-body">
-                                <div class="form-group {{ $errors->has('qr_hash') ? 'has-error' : '' }}">
-                                    <label>QR Hash<span class=""></span></label>
-                                    <input type="text" id="qr_hash" name="qr_hash"
-                                           class="form-control" value="{{ $model->qr_hash }}">
-                                    @if ($errors->has('qr_hash'))
-                                        <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('qr_hash') }}</strong>
-                                    </span>
-                                    @endif
 
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <div class="form-group {{ $errors->has('qr_file') ? 'has-error' : '' }}">
-                                    <label>QR File<span class=""></span></label>
-                                    <input type="text" id="qr_file" name="qr_file"
-                                           class="form-control" value="{{ $model->qr_file }}">
-                                    @if ($errors->has('qr_file'))
-                                        <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('qr_file') }}</strong>
-                                    </span>
-                                    @endif
-
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('title') ? 'has-error' : '' }}">
                                     <label>Title<span class=""></span></label>
-                                    <input type="text" id="title" name="title"
-                                           class="form-control" value="{{ $model->title }}">
+                                    <input type="text" id="title" name="title" class="form-control" value="{{ $model->title }}" required>
                                     @if ($errors->has('title'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('title') }}</strong>
@@ -124,8 +95,7 @@
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('user_sort') ? 'has-error' : '' }}">
                                     <label>User sort<span class=""></span></label>
-                                    <input type="number" id="user_sort" name="user_sort"
-                                           class="form-control" value="{{ $model->user_sort }}">
+                                    <input type="number" id="user_sort" name="user_sort" class="form-control" value="{{ $model->user_sort }}" required>
                                     @if ($errors->has('user_sort'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('user_sort') }}</strong>
@@ -153,11 +123,11 @@
                             <!-- /.box-body -->
                             <div class="box-footer">
                                 <div class="pull-right">
-                                    <a href="/edo-management-protocols"class="btn btn-default"><i class="fa fa-remove"></i> Bekor
-                                        qilish
+                                    <a href="/edo-management-protocols"class="btn btn-default">
+                                        <i class="fa fa-remove"></i> Bekor qilish
                                     </a>
-                                    <button type="submit" class="btn btn-primary"><i class="fa fa-pencil"></i>
-                                        O`zgartirish
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-pencil"></i> O`zgartirish
                                     </button>
                                 </div>
                             </div>

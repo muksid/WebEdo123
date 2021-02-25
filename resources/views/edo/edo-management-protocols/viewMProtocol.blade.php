@@ -49,8 +49,7 @@
         <!-- Main content -->
         <section class="content">
             <div class="row">
-                <div class="col-md-1"></div>
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">@lang('blade.protocol_management')</h3>
@@ -79,15 +78,13 @@
                                             @lang('blade.management_guide')
                                         </span>
                                         @if(!empty($guide) && ($guide->status == 0 || $guide->status == 1))
-                                            <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 60px; width:auto">
+                                            <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                         @elseif($guide->status == -1)
                                             <span class="label label-danger"> Rad etildi</span>
                                             <br>
                                             <span><i class="text-muted">Izox:</i> {{ $guide->descr }}</span>
                                         @elseif($guide->status == 2)
-                                            <img class="attachment-img stf-img-center-image"
-                                                src="/FilesQR/{{$guide->managementMembers->qr_file??'' }}"
-                                                alt="{{$guide->user->lname}}" style="height: 60px; width:auto">
+                                            {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name??''.'/'.$guide->managementMembers->qr_hash??''); !!}
                                         @endif
                                             <span class="description-header text-right stf-vertical-middle" style="padding-left:30px">
                                                 _____________ {{ $guide->user->substrUserName($guide->user_id) }} 
@@ -126,12 +123,12 @@
                                     @foreach($model->viewMembers as $key => $value)
                                         <div class="col-sm">
                                             <div class="description-block">
-                                                <span class="description-header text-left stf-vertical-middle" style="padding-right: 60px">
+                                                <span class="description-header text-left stf-vertical-middle" style="padding-right: 65px">
                                                     {{ $value->user->substrUserName($value->user_id) }} _____________ 
                                                 </span>
 
                                                 @if($value->status == 1)
-                                                    <img class="attachment-img" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 60px; width:auto">
+                                                    <img class="attachment-img" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                                     @if($value->user_id == \Illuminate\Support\Facades\Auth::id())
                                                         <button type="button" class="btn btn-xs btn-flat btn-primary" data-id="{{ $value->id }}" id="confirmModal">
                                                             @lang('blade.approve')
@@ -154,9 +151,11 @@
                                                         </button>
                                                     @endif
                                             @else
-                                                <img class="attachment-img"
-                                                     src="/FilesQR/{{$value->managementMembers->qr_file??'' }}"
-                                                     alt="{{$value->user->lname}}" style="height: 60px; width:auto">
+                                                <?php 
+                                                    $guide_qr_name = $guide->managementMembers->qr_name??'';
+                                                    $guide_qr_hash = $guide->managementMembers->qr_hash??'';
+                                                ?>
+                                                {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide_qr_name.'/'.$guide_qr_hash); !!}
 
                                             @endif
                                             </div>

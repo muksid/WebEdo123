@@ -162,6 +162,21 @@
 
                                 </div>
 
+                                <div class="col-md-3 col-sm-6 col-xs-12">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="slider-label">Kredit Turi<sup
+                                                        class="text-red">*</sup></label>
+                                            <select name="calcLoanType" id="calcLoanType" class="form-control select2"
+                                                    style="width: 100%;">
+                                                <option value="1">Difference calc</option>
+                                                <option value="2">Annuity calc</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
                                 <div class="col-md-12 col-sm-12 col-xs-12">
                                     <div class="form-group">
                                         <button id="submit" class="btn btn-success"><i
@@ -252,6 +267,8 @@
                 calcSumma = $('#calcSumma').val();
                 calcLoanInterest = $('#calcLoanInterest').val();
                 calcLoanMonth = $('#calcLoanMonth').val();
+                calcLoanType = $('#calcLoanType').val();
+
                 $.ajax({
                     url: '/uw/calc-form',
                     type: 'POST',
@@ -260,13 +277,15 @@
                         "_token": "{{ csrf_token() }}",
                         calcSumma: calcSumma,
                         calcLoanInterest: calcLoanInterest,
-                        calcLoanMonth: calcLoanMonth
+                        calcLoanMonth: calcLoanMonth,
+                        calcLoanType: calcLoanType
                     },
                     success: function (res) {
                         $('#result_calc_div').show();
                         $('.calc-table').html(res.table_data);
                         $('#total_summ').html(res.total_summ);
                         $('#total_month').html(res.total_month);
+                        $('#total_interest').html(res.total_interest);
                         $('#loanInterset').html(curr + ' %');
 
                     },

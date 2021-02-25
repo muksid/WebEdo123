@@ -10,6 +10,8 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
 
 class EdoManagementProtocolsController extends Controller
 {
@@ -67,16 +69,20 @@ class EdoManagementProtocolsController extends Controller
     {
         //
         $this->validate($request, [
-            'user_id' => 'required',
-            'qr_name' => 'required',
-            'qr_file' => 'required',
-            'qr_hash' => 'required'
+            'user_id'   => 'required',
+            'qr_name'   => 'required',
+            'title'     => 'required',
+            'user_sort' => 'required',
+            'status'    => 'required'
         ]);
 
-        $data = $request->all();
-
-        $model = new EdoManagementMembers($data);
-
+        $model              = new EdoManagementMembers();
+        $model->user_id     = $request->input('user_id');
+        $model->qr_name     = $request->input('qr_name');
+        $model->qr_hash     = Hash::make($request->input('qr_name'));
+        $model->title       = $request->input('title');
+        $model->user_sort   = $request->input('user_sort');
+        $model->status      = $request->input('status');
         $model->save();
 
         return back()->with('success', 'Management user muvaffaqiyatli yaratildi');
@@ -169,16 +175,56 @@ class EdoManagementProtocolsController extends Controller
     public function memberProtocol()
     {
         //
-        $user = EdoManagementMembers::where('user_id', Auth::id())->where('status',1)->first();
+        $user = EdoManagementMembers::where('user_id', Auth::id())->first();
 
-        if ($user != null || Auth::id() == 199)
+        if ($user != null || Auth::id() == 199 )
         {
 
             $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
+                ->whereHas('protocol', function($query){
+                    $query->where('protocol_type',null);
+                })
                 ->whereIn('status', [-1,1,2,3])
                 ->orderBy('created_at', 'DESC')->get();
 
             return view('edo.edo-management-protocols.memberProtocol',compact('models'));
+
+        }
+        else
+        {
+            return response()->view('errors.' . '404', [], 404);
+
+        }
+    }
+
+    public function hrMemberProtocol()
+    {
+        //
+        $user = EdoManagementMembers::where('user_id', Auth::id())->first();
+        if ($user != null || Auth::id() == 199 )
+        {
+            if($user->user_id == 145){
+
+                $models = EdoManagementProtocolMembers::where('user_id',1)
+                ->whereHas('protocol', function($query){
+                    $query->where('protocol_type', 11);
+                })
+                // ->where('protocol_type', 11)
+                ->whereIn('status', [-1,1,2,3])
+                ->orderBy('created_at', 'DESC')->get();
+                return view('edo.edo-management-protocols.memberProtocol',compact('models'));
+
+            }else{
+                $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
+                ->whereHas('protocol', function($query){
+                    $query->where('protocol_type', 11);
+                })
+                // ->where('protocol_type', 11)
+                ->whereIn('status', [-1,1,2,3])
+                ->orderBy('created_at', 'DESC')->get();
+
+            return view('edo.edo-management-protocols.memberProtocol',compact('models'));
+            }
 
         }
         else
@@ -468,10 +514,11 @@ class EdoManagementProtocolsController extends Controller
     {
         //
         $request->validate([
-            'user_id' => 'required',
-            'qr_name' => 'required',
-            'qr_file' => 'required',
-            'qr_hash' => 'required'
+            'user_id'   => 'required',
+            'qr_name'   => 'required',
+            'title'     => 'required',
+            'user_sort' => 'required',
+            'status'    => 'required'
         ]);
 
         $data = $request->all();
@@ -732,18 +779,53 @@ class EdoManagementProtocolsController extends Controller
 
         $id = $request->input('model_id');
 
-        $model = EdoManagementProtocols::find($id);
+        $modelHR = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_id', Auth::id())->first();
+        
+        if($modelHR){
+            $model = EdoManagementProtocols::find($id);
 
-        $model->update(['status' => 2]);
+            $model->update(['status' => 2]);
+    
+            $modelMem = EdoManagementProtocolMembers::where('protocol_id', $id);
+    
+            $modelMem->update(['status' => 1]);
 
-        $modelMem = EdoManagementProtocolMembers::where('protocol_id', $id);
+            $modelHR = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_id', Auth::id())->first()->update(['status' => 2]);
 
-        $modelMem->update(['status' => 1]);
+        }else{
+            return response()->json(array(
+                'success' => false,
+                'msg'   => 'Hujjatda siz ishtirok etmagansiz!')
+            ); 
+        }
 
         return response()->json(array(
                 'success' => true,
-                'msg' => 'Xodim buyrug`i muvaffaqiyatli tasdiqlandi')
+                'msg'   => 'Xodim buyrug`i muvaffaqiyatli tasdiqlandi')
         );
+    }
+
+    public function stfMainCancel(Request $request)
+    {
+        $this->validate($request, [
+            'protocol_id' => 'required',
+            'cancel_text' => 'required'
+        ]);
+
+        $id     = $request->input('protocol_id');
+        $text   = $request->input('cancel_text');
+
+        $model = EdoManagementProtocols::find($id);
+        if($model){
+            $model->update([
+                'comments'  => $text,
+                'status'    => -1
+            ]);
+            return redirect(route('edo-staff-protocols'))->with('success', 'Protocol muvoffaqiyatli bekor qilindi!');
+        }else{
+            return back()->with('error', 'Protocol Not Found');
+        }
+
     }
 
 }

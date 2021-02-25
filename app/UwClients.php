@@ -41,6 +41,7 @@ class UwClients extends Model
         'live_number',
         'job_address',
         'status',
+        'reg_status',
         'is_inps',
         'iabs_num',
         'descr'

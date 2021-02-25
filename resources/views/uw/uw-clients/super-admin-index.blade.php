@@ -131,6 +131,7 @@
                                 <th>STIR</th>
                                 <th>Summa</th>
                                 <th>Status</th>
+                                <th>OnlineReg</th>
                                 <th>Ball</th>
                                 <th>Filial</th>
                                 <th>Inspektor</th>
@@ -175,6 +176,21 @@
                                             @else
                                                 <span class="badge bg-red-active">Aniqlanmagan</span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            <div class="btn-group center-block" data-toggle="btn-toggle">
+                                                @if($model->reg_status == 0)
+                                                    <button type="button" class="btn btn-default btn-sm">
+                                                        <i class="fa fa-square text-red"></i>
+                                                    </button>
+                                                @elseif($model->reg_status == 1)
+                                                    <button type="button" class="btn btn-default btn-sm active">
+                                                        <i class="fa fa-square text-green"></i>
+                                                    </button>
+                                                @else
+                                                    <span class="badge bg-red-active">Not found</span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="text-center">
                                             @if(isset($model->katm->katm_sc_ball))
@@ -232,6 +248,31 @@
                                                             <select id="status" class="form-control select2" name="status" style="width: 100%">
                                                             </select>
 
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label class="text-maroon">KATM Online Registration <i class="fa fa-exclamation"></i></label>
+                                                            <select id="reg_status" class="form-control select2" name="reg_status" style="width: 100%">
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label class="text-yellow">KATM Status</label>
+                                                            <select id="reg_katm" class="form-control" name="reg_katm" style="width: 100%">
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label class="text-yellow">INPS Status</label>
+                                                            <select id="reg_inps" class="form-control" name="reg_inps" style="width: 100%">
+                                                            </select>
                                                         </div>
                                                     </div>
 
@@ -361,6 +402,28 @@
 
                         $('#model_id').val(model_id);
 
+                        $('#reg_katm').html(
+                            '<option value="1" selected>KATM status</option>'+
+                            '<option value="0">O`chirish</option>'
+                        );
+
+                        $('#reg_inps').html(
+                            '<option value="1" selected>INPS status</option>'+
+                            '<option value="0">O`chirish</option>'
+                        );
+
+                        if (data.model.reg_status == 0){
+                            $('#reg_status').html(
+                                '<option value="'+data.model.reg_status+'" selected>OnlineReg (yoniq)</option>'+
+                                '<option value="1">OnlineReg (o`chik)</option>'
+                            );
+                        }else if (data.model.reg_status == 1) {
+                            $('#reg_status').html(
+                                '<option value="'+data.model.reg_status+'" selected>OnlineReg (o`chik)</option>'+
+                                '<option value="0">OnlineReg (yoniq)</option>'
+                            );
+                        }
+
                         if (data.model.status == -1){
                             $('#status').html(
                                 '<option value="'+data.model.status+'" selected>O`chirilgan</option>'+
@@ -443,7 +506,7 @@
                             type: "POST",
                             dataType: 'json',
                             success: function (data) {
-                                //console.log(data);
+                                console.log(data);
                                 var model =
                                     '<tr id="rowId_' + data.model.id + '">' +
                                     '<td>' + data.model.id + '</td>' +
@@ -456,6 +519,7 @@
                                     '<td>' + data.model.family_name +' '+data.model.name+' '+data.model.patronymic+ '</td>' +
                                     '<td>' + data.model.inn + '</td>' +
                                     '<td>' + formatCurrency(data.model.summa) + '</td>' +
+                                    '<td><span class="badge bg-yellow-active">Yangi</span></td>' +
                                     '<td><span class="badge bg-yellow-active">Yangi</span></td>' +
                                     '<td>' + data.sc_ball + '</td>' +
                                     '<td>' + data.model.branch_code + '</td>'+

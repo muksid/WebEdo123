@@ -320,6 +320,7 @@ return [
     // Edo message
     'urgent'                    => 'Shoshilinch',
     'limit_512'                 => 'matn chegarasi 512 ta belgidan iborat',
+    'limit_100'                 => 'Chegara 100 ta belgi',
     // editGiedeTask
     'forward_task'              => 'Vazifani yo`naltirish',
     'search_executors'          => 'Ijrochilarni izlash',
@@ -402,6 +403,7 @@ return [
     'qr_mobile'                => 'Сот:',
     'qr_conf_sign'             => 'Imzoni tasdiqlash',
     'qr_you_sign'              => 'Siz xujjatni imzolamochimisiz?',
+    'qr_cancel'                => 'Hujjatni bekor qilmoqchimisiz?',
     'qr_i_sign'                => 'Xa, roziman',
     'office'                   => 'Kanselariya',
     'not_found'                => 'Yozuvlar topilmadi',

@@ -4,7 +4,7 @@
     <div class="content-header">
         <!-- Content Header (Page header) -->
         <section class="content-header">
-            <h1>@lang('blade.hr_orders')
+            <h1>@lang('blade.hr_orders') * {{ $model->title }}
                 <small></small>
             </h1>
             <ol class="breadcrumb">
@@ -37,8 +37,8 @@
                                 <h3>{{ $message }}</h3>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-info closeModal" data-dismiss="modal"><i
-                                            class="fa fa-check-circle"></i> Ok
+                                <button type="button" class="btn btn-info closeModal" data-dismiss="modal">
+                                    <i class="fa fa-check-circle"></i> Ok
                                 </button>
                             </div>
                         </div>
@@ -51,9 +51,8 @@
         <!-- Main content -->
         <section class="content">
             <div class="row">
-                <div class="col-md-1"></div>
 
-                <div class="col-md-6" id="printProtocol">
+                <div class="col-md-7" id="printProtocol">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <!-- <h3 class="box-title">@lang('blade.hr_orders')</h3>
@@ -69,10 +68,7 @@
                         </div>
 
                         <div class="box-body no-padding">
-                            <div class="mailbox-read-info text-center">
-                                <h3>{{ $model->title }}</h3>
-                            </div>
-
+                            
                             <div class="mailbox-read-message">
                                 <?php echo $model->text ?? ''; ?>
                             </div>
@@ -81,25 +77,21 @@
                         <div class="col-md-12">
                             <div class="row">
                                 <div class="description-block">
-                                    <?php 
-                                        // dd($guide);
-                                    ?>
                                     @if($guide)
                                         <span class="description-header text-left stf-vertical-middle" style="padding-right:30px">
                                             {{ $guide->user->job_title??'' }}
                                         </span>
                                         @if(!empty($guide) && ($guide->status == 0 || $guide->status == 1))
-                                            <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 60px; width:auto">
+                                            <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                         @elseif($guide->status == -1)
                                             <span class="label label-danger"> Rad etildi</span>
                                             <br>
                                             <span><i class="text-muted">Izox:</i> {{ $guide->descr }}</span>
                                         @elseif($guide->status == 2)
-                                            <img class="attachment-img stf-img-center-image"
-                                                src="/FilesQR/{{$guide->managementMembers->qr_file??'' }}"
-                                                alt="{{$guide->user->lname}}" style="height: 60px; width:auto">
+                                            {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.'/'.$guide->managementMembers->qr_hash); !!}                                        
+
                                         @endif
-                                        <span class="description-header text-right stf-vertical-middle" style="padding-left:30px">
+                                        <span class="description-header text-right stf-vertical-middle" style="padding-left:20px">
                                             _____________ {{ $guide->user->substrUserName($guide->user_id) }}
                                         </span>
                                     @endif
@@ -114,13 +106,11 @@
                                             @if($model->status == 1)
                                                 <div class="box-footer">
                                                     <div class="pull-right">
-                                                        <button type="button" id="cancel-protocol"
-                                                                data-id="{{ $model->id }}" class="btn btn-flat btn-default">
+                                                        <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
                                                             <i class="fa fa-ban"></i> @lang('blade.cancel')
                                                         </button>
 
-                                                        <button type="button" id="confirm-protocol"
-                                                                data-id="{{ $model->id }}" class="btn btn-flat btn-info">
+                                                        <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
                                                             <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
                                                         </button>
                                                     </div>
@@ -143,7 +133,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <div class="box box-primary">
                         <div class="box-body" id="printMembers">
                             <h4>@lang('blade.management_members'):</h4>
@@ -153,29 +143,29 @@
 
                                     <div class="col-sm">
                                         <div class="description-block">
-                                            <span class="description-header text-left stf-vertical-middle" style="padding-right: 60px">
+                                            <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
                                                 {{ $value->user->substrUserName($value->user_id) }} _____________
                                             </span>
 
                                             @if($value->status == 1)
-                                            <img class="attachment-img stf-img-center-image pull-right" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 60px; width:auto">
+                                            <img class="attachment-img stf-img-center-image pull-right" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @if($value->user_id == \Illuminate\Support\Facades\Auth::id())
 
-                                                <a href="{{ route('confirm-protocol', $value->id) }}" type="submit" class="btn btn-dropbox pull-right">
+                                                <!-- <a href="{{ route('confirm-protocol', $value->id) }}" type="submit" class="btn btn-dropbox pull-right">
                                                     <i class="glyphicon glyphicon-ok"></i> @lang('blade.approve')
                                                 </a>
                                                 <button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#cancelModal">
                                                     <i class="fa fa-ban"></i> @lang('blade.cancel')
-                                                </button>
+                                                </button> -->
                                             @endif
                                             @elseif($value->status == -1)
                                                 <span class="label label-danger"> Rad etildi</span>
                                                 <br>
                                                 <span><i class="text-muted">Izox:</i> {{ $value->descr }}</span>
                                             @elseif($value->status == 0)
-                                                <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 60px; width:auto">
+                                                <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @else
-                                                <img class="attachment-img stf-img-center-image" src="/FilesQR/{{$value->managementMembers->qr_file??'' }}" alt="{{$value->user->lname}}" style="height: 60px; width:auto">
+                                                {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.'/'.$guide->managementMembers->qr_hash); !!}
                                             @endif
                                         </div>
                                     </div>
@@ -195,13 +185,41 @@
                 </div>
             </div>
 
+            {{--Cancel modal--}}
+            <div class="modal fade modal-warning" id="cancel-modal" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-check-circle-o"></i> @lang('blade.cancel')</h4>
+                        </div>
+                        <form id="cancelForm" name="cancelForm" action="{{ route('stf-main-cancel') }}" method="POST">
+                            @csrf
+                            <div class="modal-body">
+                                <p class="text-center">@lang('blade.qr_cancel')</p>
+                                <input type="text" name="protocol_id" id="protocol_id_to_cancel" hidden>
+                                <label for="cancelText">@lang('blade.limit_100') <span class="text-red">*</span> </label>
+                                <textarea type="text" class="text-muted" name="cancel_text" id="cancelText" maxlength="100"  rows="3" cols="35" required></textarea>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"> @lang('blade.cancel') </button>
+                                <button type="submit" class="btn btn-outline" id="" value=""> @lang('blade.qr_i_sign') </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             {{--Confirm modal--}}
             <div class="modal fade modal-info" id="confirm-modal" aria-hidden="true">
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span></button>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                             <h4 class="modal-title"><i class="fa fa-check-circle-o"></i> @lang('blade.confirm')</h4>
                         </div>
                         <form id="confirmForm" name="confirmForm">
@@ -210,10 +228,11 @@
                                 <p id="hr_id"></p>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-outline pull-left"
-                                        data-dismiss="modal">@lang('blade.cancel')</button>
-                                <button type="submit" class="btn btn-outline" id="btn-save"
-                                        value="create">@lang('blade.qr_i_sign')
+                                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">
+                                    @lang('blade.cancel')
+                                </button>
+                                <button type="submit" class="btn btn-outline" id="btn-save" value="create">
+                                    @lang('blade.qr_i_sign')
                                 </button>
                             </div>
                         </form>
@@ -240,6 +259,29 @@
                     </div>
                 </div>
             </div>
+
+            {{--Error modal--}}
+            <div class="modal fade modal-danger" id="danger-modal" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <h4 class="modal-title">@lang('blade.hr_orders')</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p id="danger-msg" class="text-center"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline pull-right" data-dismiss="modal">
+                                @lang('blade.close')
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- jQuery 2.2.3 -->
             <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
@@ -336,9 +378,13 @@
 
                                     success: function (data) {
 
-                                        $('#success-msg').prepend(data.msg);
-
-                                        $('#success-modal').modal('show');
+                                        if(data.success){
+                                            $('#success-msg').prepend(data.msg);
+                                            $('#success-modal').modal('show');
+                                        }else{
+                                            $('#danger-msg').prepend(data.msg);
+                                            $('#danger-modal').modal('show');
+                                        }
 
                                         setTimeout(function () {
                                             window.location.href = "/edo/staff-protocols";
@@ -355,6 +401,13 @@
                             }
                         })
                     }
+
+                    $('#cancel-protocol').unbind().click(function(){
+                        let id = $(this).data('id')
+                        $('#protocol_id_to_cancel').val(id)
+                        let i = $('#protocol_id_to_cancel').val(id)
+
+                    })
 
                 });
             </script>

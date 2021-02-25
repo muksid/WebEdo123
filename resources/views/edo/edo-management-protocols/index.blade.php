@@ -86,11 +86,12 @@
                                     <td>{{ $model->qr_hash }}</td>
                                     <td>
                                         <div class="user-block">
-                                            @if(!empty($model->qr_file))
+                                            {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$model->qr_name.'/'.$model->qr_hash); !!}
+                                            <!-- @if(!empty($model->qr_file))
                                                 <img class="img-rounded" src="/FilesQR/{{ $model->qr_file }}" alt="User QR">
                                             @else
                                                 <img class="img-circle" src="/admin-lte/dist/img/user.png" alt="User QR">
-                                            @endif
+                                            @endif -->
                                         </div>
 
                                     </td>
@@ -108,14 +109,17 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <form action="{{ url('edo-management-protocols/'.$model->id) }}" method="POST" style="display: inline-block">
+                                        <!-- <form action="{{ url('edo-management-protocols/'.$model->id) }}" method="POST" style="display: inline-block">
                                             {{ csrf_field() }}
                                             {{ method_field('DELETE') }}
 
                                             <button type="submit" id="delete-group-{{ $model->id }}" class="btn btn-danger">
                                                 <i class="fa fa-btn fa-trash"></i>
                                             </button>
-                                        </form>
+                                        </form> -->
+                                        <span class="text-red">
+                                            Trash Commented
+                                        </span>
                                     </td>
                                 </tr>
                             @endforeach

@@ -54,8 +54,8 @@
                                 <div class="form-group {{ $errors->has('user_id') ? 'has-error' : '' }}">
                                     <label>User <span class=""></span></label>
 
-                                    <select name="user_id" id="user_id" class="form-control select2" style="width: 100%;">
-                                        <option selected="selected">Select users</option>
+                                    <select name="user_id" id="user_id" class="form-control select2" style="width: 100%;" required>
+                                        <option selected="selected" value="">Select users</option>
                                         @foreach($users as $key => $value)
                                             <option value="{{ $value->id }}">{{ $value->full_name }}</option>
 
@@ -68,8 +68,7 @@
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('qr_name') ? 'has-error' : '' }}">
                                     <label>QR Name<span class=""></span></label>
-                                    <input type="text" id="qr_name" name="qr_name"
-                                           class="form-control" placeholder="qr code name">
+                                    <input type="text" id="qr_name" name="qr_name" class="form-control" placeholder="qr code name" required>
                                     @if ($errors->has('qr_name'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('qr_name') }}</strong>
@@ -78,40 +77,11 @@
 
                                 </div>
                             </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <div class="form-group {{ $errors->has('qr_hash') ? 'has-error' : '' }}">
-                                    <label>QR Hash<span class=""></span></label>
-                                    <input type="text" id="qr_hash" name="qr_hash"
-                                           class="form-control" placeholder="user hash">
-                                    @if ($errors->has('qr_hash'))
-                                        <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('qr_hash') }}</strong>
-                                    </span>
-                                    @endif
-
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <div class="form-group {{ $errors->has('qr_file') ? 'has-error' : '' }}">
-                                    <label>QR File<span class=""></span></label>
-                                    <input type="text" id="qr_file" name="qr_file"
-                                           class="form-control" placeholder="qr file">
-                                    @if ($errors->has('qr_file'))
-                                        <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('qr_file') }}</strong>
-                                    </span>
-                                    @endif
-
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
+                            
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('title') ? 'has-error' : '' }}">
                                     <label>Title<span class=""></span></label>
-                                    <input type="text" id="title" name="title"
-                                           class="form-control" placeholder="title">
+                                    <input type="text" id="title" name="title" class="form-control" placeholder="title" required>
                                     @if ($errors->has('title'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('title') }}</strong>
@@ -124,8 +94,7 @@
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('user_sort') ? 'has-error' : '' }}">
                                     <label>User sort<span class=""></span></label>
-                                    <input type="number" id="user_sort" name="user_sort"
-                                           class="form-control" placeholder="user_sort">
+                                    <input type="number" id="user_sort" name="user_sort" class="form-control" placeholder="user_sort" required>
                                     @if ($errors->has('user_sort'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('user_sort') }}</strong>
@@ -139,7 +108,7 @@
                                 <div class="form-group {{ $errors->has('status') ? 'has-error' : '' }}">
                                     <label>status<span class=""></span></label>
 
-                                    <select name="status" id="status" class="form-control" style="width: 100%;">
+                                    <select name="status" id="status" class="form-control" style="width: 100%;" required>
                                         <option value="1" selected="selected">Active</option>
                                         <option value="0">Passive</option>
                                     </select>

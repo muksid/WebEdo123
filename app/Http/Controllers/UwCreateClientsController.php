@@ -11,6 +11,7 @@ use App\UwClients;
 use App\UwLoanTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UwCreateClientsController extends Controller
 {
@@ -194,8 +195,13 @@ class UwCreateClientsController extends Controller
      */
     public function postCreateStepThree(Request $request)
     {
-
+        //
         $model = $request->session()->get('model');
+
+        $checkModel = UwClients::where('inn', $model->inn)
+            ->orWhere(DB::raw("CONCAT(`document_serial`,`document_number`)"), $model->document_serial.$model->document_serial)
+            ->orWhere('pin', $model->pin)
+            ->first();
 
         $inn = preg_replace('/[^A-Za-z0-9]/', '', $model->inn);
         $phone = preg_replace('/[^A-Za-z0-9]/', '', $model->phone);
@@ -231,6 +237,17 @@ class UwCreateClientsController extends Controller
         $model->loan_type_id = $loanType->id;
         $model->summa = $summa;
         $model->status = 1;
+
+        if ($checkModel){
+            //$request->session()->forget('model');
+
+            return back()->with(
+                [
+                    'status' => 'warning',
+                    'message' => 'Mijoz tizimda mavjud Risk Adminstratorga murojaat qiling!!!',
+                    'data' => 'Inspektor: '.$checkModel->user->lname.' '.$checkModel->user->fname.' (MFO: '.$checkModel->branch_code.')',
+                ]);
+        }
 
         $model->save();
 

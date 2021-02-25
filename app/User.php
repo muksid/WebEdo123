@@ -137,4 +137,27 @@ class User extends Authenticatable
 
     }
 
+    public function protocolMember()
+    {
+        return $this->hasOne(EdoManagementMembers::class, 'user_id', 'id');
+    }
+
+    public function hasManyProtocols()
+    {
+        $count_unsigned_protocols = EdoManagementProtocols::where('protocol_type', 11)->where('status', 1)->count();
+        return $count_unsigned_protocols;
+    }
+
+    public function countHRProtocols()
+    {   
+        $user_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
+                $query->where('protocol_type', 11);
+            })
+            ->where('user_id', Auth::id())
+            ->where('status', 1)
+            ->count();
+
+        return $user_count;
+    }
+
 }

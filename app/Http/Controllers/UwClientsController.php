@@ -232,6 +232,7 @@ class UwClientsController extends Controller
         // Risk admin comments
         $modelComment = new UwClientComments();
         $modelComment->uw_clients_id = $id;
+        $modelComment->user_id = Auth::id();
         $modelComment->claim_id = $model->claim_id;
         $modelComment->title = 'Confirmed';
         $modelComment->comment_type = 3;
@@ -253,6 +254,7 @@ class UwClientsController extends Controller
         // Risk admin comments
         $modelComment = new UwClientComments();
         $modelComment->uw_clients_id = $id;
+        $modelComment->user_id = Auth::id();
         $modelComment->claim_id = $model->claim_id;
         $modelComment->title = $descr;
         $modelComment->comment_type = 1;
@@ -355,15 +357,28 @@ class UwClientsController extends Controller
         $model = UwClients::find($row_id);
         $model->update([
             'status' => $request->status,
+            'reg_status' => $request->reg_status,
             'user_id' => $request->cs_user_id
         ]);
+
+        // update katm
+        if ($request->reg_katm == 0){
+            $modelKatm = UwKatmClients::where('uw_clients_id', $row_id);
+            $modelKatm->update(['status' => $request->reg_katm]);
+        }
+
+        // update inps
+        if ($request->reg_inps == 0){
+            $modelInps = UwInpsClients::where('uw_clients_id', $row_id);
+            $modelInps->update(['status' => $request->reg_inps]);
+        }
 
         // create comment on update
         $comment = new UwClientComments();
         $comment->uw_clients_id = $model->id;
         $comment->claim_id = $model->claim_id;
         $comment->user_id = Auth::id();
-        $comment->title = $request->descr.' - change'.$request->cs_user_id;
+        $comment->title = json_encode($request->all());
         $comment->comment_type = $request->status;
         $comment->save();
 
@@ -1316,38 +1331,39 @@ class UwClientsController extends Controller
     public function calcForm(Request $request)
     {
         //
-        $str_summa = str_replace(',', '.', $request->calcSumma);
-        $summa = str_replace(' ', '', $str_summa);
-        $capital = $summa;
+        if ($request->calcLoanType == 1){
+            $str_summa = str_replace(',', '.', $request->calcSumma);
+            $summa = str_replace(' ', '', $str_summa);
+            $capital = $summa;
 
-        $interest = $request->calcLoanInterest;
+            $interest = $request->calcLoanInterest;
 
-        $month = $request->calcLoanMonth;
+            $month = $request->calcLoanMonth;
 
-        $next_month =  date("d.m.Y", strtotime("+0 month"));
+            $next_month =  date("d.m.Y", strtotime("+0 month"));
 
-        $begin = new \DateTime( $next_month );
+            $begin = new \DateTime( $next_month );
 
-        $n_month = $month / 12;
-        $next_year = date("d.m.Y", strtotime("+{$n_month} year"));
-        $end = new \DateTime( $next_year );
-        $capital_qol = $capital/$month;
-        $result = '';
-        $key = 0;
-        $sum = 0;
-        for ($i = $begin; $i < $end; $i->modify('+1 month'))
-        {
-            $key++;
+            $n_month = $month / 12;
+            $next_year = date("d.m.Y", strtotime("+{$n_month} year"));
+            $end = new \DateTime( $next_year );
+            $capital_qol = $capital/$month;
+            $result = '';
+            $key = 0;
+            $sum = 0;
+            for ($i = $begin; $i < $end; $i->modify('+1 month'))
+            {
+                $key++;
 
-            $month_in_day = cal_days_in_month(CAL_GREGORIAN, $i->format('m'), $i->format('Y'));
+                $month_in_day = cal_days_in_month(CAL_GREGORIAN, $i->format('m'), $i->format('Y'));
 
-            $loan_pers = $capital * ($interest / 100) / 365 * $month_in_day;
+                $loan_pers = $capital * ($interest / 100) / 365 * $month_in_day;
 
-            $capital = $capital - $capital_qol;
+                $capital = $capital - $capital_qol;
 
-            $loan_pay = $capital_qol + $loan_pers;
+                $loan_pay = $capital_qol + $loan_pers;
 
-            $result .= '
+                $result .= '
                         <tr>
                              <td>' . $key . '</td>
                              <td>' . $i->format("d.m.Y") . '</td>
@@ -1358,18 +1374,64 @@ class UwClientsController extends Controller
                              <td>' .$month_in_day. '</td>
                         </tr>
                         ';
-            $sum += $loan_pay;
+                $sum += $loan_pay;
+            }
+
+            $sum_month = number_format($sum/$month, 2);
+
+            $models = array(
+                'table_data'  => $result,
+                'total_summ'  => number_format($sum),
+                'total_month'  => $sum_month
+            );
+            echo json_encode($models);
+
+        } elseif ($request->calcLoanType == 2) {
+            $str_summa = str_replace(',', '.', $request->calcSumma);
+            $vehicle_value = str_replace(' ', '', $str_summa);
+
+            $next_month =  date("d.m.Y", strtotime("+0 month"));
+
+            $begin = new \DateTime( $next_month );
+
+            $n_month = $request->calcLoanMonth / 12;
+            $next_year = date("d.m.Y", strtotime("+{$n_month} year"));
+            $end = new \DateTime( $next_year );
+
+            $balance = (float) $vehicle_value;
+            $monthly_payment = (($request->calcLoanInterest /(100 * 12)) * $vehicle_value) / (1 - pow(1 + $request->calcLoanInterest / 1200,  (-$request->calcLoanMonth)));
+            $result = '';
+            $key = 0;
+            for ($i = $begin; $i < $end; $i->modify('+1 month'))
+            {
+                $month_in_day = cal_days_in_month(CAL_GREGORIAN, $i->format('m'), $i->format('Y'));
+                $interest = $balance * $request->calcLoanInterest / 1200;
+                $principal = $monthly_payment - $interest;
+
+                $key++;
+
+                $result .= '
+                        <tr>
+                             <td>' . $key . '</td>
+                             <td>' . $i->format("d.m.Y") . '</td>
+                             <td>' .number_format($balance, 2). '</td>
+                             <td>' .number_format($principal, 2). '</td>
+                             <td>' .number_format($interest, 2). '</td>
+                             <td>' .number_format($monthly_payment, 2). '</td>
+                             <td>' .$month_in_day. '</td>
+                        </tr>
+                        ';
+                $balance -= $principal;
+            }
+
+            $models = array(
+                'table_data'  => $result,
+                'total_summ'  => number_format($monthly_payment * $request->calcLoanMonth, 2),
+                'total_month'  => number_format($monthly_payment, 2)
+            );
+            echo json_encode($models);
+
         }
-
-        $sum_month = number_format($sum/$month, 2);
-
-        $models = array(
-            'table_data'  => $result,
-            'total_summ'  => number_format($sum),
-            'total_month'  => $sum_month
-        );
-
-        echo json_encode($models);
 
     }
 
@@ -1541,6 +1603,7 @@ class UwClientsController extends Controller
 
         $clientComment = new UwClientComments();
         $clientComment->uw_clients_id = $id;
+        $clientComment->user_id = Auth::id();
         $clientComment->claim_id = $model->claim_id;
         $clientComment->title = '(code:'.$code.' - result:'.$result.') '.$resultMessage;
         $clientComment->comment_type = '-1';

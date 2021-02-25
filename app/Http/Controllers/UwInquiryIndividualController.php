@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UwClientComments;
 use App\UwClientDebtors;
 use App\UwClientFiles;
 use App\UwClients;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 
 class UwInquiryIndividualController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      *
@@ -26,9 +26,9 @@ class UwInquiryIndividualController extends Controller
         //
         $model = UwClients::find($id);
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->groupBy('claim_id')->sum('INCOME_SUMMA');
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->groupBy('PERIOD')->get()->count();
-        $clientK = UwKatmClients::where('uw_clients_id', $id)->first();
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->groupBy('claim_id')->sum('INCOME_SUMMA');
+        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)->groupBy('PERIOD')->get()->count();
+        $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
         $scoringBall = json_decode($clientK['katm_score'], true);
 
         // Client Debitors Payment Calculate
@@ -68,12 +68,6 @@ class UwInquiryIndividualController extends Controller
 
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-
     public function onlineRegistration(Request $request)
     {
         //
@@ -83,22 +77,9 @@ class UwInquiryIndividualController extends Controller
 
         $modelLoanType = UwLoanTypes::find($modelClient->loan_type_id);
 
-        $katm_client = UwKatmClients::where('uw_clients_id', $id)->first();
+        if ($modelClient->reg_status == 1) {
 
-        if ($katm_client) {
-            if ($modelClient->is_inps == 1){
-                return $this->creditReportI($id, $modelClient->claim_id);
-            }
-            else {
-
-                return response()->json(
-                    [
-                        'status'=>'success',
-                        'message'=>'KATM Mijoz kredit tarixi muvaffaqiyatli saqlandi',
-                        'credit_results' => $this->clientCreditResults($id),
-                    ]);
-
-            }
+            return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
 
         }
 
@@ -169,6 +150,19 @@ class UwInquiryIndividualController extends Controller
 
         if ($code == '05000') {
 
+            // update reg
+            $modelClient = UwClients::find($id);
+
+            $modelClient->update(['reg_status' => 1]);
+
+            $clientComment = new UwClientComments();
+            $clientComment->uw_clients_id = $id;
+            $clientComment->user_id = Auth::id();
+            $clientComment->claim_id = $modelClient->claim_id;
+            $clientComment->title = '(code:'.$code.') Online Registration Success';
+            $clientComment->comment_type = '1';
+            $clientComment->save();
+
             return $this->creditReportK($id, $modelClient->claim_id, $modelClient->is_inps);
 
         } else {
@@ -190,6 +184,12 @@ class UwInquiryIndividualController extends Controller
     public function creditReportK($id, $claim_id, $is_inps)
     {
         //
+        $katm_client = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
+
+        if ($katm_client){
+            return $this->creditReportI($id, $claim_id);
+        }
+
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
 
         $data = array(
@@ -479,17 +479,16 @@ class UwInquiryIndividualController extends Controller
     public function creditReportI($id, $claim_id)
     {
         //
-        $katm_client = UwInpsClients::where('uw_clients_id', $id)->first();
+        $inps_client = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        if ($katm_client) {
+        if ($inps_client) {
 
             return response()->json(
                 [
                     'status' => 'success',
                     'message' => 'KATM va INPS natijasi muvaffaqiyatli saqlandi',
-                    'credit_results' => $this->clientCreditResults($id),
+                    'credit_results' => $this->clientCreditResults($id)
                 ]);
-
         }
 
         $url = 'http://10.22.50.3:8001/katm-api/v1/credit/report';
@@ -531,7 +530,6 @@ class UwInquiryIndividualController extends Controller
         $resultMessage = $data_decode['data']['resultMessage'];
 
         if ($code == '200'){
-
             if ($result == '05050'){
 
                 $tokenI = $data_decode['data']['token'];
@@ -542,9 +540,9 @@ class UwInquiryIndividualController extends Controller
                 return response()->json(
                     [
                         'status'=>'warning',
-                        'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены a',
-                        'data'=> $result.' - '.$resultMessage,
-                        'credit_results' => $this->clientCreditResults($id),
+                        'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены',
+                        'data'=> $result.''.$resultMessage,
+                        'credit_results' => $this->clientCreditResults($id)
                     ]);
             }
 
@@ -554,9 +552,9 @@ class UwInquiryIndividualController extends Controller
             return response()->json(
                 [
                     'status'=>'warning',
-                    'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены b',
+                    'message'=>'('.$code.') Сведения о доходах по ИНПС не найдены',
                     'data'=> $result.''.$errorMessage,
-                    'credit_results' => $this->clientCreditResults($id),
+                    'credit_results' => $this->clientCreditResults($id)
                 ]);
 
         }
@@ -618,7 +616,7 @@ class UwInquiryIndividualController extends Controller
             $models = json_decode($base64_decode, true);
 
             if ($models['report']['incomes']) {
-                $old_inps = UwInpsClients::where('uw_clients_id', $id);
+                $old_inps = UwInpsClients::where('uw_clients_id', $id)->where('status', 1);
                 $old_inps->delete();
 
                 $models_array = $models['report']['incomes']['INCOME'];
@@ -657,18 +655,18 @@ class UwInquiryIndividualController extends Controller
                     [
                         'status'=>'success',
                         'message'=>'KATM va INPS ma`lumotlari muvaffaqiyatli saqlandi',
-                        'credit_results' => $this->clientCreditResults($id),
+                        'credit_results' => $this->clientCreditResults($id)
                     ]);
 
             } else {
-                $old_inps = UwInpsClients::where('uw_clients_id', $id);
+                $old_inps = UwInpsClients::where('uw_clients_id', $id)->where('status', 1);
 
                 $old_inps->delete();
 
                 return response()->json(
                     [
                         'status'=>'warning',
-                        'message'=>'Сведения о доходах по ИНПС не найдены (1)',
+                        'message'=>'('.$models.') Сведения о доходах по ИНПС не найдены',
                         'credit_results' => $this->clientCreditResults($id),
                     ]);
             }
@@ -687,46 +685,39 @@ class UwInquiryIndividualController extends Controller
     public function getResultButtons($id)
     {
         //
-        $button_k = UwKatmClients::where('uw_clients_id', $id)->first();
+        $button_k = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
-        $button_i = UwInpsClients::where('uw_clients_id', $id)->get();
+        $button_i = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->get();
 
         return response()->json(
             [
                 'status' => '200',
                 'data_k' => $button_k,
                 'data_i' => $button_i,
-                'credit_results' => $this->clientCreditResults($id),
+                'credit_results' => $this->clientCreditResults($id)
             ]);
     }
 
     public function getClientKatm($id)
     {
-        $model = UwKatmClients::where('uw_clients_id', $id)->first();
+        $model = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
 
         $modelClient = UwClients::find($id);
 
         if ($model){
             $summ = $model->katm_summ;
-
             $scoring = json_decode($model->katm_score, true);
-
             $table = json_decode($model->katm_tb, true);
-
             $image = $model->katm_img;
 
         } else {
             $summ = '0';
-
             $scoring = 'null';
-
             $table = 'null';
-
             $image = 'null';
 
         }
         $getFile = file_get_contents("uw/scoring_page.php");
-
         $getFileScoringImg = file_get_contents("katm_files/".$modelClient->claim_id.".php");
 
         return response()->json([
@@ -742,7 +733,7 @@ class UwInquiryIndividualController extends Controller
 
     public function getClientInps($id)
     {
-        $result = UwInpsClients::where('uw_clients_id', $id)->get();
+        $result = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->get();
 
         return response()->json($result);
     }
@@ -754,13 +745,14 @@ class UwInquiryIndividualController extends Controller
      */
     public function getStatusSend($id)
     {
+        //
         // Scoring Calculator
         $model = UwClients::find($id);
         $modelFile = UwClientFiles::where('uw_client_id', $id)->first();
 
-        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->groupBy('claim_id')->sum('INCOME_SUMMA');
-        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->groupBy('PERIOD')->get()->count();
-        $clientK = UwKatmClients::where('uw_clients_id', $id)->first();
+        $clientTotalSum = UwInpsClients::where('uw_clients_id', $id)->where('status', 1)->groupBy('claim_id')->sum('INCOME_SUMMA');
+        $clientTotalSumMonthly = UwInpsClients::where('claim_id', $model->claim_id)->where('status', 1)->groupBy('PERIOD')->get()->count();
+        $clientK = UwKatmClients::where('uw_clients_id', $id)->where('status', 1)->first();
         $scoringBall = json_decode($clientK['katm_score'], true);
         $creditDebt = 0;
         $creditCanBe = 0;

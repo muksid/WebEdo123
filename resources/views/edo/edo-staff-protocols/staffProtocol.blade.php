@@ -64,7 +64,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>@lang('blade.from_whom')</th>
-                                <th>@lang('blade.dep_staff')</th>
+                                <!-- <th>@lang('blade.dep_staff')</th> -->
                                 <th>@lang('blade.reg')</th>
                                 <th>@lang('blade.doc_name')</th>
                                 <th>@lang('blade.management_members')</th>
@@ -81,7 +81,7 @@
                                     <td class="text-green">
                                         {{ mb_substr($model->user->fname ?? '', 0,1).'.'.mb_scrub($model->user->lname ?? '') }}
                                     </td>
-                                    <td style="max-width: 150px;">
+                                    <!-- <td style="max-width: 150px;">
                                         @if($model->to_user_id)
                                             {{ $model->userEmp->lname??''}} {{ $model->userEmp->fname??'' }}
                                             <br>
@@ -98,7 +98,7 @@
                                             </span>
                                         @endif
 
-                                    </td>
+                                    </td> -->
                                     <td class="text-bold text-center">
                                         @if($model->status == 1)
                                             <span class="text-center text-muted text-sm">(raqam/sana)</span>
@@ -156,6 +156,10 @@
                                             <span class="label label-danger">@lang('blade.new')</span>
                                         @elseif($model->status == -1)
                                             <span class="label label-warning">@lang('blade.cancel')</span>
+                                            <br>
+                                            @if($model->comments)
+                                                <span class="text-muted">{{ $model->comments }}</span>
+                                            @endif
                                         @elseif($model->status == 2)
                                             <span class="label label-primary">@lang('blade.on_process')</span>
                                         @elseif($model->status == 3)
@@ -171,7 +175,7 @@
                                                 <i class="fa fa-pencil"></i>
                                             </a>
                                         @endif
-                                        @if($model->status == 1)
+                                        @if($model->status == 1 || $model->status == -1)
                                             <a href="{{ route('delete-stf-protocol', ['id' => $model->id ] ) }}" class="btn btn-danger btn-flat">
                                                 <i class="fa fa-trash"></i>
                                             </a>
