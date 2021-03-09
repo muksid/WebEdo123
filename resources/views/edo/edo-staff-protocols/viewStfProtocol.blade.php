@@ -55,8 +55,10 @@
                 <div class="col-md-7" id="printProtocol">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <!-- <h3 class="box-title">@lang('blade.hr_orders')</h3>
-
+                            @if($model->stf_number??'')
+                             <h4 class="" style="margin: 1px">{{ $model->stf_number??'' }}, {{ date('d-m-Y', strtotime($model->stf_date)) }}</h4>
+                             @endif
+                            <!--
                             <div class="box-tools pull-right">
                                 <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Orqaga">
                                     <i  class="fa fa-chevron-left"></i>
@@ -88,12 +90,12 @@
                                             <br>
                                             <span><i class="text-muted">Izox:</i> {{ $guide->descr }}</span>
                                         @elseif($guide->status == 2)
-                                            {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.'/'.$guide->managementMembers->qr_hash); !!}                                        
-
+                                        {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.
+                                                '/'.$guide->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}
                                         @endif
                                         <span class="description-header text-right stf-vertical-middle" style="padding-left:20px">
                                             _____________ {{ $guide->user->substrUserName($guide->user_id) }}
-                                        </span>
+                                        </span> 
                                     @endif
                                 </div>
                                    
@@ -131,6 +133,54 @@
                         </div>
 
                     </div>
+                    <div class="col-md" id="application">
+                        <div class="box" style="padding: 5px">
+                            <h4>Ilovalar:</h4>
+                            <table class="table" style="max-width: 576px">
+                                <tbody>
+
+                                @if($model_files)
+                                    @foreach($model_files as $key => $file)   
+
+                                            <tr>
+                                                <th scope="row">{{ $key+1 }}</th>
+                                                <td>
+                                                    @switch($file->file_extension)
+                                                        @case('doc')                                                        
+                                                        @case('docx')                                                        
+                                                        @case('xls')                                                        
+                                                        @case('xlsx')                                                        
+                                                        @case('pptx')                                                        
+                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
+                                                            class="text-info text-bold"> 
+                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }}
+                                                        </a>
+                                                        @break
+                                                        @default
+                                                        <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
+                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
+                                                        </a>
+                                                        @break
+                                                    @endswitch
+
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
+                                                        @lang('blade.download') <i class="fa fa-download"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        
+                                    @endforeach
+                                @endif
+
+                                </tbody>
+                                
+                            </table>
+
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="col-md-5">
@@ -161,11 +211,13 @@
                                             @elseif($value->status == -1)
                                                 <span class="label label-danger"> Rad etildi</span>
                                                 <br>
-                                                <span><i class="text-muted">Izox:</i> {{ $value->descr }}</span>
+                                                <span><i class="text-muted">Izox:</i> {{ $value->descr }} </span>
                                             @elseif($value->status == 0)
                                                 <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @else
-                                                {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.'/'.$guide->managementMembers->qr_hash); !!}
+                                            
+                                                {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$value->managementMembers->qr_name.
+                                                    '/'.$value->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}
                                             @endif
                                         </div>
                                     </div>
@@ -292,6 +344,7 @@
                     document.head.insertAdjacentHTML( 'beforeend', '<link rel="stylesheet" type="text/css" href="/admin-lte/dist/css/AdminLTE.min.css"/>' );
                     document.head.insertAdjacentHTML( 'beforeend', '<link rel="stylesheet" type="text/css" href="/admin-lte/bootstrap/css/bootstrap.css"/>' );
                     $("#printProtocol button").hide();
+                    $("#application").hide();
 
                     var printContents = document.getElementById('printProtocol').innerHTML;
                     var originalContents = document.body.innerHTML;
@@ -407,6 +460,16 @@
                         $('#protocol_id_to_cancel').val(id)
                         let i = $('#protocol_id_to_cancel').val(id)
 
+                    })
+
+                    // Preview File
+                    $('.previewSingleFile').unbind().click(function(){
+
+                        let id = $(this).data('id')
+
+                        window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
+
+                        return false
                     })
 
                 });

@@ -96,11 +96,11 @@
                         </a></li>
                 </ul>
             </li>
-            <li>
+            <!-- <li>
                 <a href="{{ url('/chat') }}">
                     <i class="fa fa-send"></i> <span>@lang('blade.chat')</span>
                 </a>
-            </li>
+            </li> -->
 
             @foreach(json_decode(Auth::user()->roles) as $user)
                 @switch($user)

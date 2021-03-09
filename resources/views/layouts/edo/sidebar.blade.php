@@ -544,6 +544,11 @@
                                 Protocol</a></li>
                         <li><a href="{{ url('/edo/member-protocols') }}"><i class="fa fa-user"></i> Protocols</a>
                         </li>
+                        <li>
+                            <a href="{{ url('/edo/staff-protocols') }}"><i class="fa fa-reorder"></i>
+                                ОК @lang('blade.protocol_management')<span class="pull-right-container">
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

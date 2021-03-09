@@ -51,6 +51,98 @@
                                     <label>@lang('blade.summary')</label><sup class="text-red"> *</sup>
                                     <textarea name="text" id="editor" required>{{ $model->text }}</textarea>
                                 </div>
+
+                                <div class="form-group">
+                                    <strong>@lang('blade.upload_file'):</strong>
+                                    <div class="input-group control-group increment">
+                                        <input type="file" id="uploadFile" name="protocol_file[]" class="form-control" multiple>
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-success" type="button">
+                                                <i class="glyphicon glyphicon-plus"></i> @lang('blade.add')
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="clone hide">
+                                        <div class="control-group input-group" style="margin-top:10px">
+                                            <input type="file" name="protocol   _file[]" class="form-control" multiple>
+                                            <div class="input-group-btn">
+                                                <button class="btn btn-danger" type="button">
+                                                    <i class="glyphicon glyphicon-trash"></i> @lang('blade.delete')
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="box box-solid">
+                                        <div id="box_body_prev"></div>
+                                        <!-- /.box-header -->
+                                        <div class="box-body">
+                                            <dl>
+                                                <div id="upload_prev"></div>
+                                            </dl>
+                                        </div>
+                                        <!-- /.box-body -->
+                                    </div>
+                                    <!-- /.box -->
+
+                                </div>
+
+
+                                <br>
+                                @if($model_files)
+                                <div class="form-group">
+                                    <h4>Ilovalar:</h4>
+                                    <table class="table" style="max-width: 576px">
+                                        <tbody>
+
+                                        @if($model_files)
+                                            @foreach($model_files as $key => $file)   
+
+                                                    <tr>
+                                                        <th scope="row">{{ $key+1 }}</th>
+                                                        <td>
+                                                            @switch($file->file_extension)
+                                                                @case('doc')                                                        
+                                                                @case('docx')                                                        
+                                                                @case('xls')                                                        
+                                                                @case('xlsx')                                                        
+                                                                @case('pptx')                                                        
+                                                                <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
+                                                                    class="text-info text-bold"> 
+                                                                    <i class="fa fa-search-plus"></i> {{ $file->file_name }}
+                                                                </a>
+                                                                @break
+                                                                @default
+                                                                <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
+                                                                    <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
+                                                                </a>
+                                                                @break
+                                                            @endswitch
+
+                                                        </td>
+                                                        <td>
+                                                            <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
+                                                                @lang('blade.download') <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </td>
+                                                        @if($model->status == 1 || $model->status == -1)
+                                                        <td style="padding-left: 50px">
+                                                            <a href="{{ route('remove-single-protocol-file', ['id' => $file->id]) }}" class="text-bold text-red"> <i class="fa fa-trash fa-lg"></i></a>
+                                                        </td>
+                                                        @endif
+                                                    </tr>
+                                                
+                                            @endforeach
+                                        @endif
+
+                                        </tbody>
+                                        
+                                    </table>
+
+                                </div>
+                                @endif
+                                
+
                                 <div class="form-group">
                                     <div class="box-body box-profile">
                                         <ul class="list-group list-group-unbordered" id="selectedUsers">
@@ -258,6 +350,55 @@
 
                 $('.select-user .removeItem').hide();
             });
+
+            $('#uploadFile').on('change', function() {
+
+                $("#upload_prev").empty();
+
+                $("#box_body_prev").empty();
+
+                $("#box_body_prev").append('<div class="box-header with-border">'+
+                    '<i class="fa fa-paperclip"></i>' +
+                    '<h3 class="box-title"> Tanlangan fayllar </h3>'+
+                    '</div>');
+
+
+                var files = $('#uploadFile')[0].files;
+                var totalSize = 0;
+
+                for (var i = 0; i < files.length; i++) {
+                    // calculate total size of all files
+                    totalSize += files[i].size;
+                }
+                //1x10^9 = 1 GB
+                var sizeInGb = totalSize / 128000000;
+                if(sizeInGb > 1){
+                    alert("Siz limitdan ortiq fayl belgiladingiz. (max: 120 MB)");
+                    this.value = null;
+                    $("#upload_prev").empty();
+                }
+
+                for (var j = 0; j < files.length; j++) {
+                    var fileSize = (files[j].size / 1024 / 1024).toFixed(2);
+                    var num = j + 1;
+                    $("#upload_prev").append(
+
+                        '<dd>' +num + ". " + files[j].name + ' (' + fileSize + ' MB)' + '</dd>');
+                }
+                fileCount += files.length;
+                showFileCount();
+            });
+
+
+            // Preview File
+            $('.previewSingleFile').unbind().click(function(){
+
+                let id = $(this).data('id')
+
+                window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
+
+                return false    
+            })
 
         </script>
 

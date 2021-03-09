@@ -377,9 +377,9 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/edo/index-protocols', 'EdoManagementProtocolsController@indexProtocol');
 
-    Route::get('/edo/member-protocols', 'EdoManagementProtocolsController@memberProtocol');
+    Route::any('/edo/member-protocols', 'EdoManagementProtocolsController@memberProtocol');
 
-    Route::get('/edo/hr-member-protocols', 'EdoManagementProtocolsController@hrMemberProtocol');
+    Route::any('/edo/hr-member-protocols', 'EdoManagementProtocolsController@hrMemberProtocol');
 
     Route::post('/edo/store-protocol','EdoManagementProtocolsController@storeProtocol')->name('edo-store-protocol');
 
@@ -396,7 +396,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/edo/confirm-protocol/{id}', 'EdoManagementProtocolsController@confirmProtocol')->name('confirm-protocol');
 
     // Main staff
-    Route::get('/edo/staff-protocols', 'EdoManagementProtocolsController@staffProtocol')->name('edo-staff-protocols');
+    Route::any('/edo/staff-protocols', 'EdoManagementProtocolsController@staffProtocol')->name('edo-staff-protocols');
 
     Route::get('/edo/create-staff-protocol', 'EdoManagementProtocolsController@createStaffProtocol');
 
@@ -407,6 +407,10 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/edo/delete-stf-protocol/{id}', 'EdoManagementProtocolsController@deleteStfProtocol')->name('delete-stf-protocol');
 
     Route::get('/edo/view-stf-protocol/{id}/{hash}', 'EdoManagementProtocolsController@viewStfProtocol')->name('view-stf-protocol');
+
+    Route::get('/edo/download-protocol-file/{id}', 'EdoManagementProtocolsController@downloadProtocolFile')->name('download-protocol-file');
+    Route::get('/edo/preview-protocol-file/{id}', 'EdoManagementProtocolsController@previewProtocolFile')->name('preview-protocol-file');
+    Route::get('/edo/remove-single-protocol-file/{id}', 'EdoManagementProtocolsController@removeSingleProtocolFile')->name('remove-single-protocol-file');
 
     Route::get('/edo/view-my-stf-protocol/{id}/{hash}', 'EdoManagementProtocolsController@viewMyStfProtocol')->name('view-my-stf-protocol');
 

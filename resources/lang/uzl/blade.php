@@ -37,7 +37,7 @@ return [
     'close'         => 'Yopish',
     
     
-    'new'               => 'yangi',
+    'new'               => 'Yangi',
     'search_users'      => 'Xodimlarni izlash',
     'write_new_message' => 'Yangi xat yozish',
     'text'              => 'Matn',
@@ -431,6 +431,7 @@ return [
     'all_filial_name'   => 'Barcha Filial Boshliqlari',
     'change_sent'       => 'Ustixatni o`zgartirish',
 
+    'archive'  => 'Arxiv',
     'archived' => 'Arxivlandi',
 
     'archive_info' => 'Ma`lumotlarni arxivlash maqsadida 01.01.2020 dan 31.07.2020 gacha bo`lgan xatlar arxivlandi. Arxivlangan xatlarni quyidagi link orqali orqali ko`rishingiz mumkin:',

@@ -160,4 +160,9 @@ class User extends Authenticatable
         return $user_count;
     }
 
+    public function edoHelperParent(){
+
+        return $this->hasOne(EdoUsers::class, 'user_child', 'id');
+    }
+
 }

@@ -84,8 +84,8 @@
                                             <br>
                                             <span><i class="text-muted">Izox:</i> {{ $guide->descr }}</span>
                                         @elseif($guide->status == 2)
-                                            {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name??''.'/'.$guide->managementMembers->qr_hash??''); !!}
-                                        @endif
+                                            {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.
+                                                    '/'.$guide->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}                                        @endif
                                             <span class="description-header text-right stf-vertical-middle" style="padding-left:30px">
                                                 _____________ {{ $guide->user->substrUserName($guide->user_id) }} 
                                             </span>
@@ -111,6 +111,53 @@
                             @endif
                             <div class="clearfix"></div>
 
+                        </div>
+                        <div class="col-md">
+                            <div class="box" style="padding: 5px">
+                                <h4>Ilovalar:</h4>
+                                <table class="table" style="max-width: 576px">
+                                    <tbody>
+
+                                    @if($model_files)
+                                        @foreach($model_files as $key => $file)   
+
+                                                <tr>
+                                                    <th scope="row">{{ $key+1 }}.</th>
+                                                    <td>
+                                                        @switch($file->file_extension)
+                                                            @case('doc')                                                        
+                                                            @case('docx')                                                        
+                                                            @case('xls')                                                        
+                                                            @case('xlsx')                                                        
+                                                            @case('pptx')                                                        
+                                                            <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
+                                                                class="text-info text-bold"> 
+                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }}
+                                                            </a>
+                                                            @break
+                                                            @default
+                                                            <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
+                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
+                                                            </a>
+                                                            @break
+                                                        @endswitch
+
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
+                                                            @lang('blade.download') <i class="fa fa-download"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            
+                                        @endforeach
+                                    @endif
+
+                                    </tbody>
+                                    
+                                </table>
+
+                            </div>
                         </div>
                     </div>
 
@@ -155,8 +202,8 @@
                                                     $guide_qr_name = $guide->managementMembers->qr_name??'';
                                                     $guide_qr_hash = $guide->managementMembers->qr_hash??'';
                                                 ?>
-                                                {!! QrCode::size(65)->generate('https://online.turonbank.uz:3347/acc/'.$guide_qr_name.'/'.$guide_qr_hash); !!}
-
+                                                {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$value->managementMembers->qr_name.
+                                                    '/'.$value->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}
                                             @endif
                                             </div>
                                         </div>
@@ -304,6 +351,16 @@
 
                         $('#myModal').hide();
 
+                    })
+
+                    // Preview File
+                    $('.previewSingleFile').unbind().click(function(){
+
+                        let id = $(this).data('id')
+
+                        window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
+
+                        return false
                     })
 
                 });

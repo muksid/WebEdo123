@@ -15,8 +15,13 @@
             <div class="alert alert-{{ Session::get('status') }} alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                 <h3><i class="icon fa fa-{{ Session::get('status') }}"></i> Message!</h3>
-                <h3>{{ Session::get('message') }}</h3>
-                <h2 class="text-maroon">{{ Session::get('data') }}</h2>
+                <h3 class="text-maroon">{{ Session::get('message') }}</h3>
+                <h3>
+                    @foreach(Session::get('data') as $key => $val)
+                        {{ $key+=1 }}. <b>Inspektor:</b> {{ $val->user->lname??'' }} {{ $val->user->fname??'' }} (MFO: {{ $val->branch_code }})
+                        <b>Ariza raqami:</b> {{ $val->claim_id }}<br>
+                    @endforeach
+                </h3>
             </div>
         @endif
 

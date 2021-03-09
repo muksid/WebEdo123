@@ -7,10 +7,34 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1>
-            @lang('blade.hr_orders')
-            <small>jadval</small>
-        </h1>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="col-sm-2">
+                    <h3 style="margin-top: 0">
+                        @lang('blade.hr_orders')
+                        <small>@lang('blade.groups_table')</small>
+                    </h3> 
+                </div>
+                <div class="col-sm-1">
+                    <form action="{{ url('/edo/staff-protocols') }}" method="post">
+                        @csrf
+                        <input id="unsigned" type="text" name="type" value="unsigned" hidden />
+                        <button type="submit" class="btn btn-danger"> @lang('blade.new') [{{ $unsigned_count }}] </button>
+                    </form>
+                </div>
+                <div class="col-sm-1">
+                    <form action="{{ url('/edo/staff-protocols') }}" method="post">
+                        @csrf
+                        <input id="signed" type="text" name="type" value="signed" hidden />
+                        <button type="submit" class="btn btn-success"> @lang('blade.archive') [{{ $singed_count }}] </button>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+
+
+
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
             <li><a href="#">@lang('blade.hr_orders')</a></li>

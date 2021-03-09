@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\EdoManagementMembers;
 use App\EdoManagementProtocolMembers;
 use App\EdoManagementProtocols;
+use App\EdoProtocolFiles;
 use App\EdoUsers;
 use App\User;
+use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 
 class EdoManagementProtocolsController extends Controller
@@ -79,11 +82,14 @@ class EdoManagementProtocolsController extends Controller
         $model              = new EdoManagementMembers();
         $model->user_id     = $request->input('user_id');
         $model->qr_name     = $request->input('qr_name');
-        $model->qr_hash     = Hash::make($request->input('qr_name'));
         $model->title       = $request->input('title');
         $model->user_sort   = $request->input('user_sort');
         $model->status      = $request->input('status');
         $model->save();
+
+        $model_hash = EdoManagementMembers::find($model->id);
+        $model_hash->update(['qr_hash' => strtolower(substr(sha1($model->id), -8))]);
+
 
         return back()->with('success', 'Management user muvaffaqiyatli yaratildi');
     }
@@ -197,35 +203,78 @@ class EdoManagementProtocolsController extends Controller
         }
     }
 
-    public function hrMemberProtocol()
+    public function hrMemberProtocol(Request $request)
     {
         //
         $user = EdoManagementMembers::where('user_id', Auth::id())->first();
-        if ($user != null || Auth::id() == 199 )
-        {
-            if($user->user_id == 145){
+        $type = ($request->input('type')) ? $request->input('type') : 'unsigned';
 
-                $models = EdoManagementProtocolMembers::where('user_id',1)
+        if ($user != null || Auth::user()->isAdmin() || Auth::id() == 145 )
+        {
+            // 
+            if(Auth::user()->edoUsers() == 'helper'){
+                $guide = Auth::user()->edoHelperParent->user_id;
+
+                $models = EdoManagementProtocolMembers::where('user_id', $guide)
                 ->whereHas('protocol', function($query){
                     $query->where('protocol_type', 11);
                 })
-                // ->where('protocol_type', 11)
-                ->whereIn('status', [-1,1,2,3])
+                ->where('status', 1)
                 ->orderBy('created_at', 'DESC')->get();
-                return view('edo.edo-management-protocols.memberProtocol',compact('models'));
 
+                $unsigned_count = $models->count();
+                $signed_count = EdoManagementProtocolMembers::where('user_id', $guide)
+                    ->whereHas('protocol', function($query){
+                        $query->where('protocol_type', 11);
+                    })
+                    ->where('status', '!=', 1)
+                    ->orderBy('created_at', 'DESC')
+                    ->count();
+
+                $type = 'unsigned';
+                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
+            }
+
+            if(!$request || $type == 'unsigned'){
+                $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
+                ->whereHas('protocol', function($query){
+                    $query->where('protocol_type', 11);
+                })
+                ->where('status', 1)
+                ->orderBy('created_at', 'DESC')->get();
+
+                $unsigned_count = $models->count();
+                $signed_count = EdoManagementProtocolMembers::where('user_id', Auth::id())
+                    ->whereHas('protocol', function($query){
+                        $query->where('protocol_type', 11);
+                    })
+                    ->where('status', '!=', 1)
+                    ->orderBy('created_at', 'DESC')
+                    ->count();
+
+                $type = 'unsigned';
+                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
             }else{
                 $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
                 ->whereHas('protocol', function($query){
                     $query->where('protocol_type', 11);
                 })
-                // ->where('protocol_type', 11)
-                ->whereIn('status', [-1,1,2,3])
+                ->whereIn('status', [-1,2,3])
                 ->orderBy('created_at', 'DESC')->get();
 
-            return view('edo.edo-management-protocols.memberProtocol',compact('models'));
-            }
+                $signed_count = $models->count();
+                $unsigned_count = EdoManagementProtocolMembers::where('user_id', Auth::id())
+                    ->whereHas('protocol', function($query){
+                        $query->where('protocol_type', 11);
+                    })
+                    ->where('status', '=', 1)
+                    ->orderBy('created_at', 'DESC')
+                    ->count();
 
+                $type = 'signed';
+                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
+            }
+            
         }
         else
         {
@@ -270,7 +319,9 @@ class EdoManagementProtocolsController extends Controller
 
             $guide = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_role', 1)->first();
 
-            return view('edo.edo-management-protocols.viewMProtocol',compact('model', 'guide'));
+            $model_files = EdoProtocolFiles::where('protocol_id', $id)->get();
+
+            return view('edo.edo-management-protocols.viewMProtocol',compact('model', 'guide', 'model_files'));
 
         }
         else
@@ -323,17 +374,16 @@ class EdoManagementProtocolsController extends Controller
         $users = EdoManagementMembers::where('status', 1)->orderBy('user_sort', 'ASC')->get();
 
         return view('edo.edo-management-protocols.createProtocol',
-            compact('users'));
+            compact('users', 'user'));
     }
 
     public function storeProtocol(Request $request)
     {
         //
-        //print_r($request->all()); die;
         $this->validate($request, [
-            'title' => 'required',
+            'title'      => 'required',
             'to_user_id' => 'required',
-            'text' => 'required'
+            'text'       => 'required'
         ]);
 
         $depart = User::find(Auth::id());
@@ -341,26 +391,16 @@ class EdoManagementProtocolsController extends Controller
         $depart = $depart->department->depart_id ?? 0;
 
         // model management protocol
-        $model = new EdoManagementProtocols();
-
-        $model->user_id = Auth::id();
-
-        $model->to_user_id = $request->input('emp_user_id');
-
-        $model->user_view = $request->input('user_view')??'0';
-
-        $model->depart_id = $depart;
-
-        $model->protocol_type = $depart;
-
-        $model->title = $request->input('title');
-
-        $model->text = $request->input('text');
-
-        $model->protocol_hash = sha1(date('dmYHis')).date('dmYHis');
-
-        $model->status = 1;
-
+        $model                  = new EdoManagementProtocols();
+        $model->user_id         = Auth::id();
+        $model->to_user_id      = $request->input('emp_user_id');
+        $model->user_view       = $request->input('user_view')??'0';
+        $model->depart_id       = $depart;
+        $model->protocol_type   = $depart;
+        $model->title           = $request->input('title');
+        $model->text            = $request->input('text');
+        $model->protocol_hash   = sha1(date('dmYHis')).date('dmYHis');
+        $model->status          = 1;
         $model->save();
 
         $memberStatus = 1;
@@ -374,22 +414,34 @@ class EdoManagementProtocolsController extends Controller
 
             foreach ($request->input('to_user_id') as $key => $user) {
                 if ($user != 0) {
-                    $member = new EdoManagementProtocolMembers();
 
-                    $member->protocol_id = $model->id;
-
-                    $member->user_id = $user;
-
-                    $member->user_role = $request->input('user_role')[$key];
-
-                    $member->user_sort = $request->input('user_sort')[$key];
-
-                    $member->status = 0;
-
+                    $member                 = new EdoManagementProtocolMembers();
+                    $member->protocol_id    = $model->id;
+                    $member->user_id        = $user;
+                    $member->user_role      = $request->input('user_role')[$key];
+                    $member->user_sort      = $request->input('user_sort')[$key];
+                    $member->status         = $memberStatus;
                     $member->save();
 
                 }
             }
+        }
+
+        if ($request->hasFile('protocol_file')){
+            foreach ($request->file('protocol_file') as $file) {
+
+                $file->store('protocol_files', 'public');
+
+                $newFile                    = new EdoProtocolFiles();
+                $newFile->protocol_id       = $model->id;
+                $newFile->file_name         = $file->getClientOriginalName();
+                $newFile->file_hash         = $file->hashName();
+                $newFile->file_extension    = $file->extension();
+                $newFile->file_size         = $file->getSize();
+                $newFile->save();
+
+            }
+
         }
 
         return back()->with('success', 'Sizning hujjatingiz muvaffaqiyatli jo`natildi');
@@ -559,23 +611,49 @@ class EdoManagementProtocolsController extends Controller
         return view('edo.edo-staff-protocols.myProtocol',compact('models'));
     }
 
-    public function staffProtocol()
+    public function staffProtocol(Request $request)
     {
         //
-        foreach (json_decode(Auth::user()->roles) as $user) {
+        $type = ($request->input('type')) ? $request->input('type') : 'unsigned';
 
-            if ($user == 'main_staff' || $user == 'main_staff_emp' || $user == 'user') {
+        foreach (json_decode(Auth::user()->roles) as $user) {
+            
+
+            if ($user == 'main_staff' || $user == 'main_staff_emp' || $user == 'user' || 'admin') {
 
                 $department = Auth::user()->department->depart_id ?? 0;
 
                 $memberStatus = 0;
 
-                if ($user == 'main_staff') {
+        //  ->where('protocol_type', 11)
 
-                    $memberStatus = 1;
+                if($user == 'admin'){
+                    if($type == 'unsigned'){
+                        $models = EdoManagementProtocols::where('status', '<=', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->get();
+                        $unsigned_count = $models->count();
+                        $singed_count = EdoManagementProtocols::where('status', '>', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->count();
+                    }else{
+                        $models = EdoManagementProtocols::where('status', '>', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->get();
+                        $singed_count = $models->count();
+                        $unsigned_count = EdoManagementProtocols::where('status', '<=', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->count();                    
+                    }
+                    return view('edo.edo-staff-protocols.staffProtocol',compact('models','memberStatus', 'type', 'singed_count', 'unsigned_count'));
+
                 }
+                
 
-                $models = EdoManagementProtocols::where('depart_id', $department)->orderBy('created_at', 'DESC')->get();
+
+                if ($user == 'main_staff') $memberStatus = 1;
+
+                if($type == 'unsigned'){
+                    $models = EdoManagementProtocols::where('depart_id', $department)->where('status', '<=', '1')->orderBy('created_at', 'DESC')->get();
+                    $unsigned_count = $models->count();
+                    $singed_count = EdoManagementProtocols::where('depart_id', $department)->where('status', '>', '1')->orderBy('created_at', 'DESC')->count();
+                }else{
+                    $models = EdoManagementProtocols::where('depart_id', $department)->where('status', '>', '1')->orderBy('created_at', 'DESC')->get();
+                    $singed_count = $models->count();
+                    $unsigned_count = EdoManagementProtocols::where('depart_id', $department)->where('status', '<=', '1')->orderBy('created_at', 'DESC')->count();                    
+                }
 
             } else {
 
@@ -584,13 +662,15 @@ class EdoManagementProtocolsController extends Controller
             }
         }
 
-        return view('edo.edo-staff-protocols.staffProtocol',compact('models', 'memberStatus'));
+        return view('edo.edo-staff-protocols.staffProtocol',compact('models','memberStatus', 'type', 'singed_count', 'unsigned_count'));
     }
 
     public function editStfProtocol($id, $hash)
     {
         //
         $model = EdoManagementProtocols::where('id', $id)->where('protocol_hash', $hash)->first();
+
+        $model_files = EdoProtocolFiles::where('protocol_id', $model->id)->get();
 
         $selectedUsers = EdoManagementProtocolMembers::where('protocol_id', $id)->orderBy('user_sort', 'ASC')->get();
 
@@ -601,7 +681,7 @@ class EdoManagementProtocolsController extends Controller
 
         $userEmp = User::select('id', 'depart_id', DB::raw('CONCAT(branch_code, " - ", lname, " ", fname) AS full_name'))->where('status', 1)->get();
 
-        return view('edo.edo-staff-protocols.editStfProtocol',compact('model', 'selectedUsers', 'userEmp', 'users'));
+        return view('edo.edo-staff-protocols.editStfProtocol',compact('model','model_files', 'selectedUsers', 'userEmp', 'users'));
 
     }
 
@@ -625,7 +705,7 @@ class EdoManagementProtocolsController extends Controller
     public function storeEditStfProtocol(Request $request)
     {
         //
-        //print_r($request->all()); die;
+
         $this->validate($request, [
             'title' => 'required',
             'text' => 'required'
@@ -633,7 +713,6 @@ class EdoManagementProtocolsController extends Controller
 
         // model edit
         $depart = User::find(Auth::id());
-
         $depart = $depart->department->depart_id ?? 0;
 
         $id = $request->input('model_id');
@@ -642,22 +721,14 @@ class EdoManagementProtocolsController extends Controller
 
         $model = EdoManagementProtocols::find($id);
 
-        $model->user_id = Auth::id();
-
-        $model->user_view = $request->input('user_view')??'0';
-
-        $model->to_user_id = $empUser;
-
-        $model->depart_id = $depart;
-
-        $model->protocol_type = $depart;
-
-        $model->title = $request->input('title');
-
-        $model->text = $request->input('text');
-
-        $model->status = 1;
-
+        $model->user_id         = Auth::id();
+        $model->user_view       = $request->input('user_view')??'0';
+        $model->to_user_id      = $empUser;
+        $model->depart_id       = $depart;
+        $model->protocol_type   = $depart;
+        $model->title           = $request->input('title');
+        $model->text            = $request->input('text');
+        $model->status          = 1;
         $model->update();
 
         // delete members
@@ -688,6 +759,23 @@ class EdoManagementProtocolsController extends Controller
             }
         }
 
+        if ($request->hasFile('protocol_file')){
+            foreach ($request->file('protocol_file') as $file) {
+
+                $file->store('protocol_files', 'public');
+
+                $newFile                    = new EdoProtocolFiles();
+                $newFile->protocol_id       = $model->id;
+                $newFile->file_name         = $file->getClientOriginalName();
+                $newFile->file_hash         = $file->hashName();
+                $newFile->file_extension    = $file->extension();
+                $newFile->file_size         = $file->getSize();
+                $newFile->save();
+
+            }
+
+        }
+
         return redirect(route('edo-staff-protocols'))
             ->with('success', 'Xodimlar buyrug`i muvaffaqiyatli yangilandi');
     }
@@ -713,8 +801,59 @@ class EdoManagementProtocolsController extends Controller
 
         $guide = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_role', 1)->first();
 
-        return view('edo.edo-staff-protocols.viewStfProtocol',compact('model', 'guide'));
 
+        $model_files = EdoProtocolFiles::where('protocol_id', $model->id)->get();
+
+        return view('edo.edo-staff-protocols.viewStfProtocol',compact('model', 'guide', 'model_files'));
+
+    }
+
+    public function downloadProtocolFile($id)
+    {
+        $model = EdoProtocolFiles::findOrFail($id);
+
+        $url = storage_path('app/public/protocol_files/'.$model->file_hash);
+
+        return response()->download($url, $model->file_name);
+    }
+
+    public function previewProtocolFile($id)
+    {
+
+        $model = EdoProtocolFiles::findOrFail($id);
+        $url = storage_path('app/public/protocol_files/'.$model->file_hash);
+
+        //
+        if ($url) {
+
+            if($model->file_extension == 'pdf'){
+                return Response::make(file_get_contents($url), 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; name ="'.$model->file_name.'"'
+                ]);
+            }
+
+            return response()->file($url);
+
+        } else {
+
+            return response()->json('Serverdan fayl topilmadi!');
+
+        }
+
+    }
+
+    public function removeSingleProtocolFile($id)
+    {
+        $model = EdoProtocolFiles::findOrFail($id);
+
+        Storage::delete('public/protocol_files/'.$model->file_hash);
+
+        $model->delete();
+
+        $msg = "Successfully deleted";
+        
+        return back()->with('success', $msg);
     }
 
     // my staff view

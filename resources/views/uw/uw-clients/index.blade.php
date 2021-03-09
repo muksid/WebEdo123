@@ -139,7 +139,7 @@
                                         </button>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-flat btn-danger" id="deleteRole"
+                                        <button type="button" class="btn btn-flat btn-danger disabled"
                                                 data-id="{{ $model->id }}">
                                             <i class="fa fa-trash"></i>
                                         </button>
