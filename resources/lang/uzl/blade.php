@@ -30,7 +30,8 @@ return [
     'download_all'  => 'Hammasini yuklash',
     'file'          => 'Fayl',
     'download'      => 'Yuklash',
-    'approve'        => 'Tasdiqlash',
+    'approve'       => 'Tasdiqlash',
+    'approved'      => 'Tasdiqlangan',
     'select'        => 'Tanlang',
     'receive'       => 'Qabul qilish',
     'reject'        => 'Rad qilish',
@@ -226,9 +227,11 @@ return [
     'to_create_group_choose' => 'Guruh yaratish uchun xodimlarni belgilashingiz kerak.',
 
     /****** ***/
-    'protocol_management'   => 'Qarorlar',
-    'management_guide'   => 'Boshqaruv Raisi',
-    'management_members'   => 'Boshqaruv a`zolari',
+    'protocol_management'   => 'Boshqaruv qarorlari',
+    'management_guide'      => 'Boshqaruv Raisi',
+    'management_members'    => 'Boshqaruv a`zolari',
+    'committe_members'      => 'Qo`mita a`zolari',
+    'select_members'        => 'A`zolarni biriktirish',
 
 
     /***        EDO      ***/
@@ -407,6 +410,16 @@ return [
     'qr_i_sign'                => 'Xa, roziman',
     'office'                   => 'Kanselariya',
     'not_found'                => 'Yozuvlar topilmadi',
+
+    // office department orders
+    'of_orders'                => 'УПР приказы',
+
+    // hr department orders
+    'hr_orders'                => 'OK buyruqlari',
+    'my_orders'                => 'Buyruqlarim',
+    'strategy_orders'          => 'Strateg protokol',
+    'kazna_protocols'          => 'Kazna protokol',
+    
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Kiruvchi hujjat raqami',
     'incoming_date_doc' => 'Kiruvchi hujjat sanasi',

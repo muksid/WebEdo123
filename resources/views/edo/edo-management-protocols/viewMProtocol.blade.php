@@ -4,7 +4,23 @@
 @section('content')
     <div class="content-header">
         <section class="content-header">
-            <h1>@lang('blade.protocol_management')
+            <h1>
+                @switch($model->protocol_type)
+                    @case(3)
+                        @lang('blade.protocol_management')
+                        @break
+                    @case(11)
+                        @lang('blade.hr_orders')
+                        @break
+                    @case(20)
+                        @lang('blade.kazna_protocols')
+                        @break
+                    @case(24)
+                        @lang('blade.strategy_orders')
+                        @break
+                    @default
+                        @break
+                @endswitch
                 <small></small>
             </h1>
             <ol class="breadcrumb">
@@ -52,7 +68,11 @@
                     <div class="col-md-7">
                         <div class="box box-primary">
                             <div class="box-header with-border">
-                                <h3 class="box-title">@lang('blade.protocol_management')</h3>
+                                @if($model->stf_number??'')
+                                    <h4 class="" style="margin: 1px">
+                                        {{ $model->stf_number??'' }}  <span style="margin-left: 1%">{{ date('d-m-Y', strtotime($model->stf_date)) }}</span>
+                                    </h4>
+                                @endif
 
                                 <div class="box-tools pull-right">
                                     <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Orqaga"><i class="fa fa-chevron-left"></i></a>
@@ -60,12 +80,12 @@
                                 </div>
                             </div>
                             <!-- /.box-header -->
-                            <div class="box-body no-padding">
+                            <div class="box-body">
                                 <div class="mailbox-read-info text-center">
                                     <h3>{{ $model->title }}</h3>
                                 </div>
 
-                                <div class="mailbox-read-message">
+                                <div class="mailbox-read-message" style="padding: 0 12% !important;">
                                     <?php echo $model->text??''; ?>
                                 </div>
                             </div>
@@ -92,6 +112,9 @@
                                     </div>
 
                                     <div class="col-md-12">
+                                        <div class="col-md-3"></div>
+                                        <div class="col-md-6">
+
                                         @if($guide->status == 1 && $guide->user_id == \Illuminate\Support\Facades\Auth::id())
                                             <button type="button" class="btn btn-flat btn-primary pull-right"
                                                     data-id="{{ $guide->id }}" id="confirmModal">
@@ -103,6 +126,9 @@
                                                 @lang('blade.cancel')
                                             </button>
                                         @endif
+                                        </div>
+                                        <div class="col-md-3"></div>
+
                                     </div>
 
                                 </div>
@@ -164,7 +190,18 @@
                     <div class="col-md-5">
                         <div class="box box-primary">
                             <div class="box-body">
-                                <h4>@lang('blade.management_members'):</h4>
+                                @switch($model->protocol_type)
+                                    @case(3)
+                                    @case(11)
+                                        <h4>@lang('blade.committe_members'):</h4>
+                                        @break
+                                    @case(24)
+                                        <h4>@lang('blade.management_members'):</h4>
+                                        @break
+                                    @default
+                                        @break
+                                @endswitch
+                                    
                                 <hr>
                                 <div class="row">
                                     @foreach($model->viewMembers as $key => $value)

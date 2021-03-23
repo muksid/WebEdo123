@@ -424,7 +424,7 @@ class EdoMessageUsersController extends Controller
         // edo type messages
         $perfUserTypes = EdoTypeMessages::where('type_code', 'performers_in_helper')->get();
 
-        $edoUsers = EdoUsers::where('user_id', Auth::id())->first();
+        $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->first();
 
         // users
         $users = DB::table('edo_users as a')

@@ -47,17 +47,64 @@
             <div class="col-xs-12">
 
                 <div class="box">
-
+                    <div class="box-body">
+                        <form action="{{route('e-tasks-process')}}" method="POST" role="search">
+                            {{ csrf_field() }}
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <div class="form-group has-success">
+                                        <input type="text" class="form-control" name="dep_num" value="{{ $dep_num??'' }}"
+                                               placeholder="Деп №">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group has-success">
+                                        <input type="text" class="form-control" name="kanc_num" value="{{ $kanc_num??'' }}"
+                                               placeholder="Kanc №">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group has-success">
+                                        <input type="text" class="form-control" name="org_name" value="{{ $org_name??'' }}"
+                                               placeholder="@lang('blade.sender_organization')">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group has-success">
+                                        <input type="text" class="form-control" name="doc_name" value="{{ $doc_name??'' }}"
+                                               placeholder="@lang('blade.doc_name')">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group has-success">
+                                        <input type="text" class="form-control" name="in_num" value="{{ $in_num??'' }}"
+                                               placeholder="Исх. №">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <a href="{{ route('e-tasks-process') }}" class="btn btn-default btn-flat"><i class="fa fa-refresh"></i> @lang('blade.reset')</a>
+                                        <button type="submit" class="btn btn-primary btn-flat"><i class="fa fa-search"></i> @lang('blade.search')</button>
+                                    </div>
+                                </div>
+                                <!-- /.col -->
+                            </div>
+                            <!-- /.row -->
+                        </form>
+                    </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table id="example1" class="table table-hover table-bordered table-striped">
+                        <b>@lang('blade.overall'){{': '. $models->total()}} @lang('blade.group_edit_count').</b>
+                        <table id="" class="table table-hover table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Деп №</th>
                                     <th>@lang('blade.from_whom')</th>
-                                    <th>@lang('blade.reg_num')</th>
+                                    <th>@lang('blade.in_num')</th>
                                     <th>@lang('blade.sender_organization')</th>
-                                    <th>Xat raqami</th>
+                                    <th>@lang('blade.out_num')</th>
                                     <th>@lang('blade.type_of_doc')</th>
                                     <th>@lang('blade.summary')</th>
                                     <th>@lang('blade.deadline')</th>
@@ -69,9 +116,9 @@
                             <tbody>
                            <?php $i = 1 ?>
                             @foreach ($models as $key => $model)
-                                @if(($model->status == 0 && ($model->mesUsers->sub_status??0) == 2) || $model->status > 0)
                                     <tr>
-                                        <td>{{ $i++ }}</td>
+                                        <td>{{ $models->firstItem()+$key }}</td>
+                                        <td class="text-bold">{{ $model->depInboxJournal->in_number??'' }}{{ $model->depInboxJournal->in_number_a??'' }}</td>
                                         <td class="text-maroon" style="min-width: 150px">
                                             {{$model->signatureUser->lname.' '.$model->signatureUser->fname}}
                                         </td>
@@ -123,10 +170,10 @@
                                             <span class="text-maroon"> ({{$model->created_at->diffForHumans()}})</span>
                                         </td>
                                     </tr>
-                                @endif
                             @endforeach
                             </tbody>
                         </table>
+                        {{ $models->links() }}
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -142,9 +189,7 @@
         <!-- DataTables -->
         <script src="/admin-lte/plugins/datatables/jquery.dataTables.min.js"></script>
         <script src="/admin-lte/plugins/datatables/dataTables.bootstrap.min.js"></script>
-        <!-- AdminLTE App -->
-        <script src="/admin-lte/dist/js/app.min.js"></script>
-        <!-- AdminLTE for demo purposes -->
+
         <script>
             $(function () {
                 $("#example1").DataTable();

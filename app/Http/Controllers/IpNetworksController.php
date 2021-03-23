@@ -69,7 +69,7 @@ class IpNetworksController extends Controller
             ));
             if (count($models) > 0)
                 return view('ip-networks.allIpNetworks',
-                    compact('models', 'q', 'f', 's', 'filials', 'modelsCount', 'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'))
+                    compact('models', 'q', 'f', 's', 'filials', 'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'))
                     ->withDetails($models)->withQuery($q);
         }
 

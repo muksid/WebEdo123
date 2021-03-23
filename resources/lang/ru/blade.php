@@ -30,14 +30,15 @@ return [
     'download_all'      => 'Скачать все',
     'file'              => 'Файл',
     'download'          => 'Скачать',
-    'aprove'            => 'Одобрить',
+    'approve'           => 'Одобрить',
+    'approved'          => 'Одобрено',
     'select'            => 'Выбрать',
     'receive'           => 'Получить',
     'reject'            => 'Отклонять',
     'close'             => 'Закрыть',
     'approve'           => 'Подтвердить',
 
-    'new'               => 'Новый',
+    'new'               => 'новый',
     'search_users'      => 'Поиск пользователя',
     'write_new_message' => 'Написать новое письмо',
     'text'              => 'Краткое содержание',
@@ -294,9 +295,12 @@ return [
 
 
     /****** ***/
-    'protocol_management'   => 'Приказы',
+    'protocol_management'   => 'Протокол правления',
     'management_guide'      => 'Бошқарув Раиси',
     'management_members'    => 'Бошқарув аъзолари',
+    'committe_members'      => 'Қўмита аъзолари',
+    'select_members'        => 'Прикрепить участники',
+
 
     //
     'not_found_reply_letters'   => 'Не найдено ответных писем',
@@ -416,6 +420,9 @@ return [
     // hr department orders
     'hr_orders'                => 'ОК приказы',
     'my_orders'                => 'Мои приказы',
+    'strategy_orders'          => 'Стратег протокол',
+    'kazna_protocols'          => 'Казна протокол',
+    
 
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Входящий номер документа',

@@ -4,7 +4,24 @@
     <div class="content-header">
         <!-- Content Header (Page header) -->
         <section class="content-header">
-            <h1>@lang('blade.hr_orders') * {{ $model->title }}
+            <h1>
+                @switch($model->protocol_type)
+                    @case(3)
+                        @lang('blade.protocol_management')
+                    @break
+                    @case(11)
+                        @lang('blade.hr_orders')
+                    @break
+                    @case(20)
+                        @lang('blade.kazna_protocols')
+                    @break
+                    @case(24)
+                        @lang('blade.strategy_orders')
+                    @break
+                    @default
+                    @break
+                @endswitch
+                * {{ $model->title }}
                 <small></small>
             </h1>
             <ol class="breadcrumb">
@@ -56,7 +73,9 @@
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             @if($model->stf_number??'')
-                             <h4 class="" style="margin: 1px">{{ $model->stf_number??'' }}, {{ date('d-m-Y', strtotime($model->stf_date)) }}</h4>
+                             <h4 class="" style="margin: 1px">
+                                {{ $model->stf_number??'' }}  <span style="margin-left: 1%">{{ date('d-m-Y', strtotime($model->stf_date)) }}</span>
+                            </h4>
                              @endif
                             <!--
                             <div class="box-tools pull-right">
@@ -69,9 +88,9 @@
                             </div> -->
                         </div>
 
-                        <div class="box-body no-padding">
+                        <div class="box-body">
                             
-                            <div class="mailbox-read-message">
+                            <div class="mailbox-read-message" style="padding: 0 12% !important;">
                                 <?php echo $model->text ?? ''; ?>
                             </div>
                         </div>
@@ -100,28 +119,64 @@
                                 </div>
                                    
 
-                                @foreach(json_decode(Auth::user()->roles) as $user)
-                                    @switch($user)
+                                @if(in_array('bank_apparat', json_decode(Auth::user()->roles)) && $model->status == 1)
+                                    <div class="box-footer">
+                                        <div class="pull-right">
+                                            <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
+                                                <i class="fa fa-ban"></i> @lang('blade.cancel')
+                                            </button>
 
-                                        @case('main_staff')
-                                        <div class="col-md-12">
-                                            @if($model->status == 1)
-                                                <div class="box-footer">
-                                                    <div class="pull-right">
-                                                        <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
-                                                            <i class="fa fa-ban"></i> @lang('blade.cancel')
-                                                        </button>
-
-                                                        <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
-                                                            <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            @endif
+                                            <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
+                                                <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
+                                            </button>
                                         </div>
-                                        @break
-                                    @endswitch
-                                @endforeach
+                                    </div>
+                                @endif
+                                @if(in_array('main_staff', json_decode(Auth::user()->roles)) && $model->status == 1)
+                                    <div class="col-md-12">
+                                            <div class="box-footer">
+                                                <div class="pull-right">
+                                                    <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
+                                                        <i class="fa fa-ban"></i> @lang('blade.cancel')
+                                                    </button>
+
+                                                    <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
+                                                        <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
+                                                    </button>
+                                                </div>
+                                            </div>
+                                    </div>
+                                @endif
+                                @if(in_array('kazna', json_decode(Auth::user()->roles)) && $model->status == 1)
+                                    <div class="col-md-12">
+                                            <div class="box-footer">
+                                                <div class="pull-right">
+                                                    <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
+                                                        <i class="fa fa-ban"></i> @lang('blade.cancel')
+                                                    </button>
+
+                                                    <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
+                                                        <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
+                                                    </button>
+                                                </div>
+                                            </div>
+                                    </div>
+                                @endif
+                                @if(in_array('strategy', json_decode(Auth::user()->roles)) && $model->status == 1)
+                                    <div class="col-md-12">
+                                            <div class="box-footer">
+                                                <div class="pull-right">
+                                                    <button type="button" id="cancel-protocol" class="btn btn-flat btn-default" data-id="{{ $model->id }}" data-toggle="modal" data-target="#cancel-modal">
+                                                        <i class="fa fa-ban"></i> @lang('blade.cancel')
+                                                    </button>
+
+                                                    <button type="button" id="confirm-protocol" data-id="{{ $model->id }}" class="btn btn-flat btn-info">
+                                                        <i class="fa fa-check-circle-o"></i> @lang('blade.approve')
+                                                    </button>
+                                                </div>
+                                            </div>
+                                    </div>
+                                @endif
 
                             </div>
 
@@ -186,7 +241,26 @@
                 <div class="col-md-5">
                     <div class="box box-primary">
                         <div class="box-body" id="printMembers">
-                            <h4>@lang('blade.management_members'):</h4>
+                            <h4>
+                                @switch(Auth::user()->department->depart_id)
+                                    @case(3)
+                                        @lang('blade.management_members'):
+                                        @break
+                                    @case(11)
+                                        @lang('blade.management_members'):
+                                        @break
+                                    @case(20)
+                                        @lang('blade.committe_members'):
+                                        @break
+                                    @case(24)
+                                        @lang('blade.committe_members'):
+                                        @break
+                                    @default
+                                        @lang('blade.management_members'):
+                                        @break
+                                @endswitch
+                                        
+                            </h4>
                             <hr>
                             <div class="row justify-content-between">
                                 @foreach($model->viewMembers as $key => $value)
@@ -345,6 +419,7 @@
                     document.head.insertAdjacentHTML( 'beforeend', '<link rel="stylesheet" type="text/css" href="/admin-lte/bootstrap/css/bootstrap.css"/>' );
                     $("#printProtocol button").hide();
                     $("#application").hide();
+                    $('.mailbox-read-message').css('padding', '0');
 
                     var printContents = document.getElementById('printProtocol').innerHTML;
                     var originalContents = document.body.innerHTML;

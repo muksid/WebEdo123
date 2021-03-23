@@ -144,16 +144,72 @@ class User extends Authenticatable
 
     public function hasManyProtocols()
     {
-        $count_unsigned_protocols = EdoManagementProtocols::where('protocol_type', 11)->where('status', 1)->count();
+        $department = Auth::user()->department->depart_id;  
+              
+        $count_unsigned_protocols = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->count();
         return $count_unsigned_protocols;
     }
 
     public function countHRProtocols()
     {   
+        $user_id = Auth::id();
+        
+        if(Auth::user()->edoUsers() == 'helper')    $user_id = Auth::user()->edoHelperParent->user_id;
+        
         $user_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
-                $query->where('protocol_type', 11);
+                $query->where('depart_id', 11);
             })
-            ->where('user_id', Auth::id())
+            ->where('user_id', $user_id)
+            ->where('status', 1)
+            ->count();
+
+        return $user_count;
+    }
+    public function countApparatProtocols()
+    {   
+
+        $user_id = Auth::id();
+        
+        if(Auth::user()->edoUsers() == 'helper')    $user_id = Auth::user()->edoHelperParent->user_id;
+
+
+        $user_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
+                $query->where('depart_id', 3);
+            })
+            ->where('user_id', $user_id)
+            ->where('status', 1)
+            ->count();
+
+        return $user_count;
+    }
+    public function countStrategyProtocols()
+    {   
+
+        $user_id = Auth::id();
+        
+        if(Auth::user()->edoUsers() == 'helper')    $user_id = Auth::user()->edoHelperParent->user_id;
+
+        $user_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
+                $query->where('depart_id', 24);
+            })
+            ->where('user_id', $user_id)
+            ->where('status', 1)
+            ->count();
+
+        return $user_count;
+    }
+
+    public function countKaznaProtocols()
+    {   
+
+        $user_id = Auth::id();
+        
+        if(Auth::user()->edoUsers() == 'helper')    $user_id = Auth::user()->edoHelperParent->user_id;
+
+        $user_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
+                $query->where('depart_id', 20);
+            })
+            ->where('user_id', $user_id)
             ->where('status', 1)
             ->count();
 

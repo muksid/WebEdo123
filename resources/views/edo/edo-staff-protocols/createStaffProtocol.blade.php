@@ -136,7 +136,7 @@
                     <div class="col-md-4">
                         <div class="box" id="edoUsers">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Boshqaruv a`zolarini biriktirish</h3>
+                                <h3 class="box-title">A`zolarni biriktirish</h3>
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body">

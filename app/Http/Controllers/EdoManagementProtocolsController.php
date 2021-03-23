@@ -107,6 +107,12 @@ class EdoManagementProtocolsController extends Controller
 
         $model->update(['status' => 2]);
 
+        if($model->user_role == 1){
+
+            $model_protocol = EdoManagementProtocols::find($model->protocol_id);
+            $model_protocol->update(['status' => 3]);
+        }
+
         return response()->json(array(
                 'success' => true,
                 'msg' => 'Vazifa muvaffaqiyatli tasdiqlandi')
@@ -163,7 +169,7 @@ class EdoManagementProtocolsController extends Controller
         //
         $admin = EdoUsers::where('user_id', Auth::id())->firstOrFail();
 
-        if ($admin->role->role_code == 'admin' || $admin->role->role_code == 'helper' || $admin->role->role_code == 'secretary_management')
+        if ($admin->role->role_code == 'admin' || $admin->role->role_code == 'helper' || $admin->role->role_code == 'secretary_management' || strpos( Auth::user()->roles, 'secretary'))
         {
             $department = Auth::user()->department->depart_id ?? 0;
 
@@ -192,8 +198,15 @@ class EdoManagementProtocolsController extends Controller
                 })
                 ->whereIn('status', [-1,1,2,3])
                 ->orderBy('created_at', 'DESC')->get();
+            $unsigned_count = $models->count();
+            $signed_count = EdoManagementProtocolMembers::whereHas('protocol', function($query){
+                    $query->where('protocol_type', null);
+                })
+                ->where('status', '!=', 1)
+                ->orderBy('created_at', 'DESC')
+                ->count();
 
-            return view('edo.edo-management-protocols.memberProtocol',compact('models'));
+            return view('edo.edo-management-protocols.memberProtocol',compact('models','unsigned_count', 'signed_count'));
 
         }
         else
@@ -203,78 +216,159 @@ class EdoManagementProtocolsController extends Controller
         }
     }
 
-    public function hrMemberProtocol(Request $request)
+    public function hrMemberProtocol(Request $request, $protocol_dep)
     {
         //
+        // dd($protocol_dep);
         $user = EdoManagementMembers::where('user_id', Auth::id())->first();
-        $type = ($request->input('type')) ? $request->input('type') : 'unsigned';
+        $edo_user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        
+        $current_user_id = Auth::id();
 
-        if ($user != null || Auth::user()->isAdmin() || Auth::id() == 145 )
+        $type = ($request->input('type')) ? $request->input('type') : 'new';
+
+        if($edo_user->role_id == 3){
+            $current_user_id = Auth::user()->edoHelperParent->user_id;
+            $user = EdoManagementMembers::where('user_id', Auth::user()->edoHelperParent->user_id)->first();
+        }
+
+        if ($user != null || Auth::user()->isAdmin() || $edo_user->role_id == 3 )
         {
-            // 
-            if(Auth::user()->edoUsers() == 'helper'){
-                $guide = Auth::user()->edoHelperParent->user_id;
 
-                $models = EdoManagementProtocolMembers::where('user_id', $guide)
-                ->whereHas('protocol', function($query){
-                    $query->where('protocol_type', 11);
-                })
-                ->where('status', 1)
-                ->orderBy('created_at', 'DESC')->get();
+            $reg_num    = $request->input('reg_num');
+            $title      = $request->input('title');
+            $date       = $request->input('date');
+    
 
-                $unsigned_count = $models->count();
-                $signed_count = EdoManagementProtocolMembers::where('user_id', $guide)
-                    ->whereHas('protocol', function($query){
-                        $query->where('protocol_type', 11);
-                    })
-                    ->where('status', '!=', 1)
-                    ->orderBy('created_at', 'DESC')
-                    ->count();
-
-                $type = 'unsigned';
-                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
-            }
-
-            if(!$request || $type == 'unsigned'){
-                $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
-                ->whereHas('protocol', function($query){
-                    $query->where('protocol_type', 11);
-                })
-                ->where('status', 1)
-                ->orderBy('created_at', 'DESC')->get();
-
-                $unsigned_count = $models->count();
-                $signed_count = EdoManagementProtocolMembers::where('user_id', Auth::id())
-                    ->whereHas('protocol', function($query){
-                        $query->where('protocol_type', 11);
-                    })
-                    ->where('status', '!=', 1)
-                    ->orderBy('created_at', 'DESC')
-                    ->count();
-
-                $type = 'unsigned';
-                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
-            }else{
-                $models = EdoManagementProtocolMembers::where('user_id', Auth::id())
-                ->whereHas('protocol', function($query){
-                    $query->where('protocol_type', 11);
-                })
-                ->whereIn('status', [-1,2,3])
-                ->orderBy('created_at', 'DESC')->get();
-
-                $signed_count = $models->count();
-                $unsigned_count = EdoManagementProtocolMembers::where('user_id', Auth::id())
-                    ->whereHas('protocol', function($query){
-                        $query->where('protocol_type', 11);
-                    })
-                    ->where('status', '=', 1)
-                    ->orderBy('created_at', 'DESC')
-                    ->count();
-
-                $type = 'signed';
-                return view('edo.edo-management-protocols.memberProtocol',compact('models', 'type','unsigned_count', 'signed_count'));
-            }
+            $search = EdoManagementProtocolMembers::where('user_id', $current_user_id)
+                ->whereHas('protocol', function($query) use($protocol_dep){
+                    $query->where('depart_id', $protocol_dep);
+                });
             
+            if($reg_num){
+                $search->whereHas('protocol', function($query) use($reg_num){
+
+                    $query->where('stf_number', 'like', '%'.$reg_num.'%');
+                
+                });
+            }  
+            if($title){
+                $search->whereHas('protocol', function($query) use($title){
+
+                    $query->where('title', 'like', '%'.$title.'%');
+                
+                });
+            }  
+            if($date){
+                $search->whereHas('protocol', function($query) use($date){
+
+                    $query->where('stf_date', $date);
+                
+                });
+            }
+
+            if($type == 'new')
+            {
+                $search->where('status', 1);
+                $new_count          = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 1)
+                    ->count();
+
+                $on_process_count   = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 2);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->whereIn('status', [2,-1])
+                    ->count();
+
+                $archive_count      = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 3);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 2)
+                    ->count();
+                
+                $type = 'new';
+                
+            }
+            elseif($type == 'on_process')
+            {
+                $search->whereIn('status', [2,-1]);
+                $search->whereHas('protocol', function($query){
+                    $query->where('status', 2);
+                });
+                $on_process_count   = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 2);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->whereIn('status', [2,-1])
+                    ->orderBy('created_at', 'DESC')
+                    ->count();
+                
+                $new_count          = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 1)
+                    ->count();
+                $archive_count      = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 3);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 2)
+                    ->count();
+                $type = 'on_process';
+                
+            }
+            else
+            {
+                $search->where('status', 2);
+                $archive_count      = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 3);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 2)
+                    ->count();
+
+                $on_process_count   = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                        $query->where('status', 2);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->whereIn('status', [2,-1])
+                    ->orderBy('created_at', 'DESC')
+                    ->count();
+                $new_count          = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
+                        $query->where('depart_id', $protocol_dep);
+                    })
+                    ->where('user_id', $user->user_id)
+                    ->where('status', 1)
+                    ->count();
+                $type = 'archive';
+                
+            }
+            $models = $search->orderBy('created_at', 'DESC')->paginate(15);
+
+            $models->appends ( array (
+                'type'      => $type,
+                'reg_num'   => $reg_num,
+                'title'     => $title,                
+                'date'      => $date,
+                'protocol_dep' => $protocol_dep
+            ) );
+
+
+            return view('edo.edo-management-protocols.hrMemberProtocol',compact('models','protocol_dep', 'type','new_count', 'on_process_count','archive_count',
+            'type','reg_num','title','date'));
+        
         }
         else
         {
@@ -311,8 +405,8 @@ class EdoManagementProtocolsController extends Controller
     {
         //
         $user = EdoManagementMembers::where('user_id', Auth::id())->first();
-
-        if ($user != null)
+        $edo_role = Auth::user()->edoUsers();
+        if ($user != null || $edo_role == 'helper')
         {
 
             $model = EdoManagementProtocols::where('id', $id)->where('protocol_hash', $hash)->first();
@@ -327,7 +421,6 @@ class EdoManagementProtocolsController extends Controller
         else
         {
             return response()->view('errors.' . '404', [], 404);
-
         }
 
     }
@@ -374,7 +467,7 @@ class EdoManagementProtocolsController extends Controller
         $users = EdoManagementMembers::where('status', 1)->orderBy('user_sort', 'ASC')->get();
 
         return view('edo.edo-management-protocols.createProtocol',
-            compact('users', 'user'));
+            compact('users'));
     }
 
     public function storeProtocol(Request $request)
@@ -420,7 +513,7 @@ class EdoManagementProtocolsController extends Controller
                     $member->user_id        = $user;
                     $member->user_role      = $request->input('user_role')[$key];
                     $member->user_sort      = $request->input('user_sort')[$key];
-                    $member->status         = $memberStatus;
+                    $member->status         = 0;
                     $member->save();
 
                 }
@@ -614,56 +707,97 @@ class EdoManagementProtocolsController extends Controller
     public function staffProtocol(Request $request)
     {
         //
-        $type = ($request->input('type')) ? $request->input('type') : 'unsigned';
+        EdoUsers::where('user_id', Auth::id())->firstOrFail();
 
-        foreach (json_decode(Auth::user()->roles) as $user) {
-            
+        $type       = ($request->input('type')) ? $request->input('type') : 'new';
+        $user_roles = json_decode(Auth::user()->roles);
 
-            if ($user == 'main_staff' || $user == 'main_staff_emp' || $user == 'user' || 'admin') {
+        $access_roles = [
+            0 => 'admin',
+            1 => 'main_staff',
+            2 => 'main_staff_emp',
+            3 => 'bank_apparat',
+            4 => 'bank_apparat_emp',
+            5 => 'strategy',
+            6 => 'strategy_emp',
+            7 => 'kazna',
+            8 => 'kazna_emp',
+        ];
 
-                $department = Auth::user()->department->depart_id ?? 0;
-
-                $memberStatus = 0;
-
-        //  ->where('protocol_type', 11)
-
-                if($user == 'admin'){
-                    if($type == 'unsigned'){
-                        $models = EdoManagementProtocols::where('status', '<=', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->get();
-                        $unsigned_count = $models->count();
-                        $singed_count = EdoManagementProtocols::where('status', '>', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->count();
-                    }else{
-                        $models = EdoManagementProtocols::where('status', '>', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->get();
-                        $singed_count = $models->count();
-                        $unsigned_count = EdoManagementProtocols::where('status', '<=', '1')->where('protocol_type', 11)->orderBy('created_at', 'DESC')->count();                    
-                    }
-                    return view('edo.edo-staff-protocols.staffProtocol',compact('models','memberStatus', 'type', 'singed_count', 'unsigned_count'));
-
-                }
-                
+        $director_roles = [
+            0 => 'main_staff',
+            1 => 'bank_apparat',
+            2 => 'strategy',
+            3 => 'kazna'
+        ];
 
 
-                if ($user == 'main_staff') $memberStatus = 1;
+        if(array_intersect($access_roles, $user_roles)){
 
-                if($type == 'unsigned'){
-                    $models = EdoManagementProtocols::where('depart_id', $department)->where('status', '<=', '1')->orderBy('created_at', 'DESC')->get();
-                    $unsigned_count = $models->count();
-                    $singed_count = EdoManagementProtocols::where('depart_id', $department)->where('status', '>', '1')->orderBy('created_at', 'DESC')->count();
-                }else{
-                    $models = EdoManagementProtocols::where('depart_id', $department)->where('status', '>', '1')->orderBy('created_at', 'DESC')->get();
-                    $singed_count = $models->count();
-                    $unsigned_count = EdoManagementProtocols::where('depart_id', $department)->where('status', '<=', '1')->orderBy('created_at', 'DESC')->count();                    
-                }
+            $memberStatus = 0;
+            $department = Auth::user()->department->depart_id ?? 0;
 
-            } else {
-
-                return response()->view('errors.' . '404', [], 404);
-
+            if(array_intersect($director_roles, $user_roles)){
+                $memberStatus = 1;
             }
+
+            $search = EdoManagementProtocols::where('depart_id', $department);
+
+            $reg_num    = $request->input('reg_num');
+            $title      = $request->input('title');
+            $date       = $request->input('date');
+
+            if($reg_num)    $search->where('stf_number', 'like', '%'.$reg_num.'%');
+
+            if($title)      $search->where('title', '%'.$title.'%');
+
+            if($date)       $search->where('stf_date', $date);
+
+
+            if($type == 'new')
+            {
+                $search->where('status', 1);
+                $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
+                $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
+                $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
+                
+            }
+            elseif($type == 'on_process')
+            {
+                $search->whereIn('status', [2,-1]);
+                $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
+                $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
+                $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
+                
+            }
+            else
+            {
+                $search->where('status', 3);
+                $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
+                $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
+                $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
+                
+            }
+            $models = $search->orderBy('created_at', 'DESC')->paginate(15);
+
+            $models->appends ( array (
+                'type'      => $type,
+                'reg_num'   => $reg_num,
+                'title'     => $title,                
+                'date'      => $date                
+            ) );
+
+        }else {
+
+            return response()->view('errors.' . '404', [], 404);
+
         }
 
-        return view('edo.edo-staff-protocols.staffProtocol',compact('models','memberStatus', 'type', 'singed_count', 'unsigned_count'));
+        return view('edo.edo-staff-protocols.staffProtocol',compact('models','memberStatus', 'type', 'new_count', 'on_process_count','archive_count',
+            'type','reg_num','title','date'));
+
     }
+
 
     public function editStfProtocol($id, $hash)
     {
@@ -700,7 +834,6 @@ class EdoManagementProtocolsController extends Controller
         return back()->with('success', 'Protocol muvaffaqiyatli o`chirildi');
     }
     
-
     // update stf protocol
     public function storeEditStfProtocol(Request $request)
     {

@@ -11,22 +11,45 @@
             <div class="col-sm-12">
                 <div class="col-sm-2">
                     <h3 style="margin-top: 0">
-                        @lang('blade.hr_orders')
+                        @switch(Auth::user()->department->depart_id)
+                            @case(3)
+                                @lang('blade.protocol_management')
+                                @break
+                            @case(11)
+                                @lang('blade.hr_orders')
+                                @break
+                            @case(20)
+                                @lang('blade.kazna_protocols')
+                                @break
+                            @case(24)
+                                @lang('blade.hr_orders')
+                                @break
+                            @default
+                                @break
+                        @endswitch
+
                         <small>@lang('blade.groups_table')</small>
                     </h3> 
                 </div>
-                <div class="col-sm-1">
+                <div class="col-sm-1" align="center">
                     <form action="{{ url('/edo/staff-protocols') }}" method="post">
                         @csrf
-                        <input id="unsigned" type="text" name="type" value="unsigned" hidden />
-                        <button type="submit" class="btn btn-danger"> @lang('blade.new') [{{ $unsigned_count }}] </button>
+                        <input id="new" type="text" name="type" value="new" hidden />
+                        <button type="submit" class="btn btn-danger"> @lang('blade.new') [{{ $new_count??'' }}] </button>
                     </form>
                 </div>
-                <div class="col-sm-1">
+                <div class="col-sm-2" align="center">
                     <form action="{{ url('/edo/staff-protocols') }}" method="post">
                         @csrf
-                        <input id="signed" type="text" name="type" value="signed" hidden />
-                        <button type="submit" class="btn btn-success"> @lang('blade.archive') [{{ $singed_count }}] </button>
+                        <input id="on_process" type="text" name="type" value="on_process" hidden />
+                        <button type="submit" class="btn btn-warning"> @lang('blade.on_process') [{{ $on_process_count??'' }}] </button>
+                    </form>
+                </div>
+                <div class="col-sm-1" align="center">
+                    <form action="{{ url('/edo/staff-protocols') }}" method="post">
+                        @csrf
+                        <input id="archive" type="text" name="type" value="archive" hidden />
+                        <button type="submit" class="btn btn-success"> @lang('blade.archive') [{{ $archive_count??'' }}] </button>
                     </form>
                 </div>
                 
@@ -35,11 +58,11 @@
 
 
 
-        <ol class="breadcrumb">
+        <!-- <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
             <li><a href="#">@lang('blade.hr_orders')</a></li>
             <li class="active">@lang('blade.hr_orders')</li>
-        </ol>
+        </ol> -->
         @if (count($errors) > 0)
             <div class="alert alert-danger">
                 <strong>Xatolik!</strong> xatolik bor.<br><br>
@@ -74,16 +97,51 @@
                 <div class="box box-primary" style="clear: both;">
 
                     <div class="box-header with-border">
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             @if($memberStatus == 0)
                             <a href="{{ url('/edo/create-staff-protocol') }}" class="btn btn-flat btn-primary">
                                 <i class="fa fa-plus"></i> @lang('blade.create_doc')</a>
                             @endif
                         </div>
+
+                        <div class="col-md-8">
+                            <form action="{{ url('/edo/staff-protocols') }}" method="POST" role="search">
+                                @csrf
+                                <div class="row">
+
+                                    <input type="text" name="type" id="" value="{{ $type??'' }}" hidden>
+                                    <div class="col-md-2">
+                                        <div class="form-group has-success">
+                                            <input type="text" class="form-control" name="reg_num" value="{{ $reg_num??'' }}" placeholder="@lang('blade.reg_num')">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group has-success">
+                                            <input type="text" class="form-control" name="title" value="{{ $title??'' }}" placeholder="@lang('blade.doc_name')">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group has-success">
+                                            <input type="date" class="form-control" name="date" value="{{ $date??'' }}" placeholder="@lang('blade.reg_date_only')">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <a href="{{ url('/edo/staff-protocols') }}" class="btn btn-default btn-flat"><i class="fa fa-refresh"></i> @lang('blade.reset')</a>
+                                            <button type="submit" class="btn btn-primary btn-flat"><i class="fa fa-search"></i> @lang('blade.search')</button>
+                                        </div>
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                                <!-- /.row -->
+                            </form>
+                        </div>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table id="example1" class="table table-striped table-bordered">
+                        <table id="" class="table table-striped table-bordered">
                             <thead>
                             <tr>
                                 <th>#</th>
@@ -210,6 +268,7 @@
                             </tbody>
                         </table>
                     </div>
+                    {{ $models->links() }}
                     <!-- /.box-body -->
 
                     <div class="modal fade modal-info" id="ajax-crud-modal" aria-hidden="true">

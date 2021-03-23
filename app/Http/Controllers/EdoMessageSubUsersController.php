@@ -25,35 +25,201 @@ class EdoMessageSubUsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function empTasksInbox()
+    public function empTasksInbox(Request $request)
     {
         //
+        if($request->all()){
+            $dep_num    = $request->input('dep_num');
+            $kanc_num   = $request->input('kanc_num');
+            $org_name   = $request->input('org_name');
+            $doc_name   = $request->input('doc_name');
+            $in_num     = $request->input('in_num');
+
+            $search = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
+                ->where('depart_id', Auth::user()->department->depart_id)
+                ->where('status', 0);
+
+            if($dep_num) {
+                $search->whereHas('depInboxJournal', function($query) use($dep_num){
+                    $query->where('in_number', 'LIKE', '%'.$dep_num.'%');
+                });
+            }
+            if($org_name) {
+                $search->whereHas('message', function($query) use($org_name){
+                    $query->where('from_name', 'LIKE', '%'.$org_name.'%');
+                });
+            }
+            if($doc_name) {
+                $search->whereHas('message', function($query) use($doc_name){
+                    $query->where('title', 'LIKE', '%'.$doc_name.'%');
+                });
+            }
+            if($kanc_num) {
+                $search->whereHas('message', function ($query) use ($kanc_num) {
+
+                    $query->where('in_number', 'LIKE', '%'.$kanc_num.'%');
+
+                });
+            }
+            if($in_num) {
+                $search->whereHas('message', function ($query) use ($in_num) {
+
+                    $query->where('out_number', 'LIKE', '%'.$in_num.'%');
+
+                });
+            }
+
+            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'dep_num'   => $dep_num,
+                'kanc_num'  => $kanc_num,
+                'org_name'  => $org_name,
+                'dep_num'   => $dep_num,
+                'in_num'    => $in_num            
+            ));
+
+            return view('edo.edo-message-sub-users.empTasksInbox',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'));
+
+        }
         $models = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
             ->where('status', 0)
             ->orderBy('created_at', 'DESC')
-            ->get();
+            ->paginate(25);
 
         return view('edo.edo-message-sub-users.empTasksInbox',compact('models'));
     }
 
-    public function empTasksProcess()
+    public function empTasksProcess(Request $request)
     {
         //
+        if($request->all()){
+
+            $dep_num    = $request->input('dep_num');
+            $kanc_num   = $request->input('kanc_num');
+            $org_name   = $request->input('org_name');
+            $doc_name   = $request->input('doc_name');
+            $in_num     = $request->input('in_num');
+            
+            $search = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
+                ->whereIn('status', [0,1,2]);
+
+            if($dep_num) {
+                $search->whereHas('depInboxJournal', function($query) use($dep_num){
+                    $query->where('in_number', 'LIKE', '%'.$dep_num.'%');
+                });
+            }
+            if($org_name) {
+                $search->whereHas('message', function($query) use($org_name){
+                    $query->where('from_name', 'LIKE', '%'.$org_name.'%');
+                });
+            }
+            if($doc_name) {
+                $search->whereHas('message', function($query) use($doc_name){
+                    $query->where('title', 'LIKE', '%'.$doc_name.'%');
+                });
+            }
+            if($kanc_num) {
+                $search->whereHas('message', function ($query) use ($kanc_num) {
+
+                    $query->where('in_number', 'LIKE', '%'.$kanc_num.'%');
+
+                });
+            }
+            if($in_num) {
+                $search->whereHas('message', function ($query) use ($in_num) {
+
+                    $query->where('out_number', 'LIKE', '%'.$in_num.'%');
+
+                });
+            }
+
+            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'dep_num'   => $dep_num,
+                'kanc_num'  => $kanc_num,
+                'org_name'  => $org_name,
+                'dep_num'   => $dep_num,
+                'in_num'    => $in_num            
+            ) );
+
+            return view('edo.edo-message-sub-users.empTasksProcess',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'))
+            ->with('i', (request()->input('page', 1) - 1) * 25);
+
+        }
         $models = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
-            ->whereIn('status', [0,1,2])
+            ->where('status', 1)
             ->orderBy('created_at', 'DESC')
-            ->get();
+            ->paginate(25);
 
         return view('edo.edo-message-sub-users.empTasksProcess',compact('models'));
     }
 
-    public function empTasksClosed()
+    public function empTasksClosed(Request $request)
     {
         //
+        if($request->all()){
+
+            $dep_num    = $request->input('dep_num');
+            $kanc_num   = $request->input('kanc_num');
+            $org_name   = $request->input('org_name');
+            $doc_name   = $request->input('doc_name');
+            $in_num     = $request->input('in_num');
+
+            $search = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
+                ->where('status', 3);
+
+            if($dep_num) {
+                $search->whereHas('depInboxJournal', function($query) use($dep_num){
+                    $query->where('in_number', 'LIKE', '%'.$dep_num.'%');
+                });
+            }
+            if($org_name) {
+                $search->whereHas('message', function($query) use($org_name){
+                    $query->where('from_name', 'LIKE', '%'.$org_name.'%');
+                });
+            }
+            if($doc_name) {
+                $search->whereHas('message', function($query) use($doc_name){
+                    $query->where('title', 'LIKE', '%'.$doc_name.'%');
+                });
+            }
+            if($kanc_num) {
+                $search->whereHas('message', function ($query) use ($kanc_num) {
+
+                    $query->where('in_number', 'LIKE', '%'.$kanc_num.'%');
+
+                });
+            }
+            if($in_num) {
+                $search->whereHas('message', function ($query) use ($in_num) {
+
+                    $query->where('out_number', 'LIKE', '%'.$in_num.'%');
+
+                });
+            }
+
+            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'dep_num'   => $dep_num,
+                'kanc_num'  => $kanc_num,
+                'org_name'  => $org_name,
+                'dep_num'   => $dep_num,
+                'in_num'    => $in_num            
+            ));
+
+            return view('edo.edo-message-sub-users.empTasksClosed',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'))
+            ->with('i', (request()->input('page', 1) - 1) * 25);
+
+        }
+
+
         $models = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
             ->where('status', 3)
             ->orderBy('created_at', 'DESC')
-            ->get();
+            ->paginate(25);
 
         return view('edo.edo-message-sub-users.empTasksClosed',compact('models'));
     }

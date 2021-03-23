@@ -30,7 +30,8 @@ return [
     'download_all'  => 'Ҳаммасини юклаш',
     'file'          => 'Файл',
     'download'      => 'Юклаш',
-    'aprove'        => 'Тасдиқлаш',
+    'approved'      => 'Тасдиқланган',
+    'approve'       => 'Тасдиқлаш',
     'select'        => 'Танланг',
     'receive'       => 'Қабул қилиш',
     'reject'        => 'Рад қилиш',
@@ -224,9 +225,11 @@ return [
     'to_create_group_choose' => 'Гуруҳ яратиш учун ходимларни белгилашингиз керак.',
 
     /****** ***/
-    'protocol_management'   => 'Қарорлар',
-    'management_guide'   => 'Бошқарув Раиси',
-    'management_members'   => 'Бошқарув аъзолари',
+    'protocol_management'   => 'Бошқарув қарорлари',
+    'management_guide'      => 'Бошқарув Раиси',
+    'management_members'    => 'Бошқарув аъзолари',
+    'committe_members'      => 'Қўмита аъзолари',
+    'select_members'        => 'Аъзоларни бириктириш',
 
     /***        EDO      ***/
     
@@ -413,6 +416,15 @@ return [
     'office'                   => 'Канцелярия',
     'not_found'                => 'Ёзувлар топилмади',
 
+    // office department orders
+    'of_orders'                => 'УПР приказы',
+
+    // hr department orders
+    'hr_orders'                => 'ОК буйруқлари',
+    'my_orders'                => 'Буйруқларим',
+    'strategy_orders'          => 'Стратег протокол',
+    'kazna_protocols'          => 'Казна протокол',
+    
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Кирувчи ҳужжат рақами',
     'incoming_date_doc' => 'Кирувчи ҳужжат санаси',

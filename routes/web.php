@@ -299,11 +299,11 @@ Route::group(['middleware' => ['auth']], function() {
     // Edo message sub users
     Route::resource('edo-message-sub-users','EdoMessageSubUsersController');
 
-    Route::get('/edo/e-tasks/inbox', 'EdoMessageSubUsersController@empTasksInbox')->name('e-tasks-inbox');
+    Route::any('/edo/e-tasks/inbox', 'EdoMessageSubUsersController@empTasksInbox')->name('e-tasks-inbox');
 
-    Route::get('/edo/e-tasks/process', 'EdoMessageSubUsersController@empTasksProcess')->name('e-tasks-process');
+    Route::any('/edo/e-tasks/process', 'EdoMessageSubUsersController@empTasksProcess')->name('e-tasks-process');
 
-    Route::get('/edo/e-tasks/closed', 'EdoMessageSubUsersController@empTasksClosed')->name('e-tasks-closed');
+    Route::any('/edo/e-tasks/closed', 'EdoMessageSubUsersController@empTasksClosed')->name('e-tasks-closed');
 
     Route::get('/edo/view-e-task/{id}/{slug}', 'EdoMessageSubUsersController@viewEmpTask')->name('view-e-task');
 
@@ -379,7 +379,7 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::any('/edo/member-protocols', 'EdoManagementProtocolsController@memberProtocol');
 
-    Route::any('/edo/hr-member-protocols', 'EdoManagementProtocolsController@hrMemberProtocol');
+    Route::any('/edo/hr-member-protocols/{protocol_dep}', 'EdoManagementProtocolsController@hrMemberProtocol');
 
     Route::post('/edo/store-protocol','EdoManagementProtocolsController@storeProtocol')->name('edo-store-protocol');
 
