@@ -239,13 +239,33 @@
                 @case('risk_adminstrator')
                 @case('risk_user')
                 @case('credit_insp')
-                <li>
-                    <a href="{{ url('uw/home') }}">
-                        <i class="fa fa-laptop"></i> <span> Anderrayting</span>
+
+                <li class="treeview active">
+                    <a href="#"><i class="fa fa-cubes"></i> <span>Anderrayting</span><span
+                                class="pull-right-container">
+                            </span>
                         <span class="pull-right-container">
-                          <small class="label pull-right bg-green">new</small>
-                        </span>
+                            <i class="fa fa-angle-left pull-right"></i>
+                            </span>
                     </a>
+                    <ul class="treeview-menu">
+                        <li>
+                            <a href="{{ url('uw/home') }}">
+                                <i class="fa fa-laptop"></i> <span> Version 1</span>
+                                <span class="pull-right-container">
+                        </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://172.16.2.13" target="_blank">
+                                <i class="fa fa-chrome"></i> <span> Version 2</span>
+                                <span class="pull-right-container">
+                                <small class="label pull-right bg-green">yangi ver.</small>
+                                </span>
+                            </a>
+                            <span class="text-maroon">"172.16.2.13" ip manzilini<br/> proxy ga kiriting!!!</span>
+                        </li>
+                    </ul>
                 </li>
                 @break
             @endswitch
