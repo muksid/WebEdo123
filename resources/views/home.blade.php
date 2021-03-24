@@ -32,7 +32,7 @@
                     </blockquote>
 
                 </div>
-                <a href="http://172.16.2.13:80/login" target="_blank"><h3 class=""> <i class="fa fa-angle-double-right"></i> @lang('blade.view_archived') (http://172.16.2.13:80/login)</h3></a>
+                <a href="http://172.16.2.13:8000/login" target="_blank"><h3 class=""> <i class="fa fa-angle-double-right"></i> @lang('blade.view_archived') (http://172.16.2.13:8000/login)</h3></a>
                 <blockquote class="blockquote">
                     <p class="mb-0">@lang('blade.settings_archived')</p>
                 </blockquote>
