@@ -22,17 +22,7 @@
 
         <div class="container">
             <div class="row justify-content-md-center">
-
-                <div class="alert alert-warning" role="alert">
-                    <h2 class="alert-heading"><i class="fa fa-file-zip-o fa-lg"></i> @lang('blade.archived') !!!</h2>
-                    <hr>
-                    <blockquote class="blockquote">
-                        <p class="mb-0">@lang('blade.archive_info')</p>
-
-                    </blockquote>
-
-                </div>
-                <a href="http://172.16.2.13:8000/login" target="_blank"><h3 class=""> <i class="fa fa-angle-double-right"></i> @lang('blade.view_archived') (http://172.16.2.13:8000/login)</h3></a>
+                <a href="http://172.16.2.13:8000/login" target="_blank" class="text-maroon"><h3 class=""> <i class="fa fa-link"></i> @lang('blade.view_archived') (http://172.16.2.13:8000/login)</h3></a>
                 <blockquote class="blockquote">
                     <p class="mb-0">@lang('blade.settings_archived')</p>
                 </blockquote>
