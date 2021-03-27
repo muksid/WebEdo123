@@ -249,21 +249,24 @@
                             </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li>
+                        {{--<li>
                             <a href="{{ url('uw/home') }}">
                                 <i class="fa fa-laptop"></i> <span> Version 1</span>
                                 <span class="pull-right-container">
                         </span>
                             </a>
-                        </li>
+                        </li>--}}
                         <li>
                             <a href="http://172.16.2.13" target="_blank">
-                                <i class="fa fa-chrome"></i> <span> Version 2</span>
-                                <span class="pull-right-container">
-                                <small class="label pull-right bg-green">yangi ver.</small>
-                                </span>
+                                <i class="fa fa-chrome"></i> <span> 172.16.2.13 (192 lik)</span>
                             </a>
                             <span class="text-maroon">"172.16.2.13" ip manzilini<br/> proxy ga kiriting!!!</span>
+                        </li>
+                        <li>
+                            <a href="http://10.11.48.7" target="_blank">
+                                <i class="fa fa-chrome"></i> <span> 10.11.48.7 (10 lik)</span>
+                            </a>
+                            <span class="text-maroon">"10.11.48.7" ip manzilini<br/> proxy ga kiriting!!!</span>
                         </li>
                     </ul>
                 </li>

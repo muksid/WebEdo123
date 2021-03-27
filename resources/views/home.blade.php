@@ -17,9 +17,6 @@
     </section>
     <!-- Main content -->
     <section class="content">
-
-
-
         <div class="container">
             <div class="row justify-content-md-center">
                 <a href="http://172.16.2.13:8000/login" target="_blank" class="text-maroon"><h3 class=""> <i class="fa fa-link"></i> @lang('blade.view_archived') (http://172.16.2.13:8000/login)</h3></a>
