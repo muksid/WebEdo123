@@ -207,6 +207,12 @@
                                     @foreach($model->viewMembers as $key => $value)
                                         <div class="col-sm">
                                             <div class="description-block">
+                                                @if($value->user_role == 3)
+                                                    <div class="col-sm">
+                                                        <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span> 
+                                                    </div>
+                                                    <br>
+                                                @endif
                                                 <span class="description-header text-left stf-vertical-middle" style="padding-right: 65px">
                                                     {{ $value->user->substrUserName($value->user_id) }} _____________ 
                                                 </span>
@@ -244,6 +250,7 @@
                                             @endif
                                             </div>
                                         </div>
+                                        <hr style="margin-top: 0px;margin-bottom: 0px;">
                                     @endforeach
                                 </div>
                             </div>

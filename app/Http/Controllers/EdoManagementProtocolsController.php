@@ -330,6 +330,9 @@ class EdoManagementProtocolsController extends Controller
             else
             {
                 $search->where('status', 2);
+                $search->whereHas('protocol', function($query){
+                    $query->where('status', 3);
+                });
                 $archive_count      = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
                         $query->where('depart_id', $protocol_dep);
                         $query->where('status', 3);

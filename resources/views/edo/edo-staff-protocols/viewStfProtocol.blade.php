@@ -90,7 +90,7 @@
 
                         <div class="box-body">
                             
-                            <div class="mailbox-read-message" style="padding: 0 12% !important;">
+                            <div class="mailbox-read-message" style="padding: 0 11% !important;">
                                 <?php echo $model->text ?? ''; ?>
                             </div>
                         </div>
@@ -98,6 +98,7 @@
                         <div class="col-md-12">
                             <div class="row">
                                 <div class="description-block">
+
                                     @if($guide)
                                         <span class="description-header text-left stf-vertical-middle" style="padding-right:30px">
                                             {{ $guide->user->job_title??'' }}
@@ -242,24 +243,7 @@
                     <div class="box box-primary">
                         <div class="box-body" id="printMembers">
                             <h4>
-                                @switch(Auth::user()->department->depart_id)
-                                    @case(3)
-                                        @lang('blade.management_members'):
-                                        @break
-                                    @case(11)
-                                        @lang('blade.management_members'):
-                                        @break
-                                    @case(20)
-                                        @lang('blade.committe_members'):
-                                        @break
-                                    @case(24)
-                                        @lang('blade.committe_members'):
-                                        @break
-                                    @default
-                                        @lang('blade.management_members'):
-                                        @break
-                                @endswitch
-                                        
+                                @lang('blade.members'):
                             </h4>
                             <hr>
                             <div class="row justify-content-between">
@@ -267,6 +251,12 @@
 
                                     <div class="col-sm">
                                         <div class="description-block">
+                                            @if($value->user_role == 3)
+                                                <div class="col-sm">
+                                                    <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span> 
+                                                </div>
+                                                <br>
+                                            @endif
                                             <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
                                                 {{ $value->user->substrUserName($value->user_id) }} _____________
                                             </span>

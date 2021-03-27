@@ -230,6 +230,10 @@ return [
     'management_members'    => 'Бошқарув аъзолари',
     'committe_members'      => 'Қўмита аъзолари',
     'select_members'        => 'Аъзоларни бириктириш',
+    'members'               => 'Аъзолар',
+    'confirming_person'     => 'Тасдиқловчи шахс',
+    'prepared_by'           => 'Тайёрланди',
+
 
     /***        EDO      ***/
     

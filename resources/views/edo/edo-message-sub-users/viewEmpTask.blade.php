@@ -351,11 +351,6 @@
                         <i class="fa fa-check-circle"></i> @lang('blade.task_closed')
                     </h4>
                 @endif
-                @if(($model->edoMessageUsersOrdinary->sub_status??0) == 2 && ($model->subUser->status??'') != 3)
-                    <h4 class="text-center text-green text-bold">
-                        <i class="fa fa-check-circle"></i> @lang('blade.sent_to_approve') ...
-                    </h4>
-                @elseif(($model->edoMessageUsersOrdinary->sub_status??0) < 2 && ($model->subUser->status??'') != 3)
                     <!-- /.box -->
                     <div class="box-header with-border bg-gray">
                         <i class="fa fa-reply"></i>
@@ -396,7 +391,6 @@
                             </div>
                         </div>
                     </form>
-                @endif
                 </div>
                 <!-- /.box -->
             </div>

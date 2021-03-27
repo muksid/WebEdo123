@@ -296,10 +296,13 @@ return [
 
     /****** ***/
     'protocol_management'   => 'Протокол правления',
-    'management_guide'      => 'Бошқарув Раиси',
+    'management_guide'      => 'Председатель правления',
     'management_members'    => 'Бошқарув аъзолари',
     'committe_members'      => 'Қўмита аъзолари',
     'select_members'        => 'Прикрепить участники',
+    'members'               => 'Участники',
+    'confirming_person'     => 'Подтверждающее лицо',
+    'prepared_by'           => 'Подготовлен',
 
 
     //

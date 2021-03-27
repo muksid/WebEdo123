@@ -232,6 +232,9 @@ return [
     'management_members'    => 'Boshqaruv a`zolari',
     'committe_members'      => 'Qo`mita a`zolari',
     'select_members'        => 'A`zolarni biriktirish',
+    'members'               => 'A`zolar',
+    'confirming_person'     => 'Tasdiqlovchi shaxs',
+    'prepared_by'           => 'Tayyorlandi',
 
 
     /***        EDO      ***/

@@ -64,7 +64,7 @@
                                     </div>
                                     <div class="clone hide">
                                         <div class="control-group input-group" style="margin-top:10px">
-                                            <input type="file" name="protocol   _file[]" class="form-control" multiple>
+                                            <input type="file" name="protocol_file[]" class="form-control" multiple>
                                             <div class="input-group-btn">
                                                 <button class="btn btn-danger" type="button">
                                                     <i class="glyphicon glyphicon-trash"></i> @lang('blade.delete')
@@ -136,7 +136,7 @@
                     <div class="col-md-4">
                         <div class="box" id="edoUsers">
                             <div class="box-header with-border">
-                                <h3 class="box-title">A`zolarni biriktirish</h3>
+                                <h3 class="box-title">@lang('blade.select_members')</h3>
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body">
@@ -157,12 +157,15 @@
                                                         <span class="pull-right btn-box-tool user_role">
                                                             <select class="form-control" name="user_role[]">
                                                                 @if($value->user_sort == 1)
-                                                                    <option value="1">Boshqaruv Raisi</option>
-                                                                    <option value="2">Boshqaruv a`zolari</option>
+                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="2">@lang('blade.members')</option>
                                                                 @else
-                                                                    <option value="2">Boshqaruv a`zolari</option>
-                                                                    <option value="1">Boshqaruv Raisi</option>
+                                                                    @if($value->user->department->depart_id == Auth::user()->department->depart_id??'')
+                                                                        <option value="3">@lang('blade.confirming_person')</option>
                                                                     @endif
+                                                                    <option value="2">@lang('blade.members')</option>
+                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                @endif
 
                                                             </select>
                                                         </span>

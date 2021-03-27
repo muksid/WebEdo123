@@ -22,7 +22,7 @@
                                 @lang('blade.kazna_protocols')
                                 @break
                             @case(24)
-                                @lang('blade.hr_orders')
+                                @lang('blade.strategy_orders')
                                 @break
                             @default
                                 @break
@@ -146,10 +146,23 @@
                             <tr>
                                 <th>#</th>
                                 <th>@lang('blade.from_whom')</th>
-                                <!-- <th>@lang('blade.dep_staff')</th> -->
                                 <th>@lang('blade.reg')</th>
                                 <th>@lang('blade.doc_name')</th>
-                                <th>@lang('blade.management_members')</th>
+                                <th>
+                                @switch(Auth::user()->department->depart_id)
+                                    @case(3)
+                                    @case(11)
+                                        @lang('blade.management_members')
+                                        @break
+                                    @case(20)
+                                    @case(24)
+                                        @lang('blade.committe_members')
+                                        @break
+                                    @default
+                                        @lang('blade.members')
+                                        @break
+                                @endswitch
+                                </th>
                                 <th>@lang('blade.status')</th>
                                 <th>@lang('blade.date')</th>
                                 <th><i class="fa fa-pencil-square-o"></i></th>
@@ -163,24 +176,6 @@
                                     <td class="text-green">
                                         {{ mb_substr($model->user->fname ?? '', 0,1).'.'.mb_scrub($model->user->lname ?? '') }}
                                     </td>
-                                    <!-- <td style="max-width: 150px;">
-                                        @if($model->to_user_id)
-                                            {{ $model->userEmp->lname??''}} {{ $model->userEmp->fname??'' }}
-                                            <br>
-                                            <span class="text-sm text-muted">
-                                        
-                                            <i class="fa fa-bank"></i> 
-
-                                            {{ $model->userEmp->department->title ?? '' }} - {{ $model->userEmp->job_title??'' }}
-                                        
-                                            </span>
-                                        @else
-                                            <span class="text-sm text-muted">
-                                                None
-                                            </span>
-                                        @endif
-
-                                    </td> -->
                                     <td class="text-bold text-center">
                                         @if($model->status == 1)
                                             <span class="text-center text-muted text-sm">(raqam/sana)</span>
@@ -209,27 +204,21 @@
                                             <span class="text-center text-muted text-sm">(boshqaruv a`zolari)</span>
                                         @else
                                             @foreach($model->members as $key => $user)
-                                                @if($key < 2 )
-                                                    {{ $user->user->substrUserName($user->user_id) }}
-                                                    @if($user->status == 0)
-                                                        <i class="fa fa-ban text-yellow"></i>
-                                                    @elseif($user->status == -1)
-                                                        <i class="fa fa-ban text-yellow"></i>
-                                                    @elseif($user->status == 1)
-                                                        <i class="fa fa-check text-red"></i>
-                                                    @elseif($user->status == 2)
-                                                        <span class="fa fa-qrcode text-black"></span>
-                                                    @else
-                                                        <i class="fa fa-check-square text-primary"></i>
-                                                    @endif
-                                                    <br>
+                                                {{ $user->user->substrUserName($user->user_id) }}
+                                                @if($user->status == 0)
+                                                    <i class="fa fa-ban text-yellow"></i>
+                                                @elseif($user->status == -1)
+                                                    <i class="fa fa-ban text-yellow"></i>
+                                                @elseif($user->status == 1)
+                                                    <i class="fa fa-check text-red"></i>
+                                                @elseif($user->status == 2)
+                                                    <span class="fa fa-qrcode text-black"></span>
+                                                @else
+                                                    <i class="fa fa-check-square text-primary"></i>
                                                 @endif
-
+                                                <br>
                                             @endforeach
 
-                                            @if(count($model->members) > 2)
-                                                <span class="text-primary text-bold">+{{count($model->members)-2}}</span>
-                                            @endif
                                         @endif
 
                                     </td>

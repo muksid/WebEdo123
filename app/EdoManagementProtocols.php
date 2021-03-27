@@ -47,7 +47,7 @@ class EdoManagementProtocols extends Model
     public function viewMembers()
     {
         return $this->hasMany(EdoManagementProtocolMembers::class, 'protocol_id')
-            ->where('user_role', 2)
+            ->where('user_role', '!=', 1)
             ->orderBy('user_sort');
     }
 }

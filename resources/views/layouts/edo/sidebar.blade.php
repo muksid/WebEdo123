@@ -910,7 +910,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('d-tasks-process') }}">
+                    <a href="{{ route('e-tasks-process') }}">
                         <i class="glyphicon glyphicon-inbox"></i> <span>@lang('blade.on_process_docs')</span>
                     </a>
                 </li>
