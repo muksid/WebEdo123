@@ -547,6 +547,25 @@
                         <i class="glyphicon glyphicon-forward"></i> <span>@lang('blade.forwarded_docs')</span>
                     </a>
                 </li>
+
+                <li class="header">DEPARTAMENT INBOX</li>
+
+                <li>
+                    <a href="{{ route('e-tasks-inbox') }}">
+                        <i class="glyphicon glyphicon-inbox"></i> <span>@lang('blade.inbox_doc')</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('e-tasks-process') }}">
+                        <i class="glyphicon glyphicon-hourglass"></i> <span>@lang('blade.on_process')</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('e-tasks-closed') }}">
+                        <i class="glyphicon glyphicon-folder-close"></i> <span>@lang('blade.closed')</span>
+                    </a>
+                </li>
+                
                 @if(in_array('main_staff', json_decode(Auth::user()->roles)))
                     <li>
                         <a href="{{ route('edo-staff-protocols') }}">

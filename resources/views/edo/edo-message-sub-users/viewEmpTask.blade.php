@@ -362,7 +362,7 @@
                             <label>@lang('blade.summary')</label><sup class="text-red"> *</sup>
                             <div class="form-group">
                                 <textarea name="text" class="form-control" rows="3" required></textarea>
-                                <input name="depart_id" value="{{ $edoUsers->department->depart_id }}" hidden />
+                                <input name="depart_id" value="{{ $edoUsers->department->depart_id??'' }}" hidden />
                                 <input name="edo_message_id" value="{{ $model->id }}" hidden />
                                 <input name="director_id" value="{{ $messageSubUser->from_user_id }}" hidden />
                                 <input name="user_id" value="{{ Auth::id() }}" hidden />
