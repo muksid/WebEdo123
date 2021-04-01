@@ -190,18 +190,7 @@
                     <div class="col-md-5">
                         <div class="box box-primary">
                             <div class="box-body">
-                                @switch($model->protocol_type)
-                                    @case(3)
-                                    @case(11)
-                                        <h4>@lang('blade.committe_members'):</h4>
-                                        @break
-                                    @case(24)
-                                        <h4>@lang('blade.management_members'):</h4>
-                                        @break
-                                    @default
-                                        @break
-                                @endswitch
-                                    
+                                <h4>@lang('blade.members'):</h4>
                                 <hr>
                                 <div class="row">
                                     @foreach($model->viewMembers as $key => $value)
