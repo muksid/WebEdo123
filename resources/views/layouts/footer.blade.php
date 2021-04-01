@@ -7,5 +7,5 @@
  */
 ?>
 <footer class="main-footer">
-    <strong>Turonbank ATB &copy; 2019-2020 Designed by</strong> Muhiddin Xalbaev
+    <strong>Turonbank ATB &copy; 2019-2020 Designed by</strong> IT Team
 </footer>

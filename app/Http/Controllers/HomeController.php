@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\ChatMessage;
 use App\User;
 use App\Message;
+use App\EmailAppeals;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -30,10 +32,37 @@ class HomeController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('home', compact('inbox_count','sent_count','term_inbox_count','all_inbox_count',
+        $user = Auth::user()->roles;
+
+        if(in_array('admin', json_decode(Auth::user()->roles))){
+            $models = EmailAppeals::orderBy('id', 'DESC')->paginate(20);
+        }else{
+            $models = EmailAppeals::where('user_id', Auth::id())->orderBy('id', 'DESC')->get();
+        }
+
+
+        return view('home', compact('models','inbox_count','sent_count','term_inbox_count','all_inbox_count',
             'chatUnReadCount','allActiveUsers'));
     }
 
+    public function sendMail(Request $request)
+    {
+
+        $this->validate($request, [
+            'subject'   => 'required',
+            'text'      => 'required',
+        ]);
+
+        $new = new EmailAppeals();
+        $new->user_id       = Auth::id();
+        $new->to_email_name = 'mirzaev_ch@turonbank.uz';
+        $new->subject       = $request->input('subject');
+        $new->text          = $request->input('text');
+        $new->save();
+
+
+        return back()->with('success', 'Muvaffaqiyatli yuborildi');
+    }
     public function index_old()
     {
         //

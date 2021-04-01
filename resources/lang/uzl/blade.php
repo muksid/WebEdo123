@@ -109,6 +109,11 @@ return [
     'profile'   => 'Profil',
     'logout'    => 'Chiqish',
 
+    'my_letters'        => 'Xatlarim',
+    'email_to_chairman' => 'Boshqaruv Raisiga murojaat yuborish',
+    'warning_of_email'  => 'Ogohlantirish!',
+    'warning_email_text'=> 'Ushbu elektron pochta formasi Boshqaruv Raisi Ch.S.Mirzaevning korporativ elektron pochtasiga to`gridan to`g`ri yuboriladi!',
+
     /* sidebar */
     'online'        => 'Onlayn',
     'my_group'      => 'Mening guruhlarim',
@@ -436,7 +441,7 @@ return [
 
     // 2020-09-29 10:55:07 compose
     'with_respect'      => 'Hurmat bilan',
-
+    'appeals'           => 'Murojatlar',
     
     // 2020-10-8
 

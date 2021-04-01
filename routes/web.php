@@ -56,6 +56,8 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/home', 'HomeController@index')->name('home');
 
+    Route::post('/home-applies', 'HomeController@sendMail')->name('home-applies');
+
     // online app
     Route::get('bank-user','AccountController@bankUserIndex')->name('bank-user');
     Route::post('replyAcc', 'AccountController@replyAccPost')->name('reply.acc');
