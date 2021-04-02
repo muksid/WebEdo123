@@ -308,7 +308,8 @@ return [
     'members'               => 'Участники',
     'confirming_person'     => 'Подтверждающее лицо',
     'prepared_by'           => 'Подготовлен',
-
+    'suggested_member'      => 'Предлагаемый',
+    'suggested_protocol_member' => 'Приглашенный член комитета',
 
     //
     'not_found_reply_letters'   => 'Не найдено ответных писем',

@@ -159,12 +159,14 @@
                                                                 @if($value->user_sort == 1)
                                                                     <option value="1">@lang('blade.management_guide')</option>
                                                                     <option value="2">@lang('blade.members')</option>
+                                                                    <option value="4">@lang('blade.suggested_member')</option>
                                                                 @else
                                                                     @if($value->user->department->depart_id == Auth::user()->department->depart_id??'')
                                                                         <option value="3">@lang('blade.confirming_person')</option>
                                                                     @endif
                                                                     <option value="2">@lang('blade.members')</option>
                                                                     <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="4">@lang('blade.suggested_member')</option>
                                                                 @endif
 
                                                             </select>

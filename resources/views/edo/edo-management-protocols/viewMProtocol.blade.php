@@ -202,6 +202,12 @@
                                                     </div>
                                                     <br>
                                                 @endif
+                                                @if($value->user_role == 4)
+                                                    <div class="col-sm">
+                                                        <span class="text-bold">@lang('blade.suggested_protocol_member')</span> 
+                                                    </div>
+                                                    <br>
+                                                @endif
                                                 <span class="description-header text-left stf-vertical-middle" style="padding-right: 65px">
                                                     {{ $value->user->substrUserName($value->user_id) }} _____________ 
                                                 </span>
