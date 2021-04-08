@@ -57,7 +57,7 @@ return [
     'select_users'      => 'Выберите сотрудников',
     'messages'          => 'Письма',
     'unread_messages'   => 'Непрочитанные письма',
-    
+
     'branch'            => 'Филиал',
     'from_whom'         => 'От кого',
     'text_message'      => 'Тема письма',
@@ -196,7 +196,7 @@ return [
 
 
     /*  Edit User   */
-    'edit_user'             => 'Редактировать пользователя', 
+    'edit_user'             => 'Редактировать пользователя',
     'name'                  => 'Имя',
     'surname'               => 'Фамилия',
     'fathers_name'          => 'Отчество',
@@ -205,14 +205,14 @@ return [
     'enter_pass_at_least_6' => 'Введите пароль (не менее 6 букв)',
     'repeat_pass'           => 'Повторите пароль',
 
-    /*   Group index   */ 
+    /*   Group index   */
     'groups_my_groups'      => 'Мои группы',
     'groups_table'          => 'Таблица',
     'groups_nav_groups'     => 'Группы',
     'groups_group_table'    => 'Таблица групп',
     'groups_create_group'   => 'Создать группу',
     'group_table_title'     => 'Наименование',
-    'group_table_title_ru'  => 'Наименование (ru)', 
+    'group_table_title_ru'  => 'Наименование (ru)',
     'group_table_date'      => 'Число',
     'group_table_user_count'=> 'Количество пользователей',
     'group_table_status'    => 'Статус',
@@ -246,7 +246,7 @@ return [
     'inbox_doc'         => 'Входящие документы',
     'journals'          => 'Журналы',
     'journal'           => 'Журнал',
-    'to_resolution'     => 'Резолюция', 
+    'to_resolution'     => 'Резолюция',
     'on_process'        => 'В процессе',
     'sent'              => 'Отправлено',
     'dep_staff'         => 'Сотрудники отдела',
@@ -275,7 +275,7 @@ return [
     'summary'           => 'Краткое содержание',
 
     // Guide
-    'reg_journal'           => 'Журнал регистрации', 
+    'reg_journal'           => 'Журнал регистрации',
     'doc_form'              => 'Форма документа',
     'incoming_letter'       => 'Входящие письмо',
     'doc_app'               => 'Приложения',
@@ -285,10 +285,10 @@ return [
     'sender'                => 'Отправитель',
     'date'                  => 'Дата',
     'status'                => 'Статус',
-    'direct_task'           => 'Направь задачу',   
+    'direct_task'           => 'Направь задачу',
     'add_mini_task'         => 'Добавить фишку',
     'execution_time'        => 'Время исполнения',
-    'at_least_3_letters'    => 'Введите не менее 3 букв', 
+    'at_least_3_letters'    => 'Введите не менее 3 букв',
     'reply_letters'         => 'Ответные письма',
     'received'              => 'получено ...',
     'sent_to_approve'       => 'отправлено на утверждение ...',
@@ -303,7 +303,8 @@ return [
     'members'               => 'Участники',
     'confirming_person'     => 'Подтверждающее лицо',
     'prepared_by'           => 'Подготовлен',
-
+    'suggested_member'      => 'Предлагаемый',
+    'suggested_protocol_member' => 'Приглашенный член комитета',
 
     //
     'not_found_reply_letters'   => 'Не найдено ответных писем',
@@ -360,7 +361,7 @@ return [
     'not_detected'              => 'Не обнаружен',
     'rejected_task'             => 'Отклонено задание',
     'reject_task'               => 'Отклонить задание',
-    // viewDirctDepartTaskProcs    
+    // viewDirctDepartTaskProcs
     'reply_doc'                 => 'Ответное письмо',
     'send_message'              => 'Отправить сообщение',
     'approve_reply'             => 'Подтвердить ответное письмо',
@@ -370,7 +371,7 @@ return [
     //  Edo users
     'users'                     => 'Пользователей',
     'user_create'               => 'Добавить пользователя',
-    // 'err_user_create'           => 'User yaratishda xatolik mavjud',  
+    // 'err_user_create'           => 'User yaratishda xatolik mavjud',
     'full_name'                 => 'Полное имя',
     'dep'                       => 'Отдел',
     'sort'                      => 'Сортировать',
@@ -425,7 +426,7 @@ return [
     'my_orders'                => 'Мои приказы',
     'strategy_orders'          => 'Стратег протокол',
     'kazna_protocols'          => 'Казна протокол',
-    
+
 
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Входящий номер документа',
@@ -436,12 +437,12 @@ return [
     'in_num'            => 'Конц.№',
     'out_num'           => 'Ис.№',
     'reg_date_only'     => 'Дата реистрации',
-    'superviser'        => 'Руководитель',    
+    'superviser'        => 'Руководитель',
 
     // 2020-09-29 10:54:18 compose
 
     'with_respect'      => 'С уважением',
-    
+
     // 2020-10-8
 
     'rejected'          => 'Отклонено',

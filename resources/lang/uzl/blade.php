@@ -235,7 +235,8 @@ return [
     'members'               => 'A`zolar',
     'confirming_person'     => 'Tasdiqlovchi shaxs',
     'prepared_by'           => 'Tayyorlandi',
-
+    'suggested_member'      => 'Taklif etilgan',
+    'suggested_protocol_member' => 'Taklif etilgan qo`mita a`zosi',
 
     /***        EDO      ***/
     

@@ -233,7 +233,8 @@ return [
     'members'               => 'Аъзолар',
     'confirming_person'     => 'Тасдиқловчи шахс',
     'prepared_by'           => 'Тайёрланди',
-
+    'suggested_member'      => 'Таклиф этилган',
+    'suggested_protocol_member' => 'Таклиф этилган қўмита аъзоси',
 
     /***        EDO      ***/
     
