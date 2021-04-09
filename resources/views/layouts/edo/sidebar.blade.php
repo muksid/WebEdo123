@@ -234,7 +234,7 @@
                     <li>
                         <a href="{{ route('edo-staff-protocols') }}">
                             <i class="fa fa-reorder"></i> @lang('blade.hr_orders')
-                            <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small></span>
+                            <small class="label pull-right bg-red">{{ Auth::user()->hasManyProtocols() }}</small>
                         </a>
                     </li>
                 @else
@@ -277,7 +277,6 @@
                         <i class="fa fa-check-square-o"></i> <span> @lang('blade.strategy_orders')</span>
                         <span class="pull-right-container">
                         <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small></span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -299,7 +298,6 @@
                         <span class="pull-right-container">
                             <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
                         </span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -449,7 +447,6 @@
                         <span class="pull-right-container">
                             <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
                         </span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -472,7 +469,6 @@
                         <span class="pull-right-container">
                             <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
                         </span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -618,7 +614,6 @@
                         <span class="pull-right-container">
                             <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
                         </span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -641,7 +636,6 @@
                         <span class="pull-right-container">
                             <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
                         </span>
-                    </span>
                     </a>
                 </li>
                 @else
@@ -802,7 +796,7 @@
                         </li>
                         <li>
                             <a href="{{ url('/edo/staff-protocols') }}"><i class="fa fa-reorder"></i>
-                                @lang('blade.hr_orders')<span class="pull-right-container">
+                                @lang('blade.hr_orders')<span class="pull-right-container"></span>
                             </a>
                         </li>
                     </ul>

@@ -1,8 +1,6 @@
 @extends('layouts.edo.dashboard')
 @section('content')
-
     <div class="content-header">
-        <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
                 @switch($model->protocol_type)
@@ -77,15 +75,6 @@
                                 {{ $model->stf_number??'' }}  <span style="margin-left: 1%">{{ date('d-m-Y', strtotime($model->stf_date)) }}</span>
                             </h4>
                              @endif
-                            <!--
-                            <div class="box-tools pull-right">
-                                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Orqaga">
-                                    <i  class="fa fa-chevron-left"></i>
-                                </a>
-                                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Keyingisi">
-                                    <i class="fa fa-chevron-right"></i>
-                                </a>
-                            </div> -->
                         </div>
 
                         <div class="box-body">
@@ -307,8 +296,6 @@
                                         </div>
                                     </div>
                                     <hr style="margin-top: 5px; margin-bottom: 5px">
-
-                                    <!-- /.col -->
                                 @endforeach
                             </div>
                         </div>
@@ -545,26 +532,19 @@
                         let id = $(this).data('id')
                         $('#protocol_id_to_cancel').val(id)
                         let i = $('#protocol_id_to_cancel').val(id)
-
                     })
-
                     // Preview File
                     $('.previewSingleFile').unbind().click(function(){
-
                         let id = $(this).data('id')
-
                         window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
 
                         return false
                     })
-
                 });
             </script>
 
         </section>
         <!-- /.content -->
     </div>
-
-
 @endsection
 
