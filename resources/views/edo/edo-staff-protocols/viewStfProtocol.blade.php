@@ -26,7 +26,6 @@
                 <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
                 <li class="active">@lang('blade.hr_orders')</li>
             </ol>
-
             @if (count($errors) > 0)
                 <div class="alert alert-danger">
                     <strong>Xatolik!</strong> Errors.<br><br>
