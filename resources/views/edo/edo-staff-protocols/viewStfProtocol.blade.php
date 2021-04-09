@@ -1,6 +1,5 @@
 @extends('layouts.edo.dashboard')
 @section('content')
-
     <div class="content-header">
         <section class="content-header">
             <h1>
