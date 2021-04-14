@@ -258,7 +258,7 @@
                                                 <br>
                                             @endif
                                             @if($value->user_id == 74)
-                                                    <span class="text-bold">«Таклиф этилган қўмита аъзоси»</span><br>
+                                                    <span class="text-bold">«Таклиф этилган»</span><br>
                                                     <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
                                                 {{ $value->user->substrUserName($value->user_id) }} _____________
                                             </span>
