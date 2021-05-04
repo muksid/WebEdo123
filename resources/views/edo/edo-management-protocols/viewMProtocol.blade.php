@@ -28,14 +28,17 @@
                 <li class="active">protocol</li>
             </ol>
 
-            @if (count($errors) > 0)
-                <div class="alert alert-danger">
-                    <strong>Xatolik!</strong> Errors.<br><br>
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+            @if(session('errors'))
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">
+                                    <h4 class="modal-title"> {{ session('errors') }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         <!-- Message Succes -->
@@ -150,29 +153,26 @@
                                                 <tr>
                                                     <th scope="row">{{ $key+1 }}.</th>
                                                     <td>
-                                                        @switch($file->file_extension)
-                                                            @case('doc')
-                                                            @case('docx')
-                                                            @case('xls')
-                                                            @case('xlsx')
-                                                            @case('pptx')
-                                                            <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}"
-                                                                class="text-info text-bold">
-                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                                            </a>
-                                                            @break
-                                                            @default
-                                                            <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}">
-                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
-                                                            </a>
-                                                            @break
-                                                        @endswitch
-
-                                                    </td>
-                                                    <td>
-                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold">
-                                                            @lang('blade.download') <i class="fa fa-download"></i>
+                                                        <a href="#"
+                                                           class="text-info text-bold mailbox-attachment-name"
+                                                           target="_blank"
+                                                           onclick="window.open('<?php echo('/prt-fileView/' . $file->id); ?>',
+                                                                   'modal',
+                                                                   'width=800,height=900,top=30,left=500');
+                                                                   return false;">
+                                                            <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
                                                         </a>
+                                                        <ul class="list-inline pull-right">
+                                                            <li>
+                                                                <a href="{{ url('prt-fileDownload',['id'=>$file->id]) }}"
+                                                                   class="link-black text-sm"><i
+                                                                            class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                            )</i><br>
+
                                                     </td>
                                                 </tr>
 

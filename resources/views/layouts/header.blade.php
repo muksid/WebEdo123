@@ -36,13 +36,6 @@
                         <span class="label label-success">{{$inbox_count}}</span>
                     </a>
                 </li>
-                <!-- Notifications: style can be found in dropdown.less -->
-                <li class="dropdown notifications-menu">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="fa fa-clock-o"></i>
-                        <span class="label label-danger">{{$term_inbox_count}}</span>
-                    </a>
-                </li>
                 <!-- User Account: style can be found in dropdown.less -->
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">

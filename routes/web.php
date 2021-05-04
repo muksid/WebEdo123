@@ -69,7 +69,7 @@ Route::group(['middleware' => ['auth']], function() {
 
     // User
     Route::resource('admin/users','UserController');
-
+    Route::get('admin/users1','UserController@getTest');
     // User search
     Route::any('users-search','UserController@search')->name('users/search');
 
@@ -90,93 +90,74 @@ Route::group(['middleware' => ['auth']], function() {
     // Message
     Route::resource('messages','MessageController');
 
-    Route::get('ef/compose','MessageController@compose')->name('ef-compose');
+    Route::get('fe/compose','MessageController@compose')->name('fe-compose');
 
-    Route::post('ef/compose','MessageController@store')->name('ef-compose');
+    Route::post('fe/compose','MessageController@store')->name('post-fe-compose');
+    Route::post('fe-ajax-compose','MessageController@feAjaxCompose');
 
-    Route::get('group-compose','MessageController@groupCompose')->name('ef-group-compose');
+    Route::get('group-compose','MessageController@groupCompose')->name('fe-group-compose');
 
-    Route::post('group-compose','MessageController@store1')->name('ef-group-compose');
+    Route::post('group-compose','MessageController@storeGroup')->name('post-fe-group-compose');
+
+    Route::post('post-fe-forward','MessageController@storeFR')->name('post-fe-forward');
 
     Route::get('/get-all-users/{q}','MessageController@getAllUsers');
 
-    Route::any('ef/sent','MessageController@eFSent')->name('ef-sent');
+    Route::get('fe/sent','MessageController@feSent')->name('fe-sent');
 
     Route::post('forward','MessageController@storeForward')->name('forward');
 
-    Route::get('view/{mes_gen}','MessageController@view')->name('view');
+    Route::get('fe/view/{id}/{hash}','MessageController@view')->name('fe-view');
 
     Route::get('view_control/{mes_gen}','MessageController@viewControl')->name('view_control');
 
-    Route::get('ef/view/sent/{user_id}/{mes_gen}','MessageController@viewEFSent')->name('view-sent');
+    Route::get('fe/view/sent/{id}/{hash}','MessageController@viewFESent')->name('fe-view-sent');
 
-    Route::get('view_my/{mes_gen}','MessageController@view_my')->name('view_my');
+    Route::get('fe-fileDownload/{id}','MessageController@fileDownload');
 
-    Route::get('control','MessageController@control')->name('control');
+    Route::get('fe-fileView/{id}','MessageController@fileView');
 
-    Route::get('load/{file}','MessageController@getDownload')->name('load');
+    Route::get('fe/getBlade','MessageController@getBlade');
 
-    Route::get('file-download/{id}','MessageController@getDownload')->name('file-download');
-    Route::get('preview/{previewFile}','MessageController@previewPdf')->name('preview');
-    Route::get('myjpg/{file}','MessageController@previewJpg')->name('myjpg');
-
-    Route::get('/ef-sent/delete/{id}','MessageController@destroy');
+    Route::get('fe/deleteMessage','MessageController@destroy');
 
     // Message users
     Route::resource('message-users','MessageUsersController');
 
-    Route::get('ef/inbox','MessageUsersController@inbox')->name('ef-inbox');
+    Route::get('fe/inbox','MessageUsersController@inbox')->name('fe-inbox');
 
-    Route::get('ef/term-inbox','MessageUsersController@termInbox')->name('ef-term-inbox');
+    Route::get('fe/all-inbox','MessageUsersController@allInbox')->name('fe-all-inbox');
 
-    Route::get('ef/all-inbox','MessageUsersController@allInbox')->name('ef-all-inbox');
+    Route::get('fe/get-filial','MessageUsersController@getFilial');
 
-    Route::get('deleted','MessageUsersController@deletedMessages')->name('ef-deleted');
+    Route::get('deleted','MessageUsersController@deletedMessages')->name('fe-deleted');
 
-    Route::get('ym-newm1','MessageUsersController@ymNewm1')->name('ym-newm1');
+    Route::post('fe/deleteAllMessage','MessageUsersController@destroy');
 
-    Route::get('edo-load/{file}','EdoMessageController@downloadFile')->name('edo-load');
+    Route::get('fe/deleteInboxMessage','MessageUsersController@destroyInbox');
 
-    Route::get('load-all/{file}','MessageController@downloadAll')->name('load-all');
+    Route::get('fe/getSentUsers','MessageUsersController@getSentUsers');
 
-    Route::get('edo-reply-load/{file}','EdoMessageController@downloadReplyFile')->name('edo-reply-load');
-
-    Route::get('preview/{previewFile}','MessageController@previewPdf')->name('preview');
-
-    Route::get('edoPreView/{preViewFile}','EdoMessageController@preViewPdf')->name('edoPreView');
-
-    Route::get('edoPreViewImg/{imgId}','EdoMessageController@preViewImg')->name('edoPreViewImg');
-
-    Route::get('export/{id}', 'MessageUsersController@exportControl');
+    #Route::get('fe/term-inbox','MessageUsersController@termInbox')->name('fe-term-inbox');
+    #Route::get('load-all/{file}','MessageController@downloadAll')->name('load-all');
 
     // Message users search
-    Route::any('all-search','MessageUsersController@search')->name('all/search');
+    #Route::any('all-search','MessageUsersController@search')->name('all/search');
 
     // Ajax
-    Route::get('ajax', function(){ return view('ajax'); });
+    #Route::get('ajax', function(){ return view('ajax'); });
 
     Route::post('/get-depart-users','AjaxController@getDepartUsers');
 
     Route::post('/get-group-users','AjaxController@getGroupUsers');
 
-    Route::post('/get-sent-users','AjaxController@getSentUsers');
+    #Route::post('/get-sent-users','AjaxController@getSentUsers');
 
-    Route::post('/get-files-modal','AjaxController@getFilesModal');
+    #Route::post('/get-files-modal','AjaxController@getFilesModal');
 
-    Route::post('/controlDateAjax','AjaxController@controlMessages');
+    #Route::post('/controlDateAjax','AjaxController@controlMessages');
 
-    Route::post('/delete-multiple','AjaxController@deleteMultiple');
-
-    // Chat message
-    Route::resource('chat', 'ChatMessageController');
-
-    Route::get('/chat', 'ChatMessageController@index')->name('chat.index');
-
-    Route::post('/send-message', 'ChatMessageController@sendMessage');
-
-    Route::post('/get-message', 'ChatMessageController@getMessage');
-
-    Route::post('/get-search-users', 'ChatMessageController@getSearchUsers');
+    #Route::post('/delete-multiple','AjaxController@deleteMultiple');
 
     // EDO Route
 
@@ -210,6 +191,14 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/edo-message-file/delete/{id}', 'EdoMessageController@destroy');
 
     Route::get('/edo/edit-g-task/{id}', 'EdoMessageController@editGuideTask')->name('edit-guide-task');
+
+    Route::get('edo-fileDownload/{id}','EdoMessageController@fileDownload');
+
+    Route::get('edo-fileView/{id}','EdoMessageController@fileView');
+
+    Route::get('edo-fileReplyDownload/{id}','EdoMessageController@fileReplyDownload');
+
+    Route::get('edo-fileReplyView/{id}','EdoMessageController@fileReplyView');
 
     # Jamshid To change Receivers
     Route::get('/edo/edit-g-task-change/{id}', 'EdoMessageController@editGuideTaskChange')->name('edit-guide-task-change');
@@ -408,9 +397,9 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/edo/view-stf-protocol/{id}/{hash}', 'EdoManagementProtocolsController@viewStfProtocol')->name('view-stf-protocol');
 
-    Route::get('/edo/download-protocol-file/{id}', 'EdoManagementProtocolsController@downloadProtocolFile')->name('download-protocol-file');
-    Route::get('/edo/preview-protocol-file/{id}', 'EdoManagementProtocolsController@previewProtocolFile')->name('preview-protocol-file');
-    Route::get('/edo/remove-single-protocol-file/{id}', 'EdoManagementProtocolsController@removeSingleProtocolFile')->name('remove-single-protocol-file');
+    Route::get('prt-fileDownload/{id}', 'EdoManagementProtocolsController@fileDownload');
+    Route::get('prt-fileView/{id}', 'EdoManagementProtocolsController@fileView');
+    Route::get('prt-fileRemove/{id}', 'EdoManagementProtocolsController@fileRemove');
 
     Route::get('/edo/view-my-stf-protocol/{id}/{hash}', 'EdoManagementProtocolsController@viewMyStfProtocol')->name('view-my-stf-protocol');
 
@@ -451,76 +440,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('admin/it-test', 'IpNetworksController@test')->name('it-test');
 
     Route::any('ip-network-search','IpNetworksController@allIPNetworks')->name('ip-network-search');
-
-
-    // uw project begin
-    Route::resource('uw/filials', 'FilialsController');
-    Route::resource('uw/uw-users', 'UwUsersController');
-    Route::resource('uw-clients', 'UwClientsController');
-    Route::get('/uw/home', 'UwClientsController@home');
-    Route::get('/uw-clients/create', 'UwClientsController@create');
-    Route::get('/uw/client-katm/{id}/{claim_id}', 'UwClientsController@clientKatm')->name('uw-katm');
-    Route::post('/uw/create-client','UwClientsController@store');
-    Route::post('/get-districts','UwClientsController@getDistricts');
-    Route::post('/get-reg-districts','UwClientsController@getRegDistricts');
-    Route::get('/uw/get-client-katm/{cid}','UwClientsController@getClientKatm');
-    Route::get('/uw/get-client-inps/{cid}','UwClientsController@getClientInps');
-    Route::post('uw-clients-edit','UwClientsController@storeEdit');
-    Route::post('uw-risk-edit','UwClientsController@riskEdit');
-    Route::post('/uw/cs-app-send', 'UwClientsController@csAppSend');
-    Route::post('uw-client-files/upload', 'UwClientsController@fileUpload');
-    Route::get('/uw/filePreView/{preViewFile}','UwClientsController@preViewPdf')->name('filePreView');
-    Route::get('file-load/{file}','UwClientsController@downloadFile')->name('file-load');
-    Route::get('/uw-client-file/delete/{id}', 'UwClientsController@destroyFile');
-    Route::get('/uw/clients/{status}', 'UwClientsController@CsIndex');
-    Route::any('/uw/loan-app/{status}','UwClientsController@riskAdminIndex');
-    Route::any('/uw/all-clients','UwClientsController@allClients');
-    Route::get('/uw/view-loan/{id}/{claim_id}', 'UwClientsController@riskAdminView');
-    Route::get('/uw/view-loan-super-admin/{id}/{claim_id}', 'UwClientsController@superAdminView');
-    Route::post('/uw/risk-admin-confirm', 'UwClientsController@riskAdminConfirm');
-    Route::post('/uw/risk-admin-cancel', 'UwClientsController@riskAdminCancel');
-    Route::get('/uw/loan-app-statistics', 'UwClientsController@loanAppStatistics');
-    Route::post('/uw/calc-form','UwClientsController@calcForm');
-    Route::get('/uw/get-app-blank/{claim_id}','UwClientsController@getAppBlank');
-    Route::resource('uw-loan-types', 'UwLoanTypesController');
-    Route::delete('uw/loan-types/{id}', 'UwLoanTypesController@destroy');
-
-    Route::group(['prefix'=>'uw'], function(){
-        Route::get('clients', 'UwCreateClientsController@index')->name('uw.create.clients.index');
-
-        Route::get('get-loan-type', 'UwCreateClientsController@getLoanType')->name('uw.get.loan.type');
-
-        Route::get('create-step-one/{id}', 'UwCreateClientsController@createStepOne')->name('uw.create.step.one');
-        Route::post('create-step-one', 'UwCreateClientsController@postCreateStepOne')->name('uw.create.step.one.post');
-
-        Route::get('create-step-two/{id}', 'UwCreateClientsController@createStepTwo')->name('uw.create.step.two');
-        Route::post('create-step-two', 'UwCreateClientsController@postCreateStepTwo')->name('uw.create.step.two.post');
-
-        Route::get('create-step-three/{id}', 'UwCreateClientsController@createStepThree')->name('uw.create.step.three');
-        Route::post('create-step-three', 'UwCreateClientsController@postCreateStepThree')->name('uw.create.step.three.post');
-
-        Route::get('create-step-result/{id}', 'UwCreateClientsController@createStepResult')->name('uw.create.step.result');
-
-        Route::post('uw-online-registration', 'UwInquiryIndividualController@onlineRegistration')->name('uw.online.registration');
-        Route::get('uw-get-result-buttons/{id}', 'UwInquiryIndividualController@getResultButtons')->name('uw.get-result-buttons');
-        Route::get('get-client-res-k/{id}','UwInquiryIndividualController@getClientKatm');
-        Route::get('get-client-res-i/{id}','UwInquiryIndividualController@getClientInps');
-        Route::get('get-status-send/{id}','UwInquiryIndividualController@getStatusSend');
-        Route::get('get-confirm-send/{id}','UwInquiryIndividualController@getConfirmSend');
-
-        // GUAR
-        Route::get('uw-get-client-guars/{id}', 'UwCreateClientsController@getClientGuars')->name('uw.get-client-guars');
-        Route::post('create-client-guar', 'UwCreateClientsController@createClientGuar')->name('uw.create-client-guar');
-        Route::get('edit-client-guar/{id}', 'UwCreateClientsController@editClientGuar');
-        Route::get('delete-client-guar/{id}', 'UwCreateClientsController@deleteClientGuar');
-
-        // FILE
-        Route::get('uw-get-client-files/{id}', 'UwCreateClientsController@getClientFiles')->name('uw.get-client-files');
-        Route::post('create-client-file', 'UwCreateClientsController@createClientFile')->name('uw.create-client-file');
-        Route::get('delete-client-file/{id}', 'UwCreateClientsController@deleteClientFile');
-    });
-    // DEBTORS
-    Route::resource('uw-debtors', 'UwClientDebtorsController');
 
     // Laravel log
     Route::get('/storage/log', 'HomeController@storageLog')->name('storage-log');

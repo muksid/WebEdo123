@@ -15,16 +15,6 @@ use App\Message;
             <li><a href="#">@lang('blade.messages')</a></li>
             <li class="active">@lang('blade.read_received')</li>
         </ol>
-        @if (count($errors) > 0)
-            <div class="alert alert-danger">
-                <strong>@lang('blade.error')</strong> @lang('blade.to_send_choose')<br><br>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         @if(session('success'))
             <div class="box box-default">
@@ -40,13 +30,13 @@ use App\Message;
             </div>
         @endif
 
-        @if(session('notFiles'))
+        @if(session('errors'))
             <div class="box box-default">
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="alert alert-danger">
-                                <h4 class="modal-title"> {{ session('notFiles') }}</h4>
+                                <h4 class="modal-title"> {{ session('errors') }}</h4>
                             </div>
                         </div>
                     </div>
@@ -72,45 +62,17 @@ use App\Message;
                                     <img class="img-circle" src="{{ url('/admin-lte/dist/img/user.png') }}" alt="User Avatar">
                                 </div>
                                 <!-- /.widget-user-image -->
-                                <h3 class="widget-user-username">{{$message->lname}} {{$message->fname}}</h3>
-                                <h5 class="widget-user-desc">МФО: {{$message->branch}} &amp; {{$message->job_title}}</h5>
+                                <h3 class="widget-user-username">{{$model->user->lname??''}} {{$model->user->fname??''}}</h3>
+                                <h5 class="widget-user-desc">МФО: {{$model->user->department->title??''}} &amp; {{$model->user->job_title??''}}</h5>
                             </div>
                             <div class="box-footer">
                                 <div class="row">
                                     <div class="col-sm-4 border-right">
                                         <div class="description-block">
                                             <h5 class="description-header"><i class="fa fa-clock-o"></i> @lang('blade.sent_date')</h5>
-                                            <span class="description-text">{{ $message->created_at }}</span>
+                                            <span class="description-text">{{ \Carbon\Carbon::parse($model->created_at)->format('d.m.Y H:i:s') }}</span>
                                         </div>
                                     </div>
-
-                                    <div class="col-sm-4 border-right">
-                                        <div class="description-block">
-                                            <h5 class="description-header"><i class="fa fa-thumb-tack"></i> @lang('blade.type_message')</h5>
-                                            <span class="description-text">
-                                                @foreach(\App\MesType::all() as $value)
-                                                    @if($value->message_type == $message->mes_type)
-                                                        <span style="color: red">{{$value->title}}</span>
-                                                    @endif
-                                                @endforeach
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-sm-4">
-                                        <div class="description-block">
-                                            <h5 class="description-header"><i class="fa fa-hourglass-half"></i> @lang('blade.deadline')</h5>
-                                            <span class="description-text">
-                                                @if($message->mes_term !== '0')
-                                                    {{$message->mes_term}}
-                                                @else
-                                                    <span style="color: red"><i class="fa  fa-ban"></i></span>
-                                                @endif
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                    <!-- /.col -->
                                 </div>
                                 <!-- /.row -->
                             </div>
@@ -127,7 +89,7 @@ use App\Message;
                             </div>
 
                             <div class="box-body">
-                                <p>{{$message->subject}}</p>
+                                <p>{{$model->subject}}</p>
                             </div>
                         </div>
                     </div>
@@ -139,7 +101,7 @@ use App\Message;
                     <div class="box-body no-padding">
                         <div class="mailbox-read-message">
                             <h3 class="box-title">@lang('blade.text'):</h3>
-                            <p>{!! $message->text !!}</p>
+                            <p>{!! $model->text !!}</p>
                         </div>
                     </div>
 
@@ -147,106 +109,26 @@ use App\Message;
                         <h3 class="box-title">@lang('blade.file'):</h3>
                         <ul class="mailbox-attachments clearfix">
                             @foreach ($message_files as $file)
-                                <?php $file_ext = strtolower($file->file_extension) ?>
-                                @switch(strtolower($file_ext))
-                                    @case('doc')
-                                    @case('docx')
-                                    <li>
-                                        <span class="mailbox-attachment-icon">
-                                            <i class="fa fa-file-word-o text-blue"></i>
-                                        </span>
-                                        <div class="mailbox-attachment-info ellipsis">
-                                            <a href="{{ route('load',['file'=>$file->id]) }}"
-                                               class="mailbox-attachment-name">
-                                                <i class="fa fa-paperclip"></i> {{$file->file_name}}</a>
-                                            <span class="mailbox-attachment-size">
-                                                {{ Message::formatSizeUnits($file->file_size) }}
-                                                <a href="{{ route('load',['file'=>$file->id]) }}" class="btn btn-default btn-xs pull-right">
-                                                    <i class="fa fa-download"></i>
-                                                </a>
-                                            </span>
-                                        </div>
-                                    </li>
-                                    @break
-                                    @case('jpg')
-                                    @case('jpeg')
-                                    @case('png')
-                                    <li>
-                                    <span class="mailbox-attachment-icon has-img">
-                                        <img src="{{ asset('/FilesFTP/'.$file->file_hash) }}"></span>
-                                        <div class="mailbox-attachment-info ellipsis">
-                                            <a href="{{ route('myjpg',['file'=>$file->id]) }}"
-                                               target="_blank" class="mailbox-attachment-name"
-                                               onclick="window.open('<?php echo('/myjpg/' . $file->id); ?>',
-                                                       'modal',
-                                                       'width=800,height=900,left=500,top=30');
-                                                       return false;">
-                                                <i class="fa fa-camera"></i> {{$file->file_name}}
-                                            </a>
-                                            <span class="mailbox-attachment-size">
-                                              {{ Message::formatSizeUnits($file->file_size) }}
-                                              <a href="{{ route('load',['file'=>$file->id]) }}"
-                                                 class="btn btn-default btn-xs pull-right">
-                                                  <i class="fa fa-download"></i></a>
-                                            </span>
-                                        </div>
-                                    </li>
-                                    @break
-                                    @case('pdf')
-                                    <li>
+                                <li>
                                     <span class="mailbox-attachment-icon">
-                                        <i class="fa fa-file-pdf-o text-danger"></i></span>
-                                        <div class="mailbox-attachment-info ellipsis">
-                                            <a href="{{ route('preview',['previewFile'=>$file->file_hash]) }}"
-                                               target="_blank" class="mailbox-attachment-name"
-                                               onclick="window.open('<?php echo ('/preview/'. $file->file_hash); ?>',
-                                                       'modal',
-                                                       'width=800,height=900,top=30,left=500');
-                                                       return false;">
-                                                {{$file->file_name}}</a>
-                                            <span class="mailbox-attachment-size">
-                                          {{ Message::formatSizeUnits($file->file_size) }}
-                                          <a href="{{ route('load',['file'=>$file->id]) }}"
-                                             class="btn btn-default btn-xs pull-right"><i class="fa fa-download"></i></a>
-                                        </span>
-                                        </div>
-                                    </li>
-                                    @break
-                                    @case('xls')
-                                    @case('xlsx')
-                                    <li>
-                                    <span class="mailbox-attachment-icon">
-                                        <i class="fa fa-file-excel-o text-success"></i></span>
-                                        <div class="mailbox-attachment-info ellipsis">
-                                            <a href="{{ route('load',['file'=>$file->id]) }}" class="mailbox-attachment-name"><i
-                                                        class="fa fa-paperclip"></i> {{$file->file_name}}</a>
-                                            <span class="mailbox-attachment-size">
-                                          {{ Message::formatSizeUnits($file->file_size) }}
-                                          <a href="{{ route('load',['file'=>$file->id]) }}"
-                                             class="btn btn-default btn-xs pull-right"><i class="fa fa-download"></i></a>
-                                        </span>
-                                        </div>
-                                    </li>
-                                    @break
+                                        <i class="fa fa-file-image-o"></i></span>
 
-                                    @default
-                                    <li>
-                                         <span class="mailbox-attachment-icon">
-                                             <i class="fa fa-file-o text-aqua"></i></span>
+                                    <div class="mailbox-attachment-info ellipsis">
+                                        <a href="#" target="_blank" class="mailbox-attachment-name"
+                                           onclick="window.open('<?php echo('/fe-fileView/' . $file->id); ?>',
+                                                   'modal',
+                                                   'width=800,height=900,top=30,left=500');
+                                                   return false;">
+                                            {{$file->file_name}}</a>
+                                        <span class="mailbox-attachment-size">
+                                                {{ $file->size($file->file_size) }}
+                                          <a href="{{ url('fe-fileDownload',['id'=>$file->id]) }}"
+                                             class="btn btn-danger btn-xs pull-right"><i
+                                                      class="fa fa-download"></i></a>
+                                        </span>
+                                    </div>
 
-                                        <div class="mailbox-attachment-info ellipsis">
-                                            <a href="{{ route('load',['file'=>$file->id]) }}"
-                                               class="mailbox-attachment-name"><i
-                                                        class="fa fa-paperclip"></i> {{$file->file_name}}</a>
-                                            <span class="mailbox-attachment-size">
-                                               {{ Message::formatSizeUnits($file->file_size) }}
-                                               <a href="{{ route('load',['file'=>$file->id]) }}"
-                                                  class="btn btn-default btn-xs pull-right"><i
-                                                           class="fa fa-download"></i></a>
-                                             </span>
-                                        </div>
-                                    </li>
-                                @endswitch
+                                </li>
 
                             @endforeach
                         </ul>
@@ -257,8 +139,7 @@ use App\Message;
                         </div>
 
                     </div>
-                    <!-- /.box-footer -->
-                    <!-- /.box-footer -->
+
                     <div class="box-footer">
                         <div class="pull-right">
                             <button type="button" class="btn btn-warning to_reply"><i class="fa fa-reply"></i> @lang('blade.reply')</button>
@@ -266,13 +147,13 @@ use App\Message;
                         </div>
                         <button type="submit" class="btn btn-danger"><i class="fa fa-trash-o"></i> @lang('blade.delete')</button>
                     </div>
-                </div>
-                <!-- /. box -->
 
-                @if(sizeof($fromUserAllMessages) > 0)
+                </div>
+
+                @if(sizeof($authAllMessages) > 0)
                     <div class="box box-success">
                         <div class="box-header with-border">
-                            <h3 class="box-title">{{$message->lname .' '. $message->fname}} - @lang('blade.from_spesific_user').</h3>
+                            <h3 class="box-title">{{$model->lname .' '. $model->fname}} - @lang('blade.from_spesific_user').</h3>
 
                             <div class="box-tools pull-right">
                                 <div class="has-feedback">
@@ -292,7 +173,7 @@ use App\Message;
                                     <button type="button" class="btn btn-default btn-sm text-red delete-all"  title="O`chirish" data-url=""><i class="fa fa-trash-o text-red"></i></button>
                                 </div>
                                 <div class="pull-right">
-                                {{ $fromUserAllMessages->count() }}
+                                {{ $authAllMessages->count() }}
                                 <!-- /.btn-group -->
                                 </div>
                                 <!-- /.pull-right -->
@@ -304,15 +185,13 @@ use App\Message;
                                         <th>#</th>
                                         <th><i class="fa fa-eye-slash"></i> @lang('blade.group_table_status')</th>
                                         <th><i class="fa fa-text-height"></i> @lang('blade.subject')</th>
-                                        <th><i class="fa fa-hourglass"></i> @lang('blade.deadline')</th>
-                                        <th><i class="fa fa-tasks"></i> @lang('blade.type_message')</th>
                                         <th><i class="fa fa-link"></i> @lang('blade.file')</th>
                                         <th><i class="fa fa-clock-o"></i> @lang('blade.received_date')</th>
                                     </tr>
                                     </thead>
                                     <tbody>
 
-                                    @foreach($fromUserAllMessages as $key => $value)
+                                    @foreach($authAllMessages as $key => $value)
                                         <tr>
                                             <td>
                                                 <input type="checkbox" class="checkbox" data-id="{{$value->mes_user_id}}">
@@ -327,28 +206,18 @@ use App\Message;
                                             <td class="mailbox-name">
                                                 <a href="{{ route('messages.show',['mes_gen' => $value->mes_gen,
                                                             'id' => $value->id]) }}">
-                                                    {{ $value->subject }}
+                                                    {{ $value->message->subject??'' }}
                                                 </a>
                                             </td>
-                                            <td class="mailbox-subject">
-                                                @if($value->mes_term == 0)
-                                                    @lang('blade.no_deadline')
-                                                @else
-                                                    <i class="fa fa-clock-o"></i> {{$value->mes_term}}
-                                                @endif
-                                            </td>
-                                            <td>
-                                                {{ $value->message_type }}
-                                            </td>
                                             <td class="mailbox-attachment"><i class="fa fa-paperclip"></i></td>
-                                            <td class="mailbox-date">{{$value->created_at}}</td>
+                                            <td class="mailbox-date">{{ \Carbon\Carbon::parse($value->created_at)->format('d m Y H:i:s')}}</td>
                                         </tr>
 
                                     @endforeach
                                     </tbody>
                                 </table>
                                 <!-- /.table -->
-                                {{ $fromUserAllMessages->links() }}
+                                {{ $authAllMessages->links() }}
                             </div>
                             <!-- /.mail-box-messages -->
                         </div>
@@ -363,7 +232,7 @@ use App\Message;
                     <div class="box-header with-border">
                         <h3 class="box-title">@lang('blade.receivers')</h3>
                         <div class="box-tools pull-right">
-                            <span data-toggle="tooltip" title="{{$to_users->count()}} ta xodimga" class="badge bg-green">{{$to_users->count()}}</span>
+                            <span data-toggle="tooltip" title="{{$model->messageUsers->count()}} ta xodimga" class="badge bg-green">{{$model->messageUsers->count()}}</span>
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                             </button>
                         </div>
@@ -372,19 +241,19 @@ use App\Message;
                     <!-- /.box-header -->
                     <div class="box-body">
                         <div class="box-footer box-comments">
-                            @foreach($to_users as $user)
+                            @foreach($model->messageUsers as $user)
                                 <div class="box-comment">
                                 <span class="username">
                                 @if($user->is_readed == 1)
-                                        <i class="fa fa-fw fa-check-square-o" style="color: #00a65a"></i> {{$user->lname}} {{$user->fname}}
-                                        <span class="text-muted pull-right" style="color: #00a65a"><i class="fa fa-clock-o"></i> {{$user->readed_date}}</span>
+                                        <i class="fa fa-fw fa-check-square-o" style="color: #00a65a"></i> {{$user->toUsers->lname??''}} {{$user->toUsers->fname??''}}
+                                        <span class="text-muted pull-right" style="color: #00a65a"><i class="fa fa-clock-o"></i> {{$user->readed_date??''}}</span>
                                     @else
-                                        <i class="fa fa-fw fa-check" style="color: #dd4b39"></i> {{$user->lname}} {{$user->fname}}
+                                        <i class="fa fa-fw fa-check" style="color: #dd4b39"></i> {{$user->toUsers->lname??''}} {{$user->toUsers->fname??''}}
                                         <span class="text-muted pull-right"></span>
                                     @endif
 
                                 </span><!-- /.username -->
-                                    <i class="fa fa-bank" style="color: #2196F3"></i> {{$user->branch_code}}  <i>{{$user->job_title}}</i>
+                                    <i class="fa fa-bank" style="color: #2196F3"></i> {{$user->toUsers->branch_code}}  <i>{{$user->toUsers->job_title}}</i>
                                 </div>
                             @endforeach
                         </div>
@@ -402,7 +271,7 @@ use App\Message;
         <div class="modal-dialog modal-confirm" style="overflow-y: scroll; max-height:70%;  margin-top: 50px; margin-bottom:50px;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title"><i class="fa fa-user text-green"></i> {{ $message->lname.' '.$message->fname }} <i class="fa fa-reply"> @lang('blade.reply')</i></h4>
+                    <h4 class="modal-title"><i class="fa fa-user text-green"></i> {{ $model->lname.' '.$model->fname }} <i class="fa fa-reply"> @lang('blade.reply')</i></h4>
                 </div>
                 <!-- ReplyMessage -->
                 <form role="form" method="POST" action="{{ route('ef-compose') }}" enctype="multipart/form-data">
@@ -410,21 +279,15 @@ use App\Message;
                     <div class="modal-body">
 
                         <input name="status" value="reply" hidden />
-                        <input name="message_id" value="{{ $message->id }}" hidden />
-                        <input name="to_users[]" value="{{$message->u_id}}" hidden />
-                        <input name="mes_type" value="other" hidden />
+                        <input name="message_id" value="{{ $model->id }}" hidden />
+                        <input name="to_users[]" value="{{$model->user_id}}" hidden />
 
-                        <div class="form-group {{ $errors->has('subject') ? 'has-error' : '' }}">
+                        <div class="form-group">
                             <label>@lang('blade.subject') <span class=""></span></label>
-                            <input name="subject" value="{{ old('subject') }}" id="subject"  class="form-control" type="text" placeholder="@lang('blade.subject')" required autofocus>
-                            @if ($errors->has('subject'))
-                                <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('subject') }}</strong>
-                                </span>
-                            @endif
+                            <input name="subject" value="{{ old('subject') }}" id="subject"  class="form-control" type="text" placeholder="@lang('blade.subject')" autofocus>
                         </div>
 
-                        <div class="form-group {{ $errors->has('text') ? 'has-error' : '' }}">
+                        <div class="form-group">
                             <label>@lang('blade.text'):</label>
                             <textarea name="text" id="editor1" rows="14" cols="110">
                                         <br>
@@ -434,11 +297,6 @@ use App\Message;
                                         <br>{{Auth::user()->fname}} {{Auth::user()->lname}}
                                         </i>
                                     </textarea>
-                            @if ($errors->has('text'))
-                                <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('text') }}</strong>
-                                    </span>
-                            @endif
 
                         </div>
 
@@ -487,7 +345,7 @@ use App\Message;
         <div class="modal-dialog modal-confirm" style="width: 50%;  margin-top: 15px; margin-bottom:15px;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title"><i class="fa fa-file-text-o text-green"></i> {{ $message->subject }} <i class="fa fa-reply"> @lang('blade.forward')</i></h4>
+                    <h4 class="modal-title"><i class="fa fa-file-text-o text-green"></i> {{ $model->subject }} <i class="fa fa-reply"> @lang('blade.forward')</i></h4>
                 </div>
 
                 <!-- FForward Jamshid -->
@@ -495,9 +353,8 @@ use App\Message;
                     {{csrf_field()}}
 
                     <input name="status" value="forward" type="text" hidden>
-                    <input name="message_id" value="{{$message->id}}" hidden />
-                    <input name="text" value="{{$message->text}}" type="text" hidden />
-                    <input name="mes_type" value="{{$message->mes_type}}" type="text" hidden />
+                    <input name="message_id" value="{{$model->id}}" hidden />
+                    <input name="text" value="{{$model->text}}" type="text" hidden />
 
                     <div id="forwardDiv" class="modal-body" style="overflow-y: scroll; max-height: 600px;">
                         <div class="box-body">
@@ -517,7 +374,7 @@ use App\Message;
                     </div>
                     <div class="modal-footer">
                         <div class="form-group">
-                            <input name="subject" value="{{$message->subject}}" type="text" style="hight:100px;" class="form-control" placeholder="@lang('blade.additional') ..." >
+                            <input name="subject" value="{{$model->subject}}" type="text" style="hight:100px;" class="form-control" placeholder="@lang('blade.additional') ..." >
                         </div>
                         <div class="pull-right">
                             <a href="" class="btn btn-default" data-dismiss="modal"><i class="fa fa-remove"></i>@lang('blade.cancel')

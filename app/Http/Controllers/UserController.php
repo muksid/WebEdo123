@@ -22,6 +22,13 @@ class UserController extends Controller
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
 
+    public function getTest()
+    {
+        $db_ext = DB::connection('mysql_uw');
+        $countries = $db_ext->table('uw_users')->count();
+        print_r($countries);
+    }
+
     public function index(Request $request)
     {
         //
@@ -65,7 +72,7 @@ class UserController extends Controller
 
         return view('users.index',
             compact('models','q','f','s','f_title','filial',
-                'inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                'inbox_count','sent_count','all_inbox_count'))
             ->with('i', (request()->input('page', 1) - 1) * 25);
     }
 
@@ -115,7 +122,7 @@ class UserController extends Controller
                         if (count ( $models ) > 0)
                             return view ( 'users.index',
                                 compact('models','q','f','s','f_title','filial',
-                                    'inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                                    'inbox_count','sent_count','all_inbox_count'))
 
                                 ->withDetails ( $models )->withQuery ( $q );
                     }
@@ -159,7 +166,7 @@ class UserController extends Controller
                         if (count($models) > 0)
                             return view('users.index',
                                 compact('models', 'q', 'f', 's','f_title','filial',
-                                    'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'))
+                                    'inbox_count', 'sent_count', 'all_inbox_count'))
                                 ->withDetails($models)->withQuery($q);
                     }
 
@@ -173,7 +180,7 @@ class UserController extends Controller
 
         return view('users.index',
             compact('models','q','f','s','f_title','filial',
-                'inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                'inbox_count','sent_count','all_inbox_count'))
             ->with('i', (request()->input('page', 1) - 1) * 25);
     }
 
@@ -201,7 +208,7 @@ class UserController extends Controller
                     $departments = Department::where('status', 1)->get();
 
                     return view('users.create',compact('roles', 'filial', 'departments',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                        'inbox_count','sent_count','all_inbox_count'));
 
                     break;
                 case('branch_admin'):
@@ -222,7 +229,7 @@ class UserController extends Controller
                         ->get();
 
                     return view('users.create',compact('roles', 'departments',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                        'inbox_count','sent_count','all_inbox_count'));
 
                     break;
                 default:
@@ -245,21 +252,21 @@ class UserController extends Controller
             'fname'         => 'required|max:25',
             'lname'         => 'required|max:25',
             'sname'         => 'max:50',
-            'username'      => 'required|max:25|unique:users', // Jamshid unique added
-            'card_num'      => 'required|max:15|unique:users', // Jamshid unique added //max: from 25 to 15 2020-06-08 09:34:05
+            'username'      => 'required|max:25|unique:users',
+            'card_num'      => 'required|max:15|unique:users',
             'branch_code'   => 'required|max:25',
             'depart_id'     => 'required|max:25',
             'job_title'     => 'required|max:70',
             'job_date'      => 'required',
             'password'      => 'required|confirmed|min:6',
-            'user_sort'     => 'required|max:3'         // Jamshid added new field 2020-06-08 10:19:56
+            'user_sort'     => 'required|max:3'
 
         ]);
 
         $input = $request->all();
-        $input['password'] = Hash::make($input['password']); //Hash password
-        $input['user_gen'] = md5($input['username']); //md5 username
-        $input['email'] = $input['branch_code'].$input['card_num']."@tb.uz"; // Jamshid Default email   branch_code + card_num + @turonbak.uz
+        $input['password'] = Hash::make($input['password']);
+        $input['user_gen'] = md5($input['username']);
+        $input['email'] = $input['branch_code'].$input['card_num']."@tb.uz";
         foreach ($input['roles'] as $value) {
             # code...
             $data_user[] = $value;
@@ -267,6 +274,27 @@ class UserController extends Controller
         $input['roles'] = json_encode($data_user);
 
         User::create($input);
+
+        // add user table in Uw
+        $db_uw = DB::connection('mysql_uw');
+
+        $uw_tb = $db_uw->table('users')->insert([
+            'fname' => $input['fname'],
+            'lname' => $input['lname'],
+            'sname' => $input['sname'],
+            'username' => $input['username'],
+            'card_num' => $input['card_num'],
+            'branch_code' => $input['branch_code'],
+            'depart_id' => $input['depart_id'],
+            'job_title' => $input['job_title'],
+            'job_date' => $input['job_date'],
+            'password' => $input['password'],
+            'user_gen' => $input['user_gen'],
+            'email' => $input['email'],
+            'roles' => json_encode($data_user),
+            'user_sort' => 1,
+            'status' => 1,
+        ]);
 
         return back()->with('success', 'Xodim muvaffaqiyatli qo`shildi');
     }
@@ -317,7 +345,7 @@ class UserController extends Controller
 
                     return view('users.edit',
                         compact('user', 'filial','departments','roles',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                        'inbox_count','sent_count','all_inbox_count'));
 
                     break;
                 case('branch_admin'):
@@ -342,20 +370,19 @@ class UserController extends Controller
                         ->get();
 
                     return view('users.edit',compact('user','departments','roles',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count',));
+                        'inbox_count','sent_count','all_inbox_count'));
 
                     break;
                 case('user'):
                 case('office'):
                     $user = User::find($id);
-                    return view('users.edit',compact('user',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                    return view('users.edit',compact('user','inbox_count','sent_count','all_inbox_count'));
                     break;
                 default:
 
                     $user = User::find($id);
                     return view('users.edit',compact('user',
-                        'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                        'inbox_count','sent_count','all_inbox_count'));
                     break;
             }
 
@@ -367,11 +394,11 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  int  $id
-     * @return Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
-        $user = User::where('id', $id)->firstOrFail();
+        $user = User::findOrFail($id);
 
         if ($id == Auth::user()->id){
 
@@ -418,9 +445,9 @@ class UserController extends Controller
                 'email', 'password','depart_id', 'job_date', 'status','user_sort');
 
             if(!empty($input['password'])){
-                $input['password'] = Hash::make($input['password']); //update the password
+                $input['password'] = Hash::make($input['password']);
             }else{
-                $input = array_except($input,array('password')); //remove password from the input array
+                $input = array_except($input,array('password'));
             }
 
             foreach ($request->input('roles') as $value) {
@@ -430,7 +457,12 @@ class UserController extends Controller
 
             $input['roles'] = json_encode($data_user);
 
-            $user->update($input); //update the user info
+            // add user table in Uw
+            $db_uw = DB::connection('mysql_uw');
+
+            $uw_tb = $db_uw->table('users')->where('id', $id)->update($input);
+
+            $user->update($input);
 
             return redirect()->route('users.index')
                 ->with('success','Xodim muvaffaqiyatli yangilandi');

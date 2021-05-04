@@ -15,19 +15,19 @@ use Auth;
 use DB;
 use Hash;
 use Illuminate\Support\Facades\Input;
-use Illuminate\Support\Facades\File; 
+use Illuminate\Support\Facades\File;
 use Illuminate\Http\UploadedFile;
 
 
 class MainController extends Controller
-{   
+{
 
     // Search User Message Control
     public function spesificUserMessageControlSearch(){
         foreach (json_decode(Auth::user()->roles) as $user){
             if($user == 'admin'){
                 @include('count_message.php');
-            
+
                 $search = User::orderBy('id', 'ASC');
 
                 $f = Input::get ( 'f' );
@@ -60,11 +60,11 @@ class MainController extends Controller
                 $users->appends ( array (
                     'f' => $f,
                     'q' => $q,
-                    's' => $s                
+                    's' => $s
                 ) );
-                
+
                 return view('control.user-message',
-                    compact('users','q','f','s','filials','f_title','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                    compact('users','q','f','s','filials','f_title','inbox_count','sent_count','all_inbox_count'))
                     ->with('i', (request()->input('page', 1) - 1) * 50);
             }else{
                 return response()->view('errors.' . '404', [], 404);
@@ -94,8 +94,8 @@ class MainController extends Controller
 
 
                 if($from == '')     $from="2020-01-01";
-                if($till == '')     $till=date("Y-m-d",strtotime('tomorrow'));    
-                
+                if($till == '')     $till=date("Y-m-d",strtotime('tomorrow'));
+
 
                 $users = User::where('id', $id)->first();
 
@@ -109,7 +109,7 @@ class MainController extends Controller
 
                         $search->where('message',function ($query) use($m_search){
                             $query->where('subject', 'like', '%'.$m_search.'%');
-                        });    
+                        });
 
                         $search_sent->where('subject', 'like', '%'.$m_search.'%');
 
@@ -144,8 +144,8 @@ class MainController extends Controller
                     ) );
 
                     return view('control.user-message-delete',
-                    compact('id','users','s_count','r_count','user_message','delete_arr','m_search','from','till','isDeleted','typeOfMessage','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
-                    ->with('i', (request()->input('page', 1) - 1) * 50); 
+                    compact('id','users','s_count','r_count','user_message','delete_arr','m_search','from','till','isDeleted','typeOfMessage','inbox_count','sent_count','all_inbox_count'))
+                    ->with('i', (request()->input('page', 1) - 1) * 50);
                 }else{
 
                     $search = Message::whereBetween('created_at',[$from, $till]);                                       # For sent
@@ -154,11 +154,11 @@ class MainController extends Controller
 
 
                     if($m_search){
-                        $search->where('subject', 'like', '%'.$m_search.'%');       
+                        $search->where('subject', 'like', '%'.$m_search.'%');
 
-                        $search_rec->where('message', function($query) use($m_search){  
+                        $search_rec->where('message', function($query) use($m_search){
 
-                            $query->where('subject', 'like', '%'.$m_search.'%');    
+                            $query->where('subject', 'like', '%'.$m_search.'%');
 
                         });
                     }
@@ -168,9 +168,9 @@ class MainController extends Controller
                         $search->where('is_deleted', $isDeleted);
 
                         $search_rec->where('is_deleted', $isDeleted);
-                    
-                    }  
-                    
+
+                    }
+
                     $messages = $search->where('user_id', $id)->orderBy('id', 'DESC')->paginate(50);
 
                     $s_count = $messages->total();
@@ -187,10 +187,10 @@ class MainController extends Controller
                         'isDeleted'     => $isDeleted,
                         'typeOfMessage' => $typeOfMessage
                     ) );
-                    
+
                     return view('control.user-message-delete',
-                    compact('id','users','s_count','r_count','messages','delete_arr','m_search','from','till','isDeleted','typeOfMessage','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
-                    ->with('i', (request()->input('page', 1) - 1) * 50); 
+                    compact('id','users','s_count','r_count','messages','delete_arr','m_search','from','till','isDeleted','typeOfMessage','inbox_count','sent_count','all_inbox_count'))
+                    ->with('i', (request()->input('page', 1) - 1) * 50);
                 }
             }else{
                 return response()->view('errors.' . '404', [], 404);
@@ -206,8 +206,8 @@ class MainController extends Controller
             if($user == 'admin'){
 
                 $departments = Department::where('parent_id', '=', 0)->where('status', '=', 1)->get();
-                
-                $message = Message::where('id', $id)->first();        
+
+                $message = Message::where('id', $id)->first();
 
                 if (empty($message)) {
                     return response()->view('errors.' . '404', [], 404);
@@ -224,12 +224,12 @@ class MainController extends Controller
                 }
 
                 $to_users = MessageUsers::where('message_id', $message->id)->get();
-                
+
 
                 @include('count_message.php');
 
                 return view('control.message_view',
-                    compact('message','id', 'departments','message_files','to_users','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+                    compact('message','id', 'departments','message_files','to_users','inbox_count','sent_count','all_inbox_count'));
             }
             else{
                 return response()->view('errors.' . '404', [], 404);
@@ -261,7 +261,7 @@ class MainController extends Controller
                 $filials = Department::where('parent_id', 0)->where('status', 1)->orderBy('id','ASC')->get();
                 $users   = Message::select('user_id')->distinct()->get();
 
-                
+
                 if($u_search)   $search->where('user_id', $u_search);
 
 
@@ -275,7 +275,7 @@ class MainController extends Controller
                     if($user_status == '3')  $user_status = '0';
                     $search->whereHas('user', function($query) use($user_status){
                         $query->where('status', $user_status);
-                    
+
                     });
                 }
 
@@ -285,7 +285,7 @@ class MainController extends Controller
                     $search->where('is_deleted',$isDeleted);
 
                 }
-                
+
                 $messages_result = $search->get();
 
                 $delete_arr = array();
@@ -312,7 +312,7 @@ class MainController extends Controller
 
                 return view('control.mes-control',
                 compact('messages','delete_arr','filials','users','f','user_status','m_search','u_search',
-                    'f_title','from','till','isDeleted','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                    'f_title','from','till','isDeleted','inbox_count','sent_count','all_inbox_count'))
                 ->with('i', (request()->input('page', 1) - 1) * 50);
             }else{
                 return response()->view('errors.' . '404', [], 404);
@@ -320,7 +320,7 @@ class MainController extends Controller
         }
     }
 
-    
+
     public function messageUsersDeleteSearch(){
         foreach (json_decode(Auth::user()->roles) as $user){
             if($user == 'admin'){
@@ -345,7 +345,7 @@ class MainController extends Controller
                 if($isDeleted){
                     if($isDeleted == '3')  $isDeleted = '0';
                     $search->where('is_deleted', $isDeleted);
-                
+
                 }
 
                 if($f){
@@ -356,7 +356,7 @@ class MainController extends Controller
                     });
                 }
 
-                
+
                 if($u_search)   $search->where('to_users_id', $u_search);
 
 
@@ -391,7 +391,7 @@ class MainController extends Controller
                 ) );
 
                 return view('control.message-users',
-                compact('message_users','users','delete_arr','filials','f_title','f','m_search','u_search','from','till','isDeleted','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+                compact('message_users','users','delete_arr','filials','f_title','f','m_search','u_search','from','till','isDeleted','inbox_count','sent_count','all_inbox_count'))
                 ->with('i', (request()->input('page', 1) - 1) * 100);
             }
             else{
@@ -407,7 +407,7 @@ class MainController extends Controller
             if($user == 'admin'){
 
                 @include('count_message.php');
-    
+
                 $f          = Input::get ( 'f'          );
                 $f_search   = Input::get ( 'f_search'   );
                 $m_search   = Input::get ( 'm_search'   );
@@ -418,9 +418,9 @@ class MainController extends Controller
                 $isDeleted  = Input::get ( 'isDeleted'  );
 
                 if($from == '') $from="2020-01-01";
-                if($till == '') $till=date("Y-m-d",strtotime('tomorrow'));  
+                if($till == '') $till=date("Y-m-d",strtotime('tomorrow'));
 
-                $f_title = Department::  select('title') 
+                $f_title = Department::  select('title')
                     ->where('branch_code', $f)
                     ->where('parent_id', '0')
                     ->first();
@@ -438,7 +438,7 @@ class MainController extends Controller
                     $search->whereHas('message', function($query) use($isDeleted) {
                         $query->where('is_deleted', $isDeleted);
                     });
-                
+
                 }
 
                 if($f){
@@ -464,22 +464,22 @@ class MainController extends Controller
 
                 if($user_status){
                     $search->whereHas('message', function($query) use($user_status) {
-                        
+
                         $query->whereHas('user', function ($q) use($user_status) {
                             $q->where('status', $user_status);
                         });
-                    
+
                     });
                 }
-                
+
 
                 if($u_search){
                     $search->whereHas('message', function($query) use($u_search) {
-                        
+
                         $query->whereHas('user', function ($q) use($u_search) {
                             $q->where('id', $u_search);
                         });
-                    
+
                     });
                 }
 
@@ -515,7 +515,7 @@ class MainController extends Controller
                 return view('control.file-delete',
                     compact('file_info','f_search','u_search','m_search','users','delete_arr','f','f_title',
                         'user_status','from','till','isDeleted','filials','inbox_count',
-                        'sent_count','term_inbox_count','all_inbox_count','file_inf_size'))
+                        'sent_count','all_inbox_count','file_inf_size'))
                     ->with('i', (request()->input('page', 1) - 1) * 50);
             }else{
                 return response()->view('errors.' . '404', [], 404);
@@ -531,7 +531,7 @@ class MainController extends Controller
     // Delete Selected the Spesific User's Messages
     // If you try to delete sent messages, you will have to delete the message from 3 tables which are 'messages', 'message-users' and 'message_files'.
     // If you want to delete received messages, you need to delete from only 'message_users' table .
-    
+
     public function deleteMultipleFiles(Request $request){
         $id = $request->input('ids');
         $filename = MessageFiles::whereIn('id', explode(',',$id))
@@ -544,7 +544,7 @@ class MainController extends Controller
             if(file_exists($file_path)){
                 unlink($file_path);
             }
-        }        
+        }
 
         return response()->json(['status'=>true,'msg'=>'Tanlangan fayllar muvaffaqiyatli o`chirildi']);
     }
@@ -570,10 +570,10 @@ class MainController extends Controller
                     unlink($file_path);
                 }
                 MessageFiles::where('id', $f->id)->delete();
-            }    
+            }
         }
         MessageUsers::whereIn('message_id', explode(",",$id))->delete();
-        
+
         $mesForward = MessageForward::whereIn('message_id', explode(",",$id))->get();
         if(count($mesForward)){
             foreach($mesForward as $mf){
@@ -585,7 +585,7 @@ class MainController extends Controller
                             unlink($file_path);
                         }
                         MessageFiles::where('id', $fn->id)->delete();
-                    }    
+                    }
                 }
                 Message::where('id',$mf->new_message_id)->delete();
                 MessageUsers::where('message_id',$mf->new_message_id)->delete();
@@ -600,7 +600,7 @@ class MainController extends Controller
                                     unlink($file_path);
                                 }
                                 MessageFiles::where('id', $f2n->id)->delete();
-                            }    
+                            }
                         }
                         Message::where('id',$mf2->new_message_id)->delete();
                         MessageUsers::where('message_id',$mf2->new_message_id)->delete();
@@ -620,7 +620,7 @@ class MainController extends Controller
 
     // Delete Spesific User Received Messages
     public function deleteMultipleSpesificUserMessages(Request $request){
-        
+
         $id = $request->input('ids');
         MessageUsers::whereIn('id', explode(",",$id))->delete();
         return response()->json(['status'=>true,'msg'=>'Tanlangan RECEIVED xatlar muvaffaqiyatli o`chirildi']);

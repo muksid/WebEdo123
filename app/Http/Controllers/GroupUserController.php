@@ -28,7 +28,7 @@ class GroupUserController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('departments.index',compact('departments','allDepartments','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('departments.index',compact('departments','allDepartments','inbox_count','sent_count','all_inbox_count'));
 
     }
 

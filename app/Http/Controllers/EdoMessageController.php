@@ -20,7 +20,9 @@ use App\EdoUserRoles;
 use App\EdoUsers;
 use App\User;
 use App\HelperTask;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +88,7 @@ class EdoMessageController extends Controller
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         # If user kanc or helper
         switch($edoUsers->role_id){
-            
+
             case 1:
             case 2:
             case 3:
@@ -103,9 +105,7 @@ class EdoMessageController extends Controller
                 ->orderBy('edo_users.sort', 'ASC')
                 ->get();
 
-
             $role = EdoUserRoles::where('id', $edoUsers->role_id)->firstOrFail();
-
 
             $messageTypes = EdoTypeMessages::where('type_code', $role->role_code)->get();
 
@@ -119,7 +119,7 @@ class EdoMessageController extends Controller
 
             default:
                 return response()->view('errors.' . '404', [], 404);
-                break;    
+                break;
         }
     }
 
@@ -127,7 +127,7 @@ class EdoMessageController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -197,16 +197,23 @@ class EdoMessageController extends Controller
 
             foreach ($request->file('message_file') as $file) {
                 if ($file != 0) {
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'edo/'.$year.'/'.$month.'/'.$day.'/';
 
                     $modelFile = new EdoMessageFile();
 
                     $modelFile->edo_message_id = $model->id;
 
+                    $modelFile->file_path = $path;
+
                     $modelFile->file_hash = $model->id . '_' . Auth::id() . '_' . date('dmYHis') . uniqid() . '.' . $file->getClientOriginalExtension();
 
                     $modelFile->file_size = $file->getSize();
 
-                    $file->move(public_path() . '/FilesEDO2/', $modelFile->file_hash);
+                    Storage::disk('ftp_edo')->put($path.$modelFile->file_hash, file_get_contents($file->getRealPath()));
 
                     $modelFile->file_name = $file->getClientOriginalName();
 
@@ -340,17 +347,23 @@ class EdoMessageController extends Controller
             $model_id = $request->input('model_id');
             foreach ($files as $file) {
                 if ($file != 0) {
-
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'edo/'.$year.'/'.$month.'/'.$day.'/';
 
                     $modelFile = new EdoMessageFile();
 
                     $modelFile->edo_message_id = $model_id;
 
+                    $modelFile->file_path = $path;
+
                     $modelFile->file_hash = $model_id . '_' . Auth::id() . '_' . date('dmYHis') . uniqid() . '.' . $file->getClientOriginalExtension();
 
                     $modelFile->file_size = $file->getSize();
 
-                    $file->move(public_path() . '/FilesEDO2/', $modelFile->file_hash);
+                    Storage::disk('ftp_edo')->put($path.$modelFile->file_hash, file_get_contents($file->getRealPath()));
 
                     $modelFile->file_name = $file->getClientOriginalName();
 
@@ -358,12 +371,7 @@ class EdoMessageController extends Controller
 
                     $modelFile->save();
 
-
-                    
-                    // (isset($_GET['comments'])) ?  $comment = $_GET['comments'] : $comment = '*Added By Helper*';
                     ($request->input('comments')) ? $comment = $request->input('comments') : $comment = null;
-                    // $comment = $request->input('comments');
-                    // log files
                     $modelLogFile = new EdoMessageLogFile();
 
                     $modelLogFile->edo_message_id = $model_id;
@@ -424,7 +432,7 @@ class EdoMessageController extends Controller
         $all_filial_exists = EdoMessageUsers::where('edo_message_id', $model->id)->where('sort', 2)->get();
         $all_filial_name   = User::where('roles', '["all_filial_manager"]')->first();
 
-            
+
         $selectedUsers = $perfUsers->implode('to_user_id', ',');
 
         $explodeUsers = explode(',', $selectedUsers);
@@ -439,7 +447,7 @@ class EdoMessageController extends Controller
             ->whereIn('r.role_code', ['guide', 'guide_manager','director_department', 'all_dep_director'])
             ->orderBy('edo_users.sort', 'ASC')
             ->get();
-        
+
 
         $filial_users = DB::table('edo_users as a')
             ->join('users as u', 'a.user_id', '=', 'u.id')
@@ -470,7 +478,7 @@ class EdoMessageController extends Controller
 
         return view('edo.edo-message.editGuideTask',
             compact('model', 'users', 'filial_users', 'tasks', 'messageTypes', 'perfUsers', 'perfUserTypes',
-            'all_dep_exists','all_dep_name', 'all_filial_exists', 'all_filial_name'  
+            'all_dep_exists','all_dep_name', 'all_filial_exists', 'all_filial_name'
         ));
     }
 
@@ -496,7 +504,7 @@ class EdoMessageController extends Controller
         $all_filial_exists = EdoMessageUsers::where('edo_message_id', $model->id)->where('sort', 2)->get();
         $all_filial_name   = User::where('roles', '["all_filial_manager"]')->first();
 
-            
+
         $selectedUsers = $perfUsers->implode('to_user_id', ',');
 
         $explodeUsers = explode(',', $selectedUsers);
@@ -511,7 +519,7 @@ class EdoMessageController extends Controller
             ->whereIn('r.role_code', ['guide', 'guide_manager','director_department', 'all_dep_director'])
             ->orderBy('edo_users.sort', 'ASC')
             ->get();
-        
+
 
         $filial_users = DB::table('edo_users as a')
             ->join('users as u', 'a.user_id', '=', 'u.id')
@@ -542,7 +550,7 @@ class EdoMessageController extends Controller
 
         return view('edo.edo-message.editGuideTaskChange',
             compact('model', 'users', 'filial_users', 'tasks', 'messageTypes', 'perfUsers', 'perfUserTypes',
-            'all_dep_exists','all_dep_name', 'all_filial_exists', 'all_filial_name'  
+            'all_dep_exists','all_dep_name', 'all_filial_exists', 'all_filial_name'
         ));
     }
 
@@ -551,7 +559,7 @@ class EdoMessageController extends Controller
         //
         $model = EdoMessage::where('message_hash', $id)->firstOrFail();
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
-        
+
         switch($edoUsers->role_id){
             case(1):
             case(2):
@@ -621,7 +629,7 @@ class EdoMessageController extends Controller
 
             default:
                 return response()->view('errors.' . '404', [], 404);
-                break;    
+                break;
         }
 
     }
@@ -641,11 +649,11 @@ class EdoMessageController extends Controller
 
         $id = $request->input('model_id');
 
-        
+
         $all_filial_managers = EdoUsers::where('role_id', 11)->get();
         $all_dir_dep = EdoUsers::where('role_id', 4)->orWhere('role_id', 19)->get();
 
-      
+
         foreach ($request->input('to_user_id') as $key => $value) {
 
             if($value != 1134 ){
@@ -681,67 +689,67 @@ class EdoMessageController extends Controller
                                 $model = new EdoMessageUsers();
 
                                 $model->edo_message_id = $id;
-            
+
                                 $model->edo_mes_jrls_id = $journal_id;
-            
+
                                 $model->from_user_id = Auth::id();
-            
+
                                 $model->to_user_id = $valDir->user_id;
-            
+
                                 $model->depart_id = $valDir->department_id;
-                                                    
+
                                 $model->performer_user = $request->input('performer_user')[$key];
 
                                 $model->sort = 1;
-            
+
                                 $model->status = 0;
-            
+
                                 $model->save();
                             }
-                            
+
                             break;
                         case 1135:
                             foreach ($all_filial_managers as $key2 => $valFil) {
                                 $model = new EdoMessageUsers();
 
                                 $model->edo_message_id = $id;
-            
+
                                 $model->edo_mes_jrls_id = $journal_id;
-            
+
                                 $model->from_user_id = Auth::id();
-            
+
                                 $model->to_user_id = $valFil->user_id;
-            
+
                                 $model->depart_id = $valFil->department_id;
-                                                    
+
                                 $model->performer_user = $request->input('performer_user')[$key];
-            
+
                                 $model->sort = 2;
 
                                 $model->status = 0;
-            
+
                                 $model->save();
                             }
-                            
+
                             break;
-                        
+
                         default:
                             $model = new EdoMessageUsers();
 
                             $model->edo_message_id = $id;
-        
+
                             $model->edo_mes_jrls_id = $journal_id;
-        
+
                             $model->from_user_id = Auth::id();
-        
+
                             $model->to_user_id = $user;
-        
+
                             $model->depart_id = $request->input('depart_id')[$key];
-                                                
+
                             $model->performer_user = $request->input('performer_user')[$key];
-        
+
                             $model->status = 0;
-        
+
                             $model->save();
                             break;
                     }
@@ -826,7 +834,7 @@ class EdoMessageController extends Controller
             }
 
         }
-        #############################################################   
+        #############################################################
         if ($request->input('to_user_id') != null) {
 
             foreach ($request->input('to_user_id') as $key => $user) {
@@ -838,67 +846,67 @@ class EdoMessageController extends Controller
                                 $model = new EdoMessageUsers();
 
                                 $model->edo_message_id = $id;
-            
+
                                 $model->edo_mes_jrls_id = $journal_id;
-            
+
                                 $model->from_user_id = Auth::id();
-            
+
                                 $model->to_user_id = $valDir->user_id;
-            
+
                                 $model->depart_id = $valDir->department_id;
-                                                    
+
                                 $model->performer_user = $request->input('performer_user')[$key];
 
                                 $model->sort = 1;
-            
+
                                 $model->status = 0;
-            
+
                                 $model->save();
                             }
-                            
+
                             break;
                         case 1135:
                             foreach ($all_filial_managers as $key2 => $valFil) {
                                 $model = new EdoMessageUsers();
 
                                 $model->edo_message_id = $id;
-            
+
                                 $model->edo_mes_jrls_id = $journal_id;
-            
+
                                 $model->from_user_id = Auth::id();
-            
+
                                 $model->to_user_id = $valFil->user_id;
-            
+
                                 $model->depart_id = $valFil->department_id;
-                                                    
+
                                 $model->performer_user = $request->input('performer_user')[$key];
-            
+
                                 $model->sort = 2;
 
                                 $model->status = 0;
-            
+
                                 $model->save();
                             }
-                            
+
                             break;
-                        
+
                         default:
                             $model = new EdoMessageUsers();
 
                             $model->edo_message_id = $id;
-        
+
                             $model->edo_mes_jrls_id = $journal_id;
-        
+
                             $model->from_user_id = Auth::id();
-        
+
                             $model->to_user_id = $user;
-        
+
                             $model->depart_id = $request->input('depart_id')[$key];
-                                                
+
                             $model->performer_user = $request->input('performer_user')[$key];
-        
+
                             $model->status = 0;
-        
+
                             $model->save();
                             break;
                     }
@@ -920,7 +928,7 @@ class EdoMessageController extends Controller
             ->with('success', 'Vazifa muvaffaqiyatli yangilandi');
     }
 
-    
+
     # Jamshid edit guide task to change Receivers
     public function storeEditGuideTaskChange(Request $request)
     {
@@ -966,7 +974,7 @@ class EdoMessageController extends Controller
                 }
 
             }
-            #############################################################   
+            #############################################################
             if ($request->input('to_user_id') != null) {
 
                 foreach ($request->input('to_user_id') as $key => $user) {
@@ -978,67 +986,67 @@ class EdoMessageController extends Controller
                                     $model = new EdoMessageUsers();
 
                                     $model->edo_message_id = $id;
-                
+
                                     $model->edo_mes_jrls_id = $journal_id;
-                
+
                                     $model->from_user_id = Auth::id();
-                
+
                                     $model->to_user_id = $valDir->user_id;
-                
+
                                     $model->depart_id = $valDir->department_id;
-                                                        
+
                                     $model->performer_user = $request->input('performer_user')[$key];
 
                                     $model->sort = 1;
-                
+
                                     $model->status = 0;
-                
+
                                     $model->save();
                                 }
-                                
+
                                 break;
                             case 1135:
                                 foreach ($all_filial_managers as $key2 => $valFil) {
                                     $model = new EdoMessageUsers();
 
                                     $model->edo_message_id = $id;
-                
+
                                     $model->edo_mes_jrls_id = $journal_id;
-                
+
                                     $model->from_user_id = Auth::id();
-                
+
                                     $model->to_user_id = $valFil->user_id;
-                
+
                                     $model->depart_id = $valFil->department_id;
-                                                        
+
                                     $model->performer_user = $request->input('performer_user')[$key];
-                
+
                                     $model->sort = 2;
 
                                     $model->status = 0;
-                
+
                                     $model->save();
                                 }
-                                
+
                                 break;
-                            
+
                             default:
                                 $model = new EdoMessageUsers();
 
                                 $model->edo_message_id = $id;
-            
+
                                 $model->edo_mes_jrls_id = $journal_id;
-            
+
                                 $model->from_user_id = Auth::id();
-            
+
                                 $model->to_user_id = $user;
-            
+
                                 $model->depart_id = $request->input('depart_id')[$key];
-                                                    
+
                                 $model->performer_user = $request->input('performer_user')[$key];
-            
+
                                 $model->status = 0;
-            
+
                                 $model->save();
                                 break;
                         }
@@ -1067,10 +1075,10 @@ class EdoMessageController extends Controller
             }
             EdoReplyMessage::where('edo_message_id', $message->id)->delete();
         }
-        
+
         EdoMessageJournal::where('edo_message_id', $message->id)
               ->update(['status' => 1]);
-              
+
         ################################## Last Added to change ##########################################
 
 
@@ -1209,93 +1217,105 @@ class EdoMessageController extends Controller
         }
     }
 
-    // preView Images
-    public function preViewImg($file)
-    {
-        //
-        $model = EdoMessageFile::find($file);
-        // dd($model);
-        if (file_exists(public_path() . "/FilesEDO2/" . $model->file_hash)) {
-
-            $pathToFile = public_path() . "/FilesEDO2/". $model->file_hash;
-
-            if(preg_match("/\.(pdf)$/", $model->file_hash)) {
-
-                return Response::make(file_get_contents($pathToFile), 200, [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; filename="'. $model->file_hash .'"'
-                ]);
-
-            }
-
-            return response()->file($pathToFile);
-
-        } else {
-
-            return response()->json('Serverdan fayl topilmadi!');
-
-        }
-
-    }
-
-    // preViewPdf
-    public function preViewPdf($file)
-    {
-
-        //
-        if (file_exists(public_path() . "/FilesEDO2/" . $file)) {
-
-            $pathToFile = public_path() . "/FilesEDO2/". $file;
-
-            if(preg_match("/\.(pdf)$/", $file)) {
-
-                return Response::make(file_get_contents($pathToFile), 200, [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; filename="'.$file.'"'
-                ]);
-
-            }
-
-            return response()->file($pathToFile);
-
-        } else {
-
-            return response()->json('Serverdan fayl topilmadi!');
-
-        }
-
-    }
-
     // download edo file
-    public function downloadFile($file){
+    public function fileDownload($id)
+    {
+        //
+        $model = EdoMessageFile::find($id);
 
-        $model = EdoMessageFile::find($file);
+        $path = '/'.$model->file_path.$model->file_hash;
 
-        if (file_exists(public_path() . "/FilesEDO2/" . $model->file_hash)) {
+        if (Storage::disk('ftp_edo')->exists($path)){
 
-            $orgName = EdoMessageFile::where('file_hash', '=', $model->file_hash)->firstOrFail();
-
-            return Response::download(public_path() . "/FilesEDO2/".$model->file_hash,$orgName->file_name);
-
-        } else {
-
-            return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
+            return Storage::disk('ftp_edo')->download($path, $model->file_name);
         }
+
+        return back()->with('errors', 'Ilova (lar) Serverdan topilmadi!');
+    }
+
+    public function fileView($id)
+    {
+        //
+        $model = EdoMessageFile::find($id);
+
+        $path = '/'.$model->file_path.$model->file_hash;
+
+        if (Storage::disk('ftp_edo')->exists($path)){
+
+            $res = Storage::disk('ftp_edo')->get($path);
+
+            if (strtoupper($model->file_extension) == 'PDF'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+
+            } elseif (strtoupper($model->file_extension) == 'PNG' || strtoupper($model->file_extension) == 'JPG' ||
+                strtoupper($model->file_extension) == 'JPEG'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'image/png',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+            } else {
+
+                return Storage::disk('ftp_edo')->download($path, $model->file_name);
+            }
+        }
+
+        return response()->json('Ilova (lar) Serverdan topilmadi!');
+
     }
 
     // download edo reply file
-    public function downloadReplyFile($file){
+    public function fileReplyDownload($id){
 
-        if (file_exists(public_path() . "/FilesEDO2/" . $file)) {
+        $model = EdoReplyMessageFile::find($id);
 
-            $orgName = EdoReplyMessageFile::where('file_hash', '=', $file)->firstOrFail();
+        $path = '/'.$model->file_path.$model->file_hash;
 
-            return Response::download(public_path() . "/FilesEDO2/".$file,$orgName->file_name);
+        if (Storage::disk('ftp_edo')->exists($path)){
 
-        } else {
-
-            return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
+            return Storage::disk('ftp_edo')->download($path, $model->file_name);
         }
+
+        return back()->with('errors', 'Ilova (lar) Serverdan topilmadi!');
+    }
+
+    public function fileReplyView($id)
+    {
+        //
+        $model = EdoReplyMessageFile::find($id);
+
+        $path = '/'.$model->file_path.$model->file_hash;
+
+        if (Storage::disk('ftp_edo')->exists($path)){
+
+            $res = Storage::disk('ftp_edo')->get($path);
+
+            if (strtoupper($model->file_extension) == 'PDF'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+
+            } elseif (strtoupper($model->file_extension) == 'PNG' || strtoupper($model->file_extension) == 'JPG' ||
+                strtoupper($model->file_extension) == 'JPEG'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'image/png',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+            } else {
+
+                return Storage::disk('ftp_edo')->download($path, $model->file_name);
+            }
+        }
+
+        return response()->json('Ilova (lar) Serverdan topilmadi!');
+
     }
 
     /**
@@ -1336,12 +1356,12 @@ class EdoMessageController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\EDOMessage  $eDOMessage
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         (isset($_GET['comments'])) ?  $comment = $_GET['comments'] : $comment = null;
-        
+
         //
         $model = EdoMessageFile::find($id);
 
@@ -1360,10 +1380,11 @@ class EdoMessageController extends Controller
 
         $modelLogFile->save();
 
+        $path = '/'.$model->file_path.$model->file_hash;
 
-        $file_path = public_path().'/FilesEDO2/'.$model->file_hash;
-        if(file_exists($file_path)){
-            unlink($file_path);
+        if (Storage::disk('ftp_edo')->exists($path)){
+
+            Storage::disk('ftp_edo')->delete($path);
         }
 
         $model->delete();

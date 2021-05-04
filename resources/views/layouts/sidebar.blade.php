@@ -14,13 +14,11 @@
 
         <?php $active = 'active'; $active_s = ''; $active_i = ''; $active_t = ''; $active_a = ''; $active_admin_d = '';
         $active_admin_r = ''; $active_admin_u = ''; $active_admin_i = '';?>
-        @if(url()->current() == route('ef-inbox'))
+        @if(url()->current() == route('fe-inbox'))
             <?php $active_i = 'active' ?>
-        @elseif(url()->current() == route('ef-sent'))
+        @elseif(url()->current() == route('fe-sent'))
             <?php $active_s = 'active' ?>
-        @elseif(url()->current() == route('ef-term-inbox'))
-            <?php $active_t = 'active' ?>
-        @elseif(url()->current() == route('ef-all-inbox'))
+        @elseif(url()->current() == route('fe-all-inbox'))
             <?php $active_a = 'active' ?>
         @elseif(url()->current() == url('/admin/departments'))
             <?php $active_admin_d = 'active' ?>
@@ -49,14 +47,14 @@
                 </a>
                 <ul class="treeview-menu">
                     <li class="treeview">
-                        <a href="{{ route('ef-group-compose') }}">
+                        <a href="{{ route('fe-group-compose') }}">
                             <i class="fa fa-user-plus"></i> <span>@lang('blade.write_group')</span>
                             <span class="pull-right-container">
             </span>
                         </a>
                     </li>
                     <li class="treeview">
-                        <a href="{{ route('ef-compose') }}">
+                        <a href="{{ route('fe-compose') }}">
                             <i class="fa fa-pencil"></i> <span>@lang('blade.write_message')</span>
                             <span class="pull-right-container">
             </span>
@@ -75,32 +73,21 @@
                 </a>
                 <ul class="treeview-menu">
                     <li class=" {{$active_i}}">
-                        <a href="{{ route('ef-inbox') }}"><i class="fa fa-eye-slash"></i> @lang('blade.unread_message')
+                        <a href="{{ route('fe-inbox') }}"><i class="fa fa-eye-slash"></i> @lang('blade.unread_message')
                             <small class="label pull-right bg-yellow">{{$inbox_count}}</small>
                         </a>
                     </li>
                     <li class=" {{$active_s}}">
-                        <a href="{{ route('ef-sent') }}"><i class="fa fa-send-o"></i> @lang('blade.sent_message')
+                        <a href="{{ route('fe-sent') }}"><i class="fa fa-send-o"></i> @lang('blade.sent_message')
                             <small class="label pull-right bg-green">{{$sent_count}}</small>
                         </a>
                     </li>
-                    <li class=" {{$active_t}}">
-                        <a href="{{ route('ef-term-inbox') }}"><i
-                                    class="fa fa-hourglass-half"></i> @lang('blade.term_message')
-                            <small class="label pull-right bg-red">{{$term_inbox_count}}</small>
-                        </a>
-                    </li>
                     <li class=" {{$active_a}}">
-                        <a href="{{ route('ef-all-inbox') }}"><i class="fa fa-inbox"></i> @lang('blade.archive_inbox')
+                        <a href="{{ route('fe-all-inbox') }}"><i class="fa fa-inbox"></i> @lang('blade.archive_inbox')
                             <small class="label pull-right bg-blue">{{$all_inbox_count}}</small>
                         </a></li>
                 </ul>
             </li>
-            <!-- <li>
-                <a href="{{ url('/chat') }}">
-                    <i class="fa fa-send"></i> <span>@lang('blade.chat')</span>
-                </a>
-            </li> -->
 
             @foreach(json_decode(Auth::user()->roles) as $user)
                 @switch($user)
@@ -249,24 +236,15 @@
                             </span>
                     </a>
                     <ul class="treeview-menu">
-                        {{--<li>
-                            <a href="{{ url('uw/home') }}">
-                                <i class="fa fa-laptop"></i> <span> Version 1</span>
-                                <span class="pull-right-container">
-                        </span>
-                            </a>
-                        </li>--}}
                         <li>
                             <a href="http://172.16.2.13" target="_blank">
                                 <i class="fa fa-chrome"></i> <span> 172.16.2.13 (192 lik)</span>
                             </a>
-                            <span class="text-maroon">"172.16.2.13" ip manzilini<br/> proxy ga kiriting!!!</span>
                         </li>
                         <li>
                             <a href="http://10.11.48.7" target="_blank">
                                 <i class="fa fa-chrome"></i> <span> 10.11.48.7 (10 lik)</span>
                             </a>
-                            <span class="text-maroon">"10.11.48.7" ip manzilini<br/> proxy ga kiriting!!!</span>
                         </li>
                     </ul>
                 </li>
@@ -279,7 +257,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('ef-deleted') }}">
+                <a href="{{ route('fe-deleted') }}">
                     <i class="fa fa-trash text-red"></i> <span class="text-red">@lang('blade.trash_message')</span>
                 </a>
             </li>

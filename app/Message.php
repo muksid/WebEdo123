@@ -24,11 +24,6 @@ class Message extends Model
         'mes_gen'
     ];
 
-    public function messageType()
-    {
-        return $this->belongsTo(MesType::class,'mes_type', 'message_type');
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');

@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use DB;
 use Hash;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
 use Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,48 +33,37 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'subject' => 'required',
             'to_users' => 'required',
             'mes_files' => 'max:131072'
-            //'mes_files' => 'size:50000' // 131072 / 128 * 1024 = 128 MB
         ]);
 
-        $file = new Message();
+        $auth = Auth::user();
 
-        if ($request->input('mes_term') !== null) {
-            $file->mes_term = $request->input('mes_term');
-        } else {
-            $file->mes_term = 0;
+        $model = new Message();
+
+        $model->user_id = $auth->getAuthIdentifier();
+
+        $model->from_branch = $auth->branch_code;
+
+        $model->subject = $request->subject;
+
+        if (!$model->subject)
+        {
+            $model->subject = $auth->lname.' '.$auth->fname;
         }
 
-        if ($request->input('text') !== null) {
-            $file->text = $request->input('text');
-        } else {
-            $file->text = '';
-        }
-        $lastMessage = Message::orderBy('id', 'DESC')->first();
-        $getLastInsertId = $lastMessage->id+1;
-        $file->mes_gen = $getLastInsertId.'_'.md5(Auth::id()) . strtotime(date('Y-m-d H:i:s', strtotime(date_default_timezone_get())));
+        $model->text = $request->text;
 
-        $file->mes_type = $request->input('mes_type');
+        $model->mes_gen = Auth::id().'_'.sha1(strtotime(now()));
 
-        $file->subject = $request->input('subject');
+        $model->save();
 
-        $file->from_branch = Auth::user()->branch_code;
-
-        $file->user_id = Auth::id();
-
-        $file->is_deleted = 0;
-
-        $file->save();
-
-
-        foreach ($request->input('to_users') as $item) {
-            if ($item != 0) {
+        foreach ($request->input('to_users') as $user) {
+            if ($user != 0) {
                 $message_users = new MessageUsers();
-                $message_users->to_users_id = $item;
-                $message_users->message_id = $file->id;
-                $message_users->from_users_id = Auth::id();
+                $message_users->to_users_id = $user;
+                $message_users->message_id = $model->id;
+                $message_users->from_users_id = $auth->getAuthIdentifier();
                 $message_users->is_readed = 0;
                 $message_users->is_deleted = 0;
                 $message_users->save();
@@ -81,43 +71,172 @@ class MessageController extends Controller
         }
 
         if ($request->file('mes_files') != null) {
-            foreach ($request->file('mes_files') as $item) {
-                if ($item != 0) {
+            foreach ($request->file('mes_files') as $file) {
+                if ($file != 0) {
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'fe/'.$year.'/'.$month.'/'.$day.'/';
+
                     $message_files = new MessageFiles();
-                    $message_files->message_id = $file->id;
-                    $message_files->file_hash = $file->id . '_' . Auth::id(). '_' . date('dmYHis') . uniqid() . '.' . $item->getClientOriginalExtension();
-                    $message_files->file_size = $item->getSize();
-                    $item->move(public_path() . '/FilesFTP/', $message_files->file_hash);
-                    $message_files->file_name = $item->getClientOriginalName();
-                    $message_files->file_extension = $item->getClientOriginalExtension();
+                    $message_files->message_id = $model->id;
+                    $message_files->file_path = $path;
+                    $message_files->file_hash = $model->id.'_'.$auth->getAuthIdentifier().'_'.date('dmYHis').uniqid().'.'.$file->getClientOriginalExtension();
+                    $message_files->file_size = $file->getSize();
+                    Storage::disk('ftp_edo')->put($path.$message_files->file_hash, file_get_contents($file->getRealPath()));
+                    $message_files->file_name = $file->getClientOriginalName();
+                    $message_files->file_extension = $file->getClientOriginalExtension();
                     $message_files->save();
                 }
             }
         }
 
+        return back()->with('success', 'Sizning xatingiz muvaffaqiyatli jo`natildi');
+    }
 
-        // Jamshid store reply and forward messages
-        $message_id_for_forward = Message::where('mes_gen', '=', $file->mes_gen)->first();
+    public function storeGroup(Request $request)
+    {
+        $this->validate($request, [
+            'groups_id' => 'required',
+            'mes_files' => 'max:131072'
+        ]);
+
+        $auth = Auth::user();
+
+        $model = new Message();
+
+        $model->user_id = $auth->getAuthIdentifier();
+
+        $model->from_branch = $auth->branch_code;
+
+        $model->subject = $request->subject;
+
+        if (!$model->subject)
+        {
+            $model->subject = $auth->lname.' '.$auth->fname;
+        }
+
+        $model->text = $request->text;
+
+        $model->mes_gen = Auth::id().'_'.sha1(strtotime(now()));
+
+        $model->save();
+
+        // send message to users with search
+        if ($request->input('to_users') != null) {
+            foreach ($request->input('to_users') as $user) {
+                if ($user != 0) {
+                    $message_users = new MessageUsers();
+                    $message_users->to_users_id = $user;
+                    $message_users->message_id = $model->id;
+                    $message_users->from_users_id = $auth->getAuthIdentifier();
+                    $message_users->is_readed = 0;
+                    $message_users->is_deleted = 0;
+                    $message_users->save();
+                }
+            }
+        }
+
+        foreach ($request->input('groups_id') as $g_user){
+
+            $group_users = GroupUsers::where('group_id', $g_user)->get();
+
+            foreach ($group_users as $user){
+                $message_users = new MessageUsers();
+                $message_users->to_users_id = $user->users_id;
+                $message_users->message_id = $model->id;
+                $message_users->from_users_id = $auth->getAuthIdentifier();
+                $message_users->is_readed = 0;
+                $message_users->is_deleted = 0;
+                $message_users->save();
+            }
+        }
+
+        if ($request->file('mes_files') != null) {
+            foreach ($request->file('mes_files') as $file) {
+                if ($file != 0) {
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'fe/'.$year.'/'.$month.'/'.$day.'/';
+
+                    $message_files = new MessageFiles();
+                    $message_files->message_id = $model->id;
+                    $message_files->file_path = $path;
+                    $message_files->file_hash = $model->id.'_'.$auth->getAuthIdentifier().'_'.date('dmYHis').uniqid().'.'.$file->getClientOriginalExtension();
+                    $message_files->file_size = $file->getSize();
+                    Storage::disk('ftp_edo')->put($path.$message_files->file_hash, file_get_contents($file->getRealPath()));
+                    $message_files->file_name = $file->getClientOriginalName();
+                    $message_files->file_extension = $file->getClientOriginalExtension();
+                    $message_files->save();
+                }
+            }
+        }
+
+        return back()->with('success', 'Sizning xatingiz muvaffaqiyatli jo`natildi');
+    }
+
+    public function storeFR(Request $request)
+    {
+        //
+        $id = $request->message_id;
+
+        $auth = Auth::user();
+
+        $model = new Message();
+
+        $model->user_id = $auth->getAuthIdentifier();
+
+        $model->from_branch = $auth->branch_code;
+
+        $model->subject = $request->subject;
+
+        if (!$model->subject)
+        {
+            $model->subject = $auth->lname.' '.$auth->fname;
+        }
+
+        $model->text = $request->text;
+
+        $model->mes_gen = Auth::id().'_'.sha1(strtotime(now()));
+
+        $model->save();
+
+        foreach ($request->input('to_users') as $user) {
+            if ($user != 0) {
+                $message_users = new MessageUsers();
+                $message_users->to_users_id = $user;
+                $message_users->message_id = $model->id;
+                $message_users->from_users_id = $auth->getAuthIdentifier();
+                $message_users->is_readed = 0;
+                $message_users->is_deleted = 0;
+                $message_users->save();
+            }
+        }
+
         if($request->input('status') == "reply"){
 
             foreach ($request->input('to_users') as $item) {
                 if ($item != 0) {
                     $message_foward = new MessageForward();
-                    $message_foward->message_id     =   $request->input('message_id');
-                    $message_foward->new_message_id =   $message_id_for_forward->id;
-                    $message_foward->from_user_id   =   Auth::id();
+                    $message_foward->message_id     =   $id;
+                    $message_foward->new_message_id =   $model->id;
+                    $message_foward->from_user_id   =   $auth->getAuthIdentifier();
                     $message_foward->to_user_id     =   $item;
-                    $message_foward->title          =   $request->input('subject');
-                    $message_foward->text           =   $request->input('text');
+                    $message_foward->title          =   $request->subject;
+                    $message_foward->text           =   $request->text;
                     $message_foward->status         =   $request->input('status');
                     $message_foward->save();
                 }
             }
 
         }
+
         if($request->input('status') == "forward"){
 
-            $var = MessageForward::where('new_message_id',$request->input('message_id'))->first();
+            $var = MessageForward::where('new_message_id',$id)->first();
 
             foreach ($request->input('to_users') as $item) {
                 if ($item != 0) {
@@ -128,11 +247,11 @@ class MessageController extends Controller
                         $message_foward->message_id     =   $request->input('message_id');
                     }
 
-                    $message_foward->new_message_id =   $message_id_for_forward->id;
+                    $message_foward->new_message_id =   $model->id;
                     $message_foward->from_user_id   =   Auth::id();
                     $message_foward->to_user_id     =   $item;
                     $message_foward->title          =   $request->input('subject');
-                    $message_foward->text           =   $request->input('text');
+                    $message_foward->text           =   $request->text;
                     $message_foward->status         =   $request->input('status');
                     $message_foward->save();
                 }
@@ -141,68 +260,47 @@ class MessageController extends Controller
         }
 
         return back()->with('success', 'Sizning xatingiz muvaffaqiyatli jo`natildi');
+
     }
 
-    public function store1(Request $request)
+    public function compose()
     {
-        $this->validate($request, [
-            'subject' => 'required',
-            'groups_id' => 'required',
-            'mes_files' => 'max:131072'
-            //'mes_files' => 'size:50000' // 131072 / 128 * 1024 = 128 MB
-        ]);
+        // count() //
+        @include('count_message.php');
 
-        $file = new Message();
+        return view('messages.compose', compact(
+            'inbox_count', 'sent_count', 'all_inbox_count'));
+    }
 
-        if ($request->input('mes_term') !== null) {
-            $file->mes_term = $request->input('mes_term');
-        } else {
-            $file->mes_term = 0;
+    public function feAjaxCompose(Request $request)
+    {
+        $auth = Auth::user();
+
+        $model = new Message();
+
+        $model->user_id = $auth->getAuthIdentifier();
+
+        $model->from_branch = $auth->branch_code;
+
+        $model->subject = $request->subject;
+
+        if (!$model->subject)
+        {
+            $model->subject = $auth->lname.' '.$auth->fname;
         }
 
-        if ($request->input('text') !== null) {
-            $file->text = $request->input('text');
-        } else {
-            $file->text = '';
-        }
-        $lastMessage = Message::orderBy('id', 'DESC')->first();
-        $getLastInsertId = $lastMessage->id+1;
-        $file->mes_gen = $getLastInsertId.'_'.md5(Auth::id()) . strtotime(date('Y-m-d H:i:s', strtotime(date_default_timezone_get())));
+        $model->text = $request->text;
 
-        $file->mes_type = $request->input('mes_type');
+        $model->mes_gen = Auth::id().'_'.sha1(strtotime(now()));
 
-        $file->subject = $request->input('subject');
+        $model->save();
 
-        $file->from_branch = Auth::user()->branch_code;
-
-        $file->user_id = Auth::id();
-
-        $file->is_deleted = 0;
-
-        $file->save();
-
-        // send message to users with search
-        if ($request->input('to_users') != null) {
-            foreach ($request->input('to_users') as $item) {
-                if ($item != 0) {
-                    $message_users = new MessageUsers();
-                    $message_users->to_users_id = $item;
-                    $message_users->message_id = $file->id;
-                    $message_users->from_users_id = Auth::id();
-                    $message_users->is_readed = 0;
-                    $message_users->is_deleted = 0;
-                    $message_users->save();
-                }
-            }
-        }
-
-        foreach ($request->input('groups_id') as $item){
-            $group_users = GroupUsers::where('group_id', '=', $item)->get();
-            foreach ($group_users as $user){
+        foreach ($request->input('to_users') as $user) {
+            if ($user != 0) {
                 $message_users = new MessageUsers();
-                $message_users->to_users_id = $user->users_id;
-                $message_users->message_id = $file->id;
-                $message_users->from_users_id = Auth::id();
+                $message_users->to_users_id = $user;
+                $message_users->message_id = $model->id;
+                $message_users->from_users_id = $auth->getAuthIdentifier();
                 $message_users->is_readed = 0;
                 $message_users->is_deleted = 0;
                 $message_users->save();
@@ -210,34 +308,28 @@ class MessageController extends Controller
         }
 
         if ($request->file('mes_files') != null) {
-            foreach ($request->file('mes_files') as $item) {
-                if ($item != 0) {
+            foreach ($request->file('mes_files') as $file) {
+                if ($file != 0) {
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'fe/'.$year.'/'.$month.'/'.$day.'/';
+
                     $message_files = new MessageFiles();
-                    $message_files->message_id = $file->id;
-                    $message_files->file_hash = $file->id . '_' . Auth::id(). '_' . date('dmYHis') . uniqid() . '.' . $item->getClientOriginalExtension();
-                    $message_files->file_size = $item->getSize();
-                    $item->move(public_path() . '/FilesFTP/', $message_files->file_hash);
-                    $message_files->file_name = $item->getClientOriginalName();
-                    $message_files->file_extension = $item->getClientOriginalExtension();
+                    $message_files->message_id = $model->id;
+                    $message_files->file_path = $path;
+                    $message_files->file_hash = $model->id.'_'.$auth->getAuthIdentifier().'_'.date('dmYHis').uniqid().'.'.$file->getClientOriginalExtension();
+                    $message_files->file_size = $file->getSize();
+                    Storage::disk('ftp_edo')->put($path.$message_files->file_hash, file_get_contents($file->getRealPath()));
+                    $message_files->file_name = $file->getClientOriginalName();
+                    $message_files->file_extension = $file->getClientOriginalExtension();
                     $message_files->save();
                 }
             }
         }
 
-        return back()->with('success', 'Sizning xatingiz muvaffaqiyatli jo`natildi');
-    }
-
-    public function compose()
-    {
-        $departments = Department::where('parent_id', 0)->where('status', 1)->orderBy('depart_id', 'ASC')->get();
-        $users = DB::table('users as a')->where('a.status', '=', 1)->select('a.id', 'a.lname', 'a.fname')->get();
-        $mes_type = MesType::all();
-
-        // count() //
-        @include('count_message.php');
-
-        return view('messages.compose', compact('users','departments', 'mes_type',
-            'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'));
+        return response()->json(array('success' => true, 'data'=>$request->all()));
     }
 
     public function groupCompose()
@@ -257,238 +349,267 @@ class MessageController extends Controller
         @include('count_message.php');
 
         return view('messages.groupCompose', compact('departments', 'groups', 'users',
-            'mes_type', 'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'));
+            'mes_type', 'inbox_count', 'sent_count', 'all_inbox_count'));
     }
 
-    public function eFSent()
+    public function feSent(Request $request)
+    {
+        // count() //
+        @include('count_message.php');
+
+        $f = $request->filial;
+
+        $u = $request->user;
+
+        $t = $request->text;
+
+        $r = $request->read;
+
+        $s_d = $request->s_start;
+
+        $e_d = $request->s_end;
+
+        if ($u != '' || $t !='' || $f !='' || $r !=''|| $s_d !='')
+        {
+
+            $search = Message::where('user_id', Auth::id())
+                ->where('is_deleted', 0);
+
+            if($u) {
+                $search->whereHas('messageUsers', function ($query) use ($u) {
+
+                    $query->where('to_users_id', $u);
+
+                    $query->where('from_users_id', Auth::id());
+
+                });
+            }
+            if($t) {
+                $search->where(function ($query) use ($t) {
+
+                    $query->where('subject', 'LIKE', '%'.$t.'%');
+
+                    $query->where('user_id', Auth::id());
+
+                });
+            }
+
+            if($s_d) {
+                $search->whereBetween('created_at', [$s_d.' 00:00:00',$e_d.' 23:59:59']);
+            }
+
+            $models = $search->orderBy('id', 'DESC')
+                ->paginate(25);
+
+            $page = 'templates.searchSent';
+
+            if ($request->page){
+
+                $page = 'messages.sent';
+                if (count ( $models ) > 0)
+                    return view ( $page,
+                        compact('models','u','t','f','s_d','e_d','inbox_count','sent_count','all_inbox_count'));
+            }
+
+            return view($page,compact('models'));
+
+        }
+        else
+        {
+            $models = Message::where('user_id', Auth::id())
+                ->where('is_deleted', 0)
+                ->orderBy('id', 'DESC')
+                ->paginate(25);
+
+            return view('messages.sent',compact('models','inbox_count','sent_count','all_inbox_count'));
+
+        }
+    }
+
+    public function show(Request $request, $hash)
     {
         //
-        $search = Message::where('from_branch', Auth::user()->branch_code)
-            ->where('user_id', Auth::id())
-            ->where('is_deleted', 0);
+        $message_id = $request->id;
 
-        $u = Input::get ( 'u' );
-        $t = Input::get ( 't' );
-        $d = Input::get ( 'd' );
-
-        if($u) {
-            $search->whereHas('messageUsers', function ($query) use ($u) {
-
-                $query->where('to_users_id', $u);
-
-                $query->where('from_users_id', Auth::id());
-
-            });
-        }
-        if($t) {
-            $search->where(function ($query) use ($t) {
-
-                $query->where('subject', 'LIKE', '%'.$t.'%');
-
-                $query->where('user_id', Auth::id());
-
-            });
-        }
-        if($d) {
-            $search->where(function ($query) use ($d) {
-
-                $query->where('created_at', 'LIKE', '%'.$d.'%');
-
-                $query->where('user_id', Auth::id());
-
-            });
-        }
-
-        $models = $search->orderBy('id', 'DESC')
-            ->paginate(25);
-
-        $models->appends ( array (
-            'u' => Input::get ( 'u' ),
-            't' => Input::get ( 't' ),
-            'd' => Input::get ( 'd' )
-        ) );
-
-        $users = User::select('id', 'fname', 'lname', 'branch_code')->where('status', 1)->get();
-
-        $searchUser = User::select('id', 'fname', 'lname', 'branch_code')->where('id', $u)->first();
-
-
-        // count() //
-        @include('count_message.php');
-
-        return view('messages.sent',compact('models','u','t','d','users', 'searchUser',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
-    }
-
-    // for Performance control
-    public function control()
-    {
-        foreach (json_decode(Auth::user()->roles) as $user){
-            switch($user){
-                case('admin');
-                    $control = DB::table('messages as a')
-                        ->join('users as u', function ($join) {
-                            $join->on('a.user_id', '=', 'u.id')
-                                ->where('u.roles', '=', '["office"]');
-                        })
-                        ->select('a.*','a.id as mc_id','u.lname','u.fname')
-                        ->where('a.mes_type', '=', 'control')
-                        ->where('a.is_deleted', '=', 0)
-                        ->orderBy('a.id', 'desc')
-                        ->paginate(100);
-                    break;
-                case('control');
-                    $control = DB::table('messages as a')
-                        ->join('users as u', function ($join) {
-                            $join->on('a.user_id', '=', 'u.id')
-                                ->where('u.roles', '=', '["office"]');
-                        })
-                        ->select('a.*','a.id as mc_id','u.lname','u.fname')
-                        ->where('a.mes_type', '=', 'control')
-                        ->where('a.is_deleted', '=', 0)
-                        ->orderBy('a.id', 'desc')
-                        ->paginate(100);
-                    break;
-                default;
-                    $control = MessageUsers::where('id', '=', 0)->first();
-
-                    if (empty($control)) {
-                        return response()->view('errors.' . '404', [], 404);
-                    }
-                    break;
-
-            }
-        }
-
-        // count() //
-        @include('count_message.php');
-
-        return view('messages.control',
-            compact('control','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
-            ->with('i', (request()->input('page', 1) - 1) * 100);
-    }
-
-    public function show($mes_gen)
-    {
+        $model = Message::findOrFail($message_id);
 
         $departments = Department::where('parent_id', '=', 0)->where('status', '=', 1)->orderBy('depart_id', 'ASC')->get();
 
-        $message = DB::table('messages as a')
-            ->join('users as u', 'a.user_id', '=', 'u.id')
-            ->join('departments as b', 'u.branch_code', '=', 'b.branch_code')
-            ->select('a.*','u.id as u_id','u.fname','u.lname','u.job_title','b.title as branch')
-            ->where('a.mes_gen', '=', $mes_gen)
-            ->where('b.parent_id', '=', 0)
-            ->first();
-        if (empty($message)) {
-            return response()->view('errors.' . '404', [], 404);
-        }
-
-        // Jamshid if the message forwarded display files from orign
-
-        $messageForwards = MessageForward::where('new_message_id','=', $message->id)->first();
-        $message_files = MessageFiles::where('message_id', '=', $message->id)->orderby('file_extension')->get();
+        $messageForwards = MessageForward::where('new_message_id', $message_id)->first();
+        $message_files = MessageFiles::where('message_id', '=', $message_id)->orderby('file_extension')->get();
         if($messageForwards != null && $messageForwards->status != 'reply'){
             $message_files = MessageFiles::where('message_id', '=', $messageForwards->message_id)->orderby('file_extension')->get();
         }
 
-        $message_users = MessageUsers::where('message_id', '=', $message->id)->where('to_users_id', '=', Auth::id())->first();
-        //$message_files = MessageFiles::where('message_id', '=', $message->id)->orderby('file_extension')->get();
-        $to_users = DB::table('message_users as a')
-            ->join('users as u', 'a.to_users_id', '=', 'u.id')
-            ->select('u.*', 'a.is_readed', 'a.created_at', 'a.readed_date')
-            ->where('a.message_id', '=', $message->id)
-            ->get();
+        $authAllMessages = MessageUsers::where('from_users_id', $model->user_id)
+            ->where('to_users_id', Auth::id())
+            ->where('is_deleted', 0)
+            ->where('id', '!=', $message_id)
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+
+        $message_users = MessageUsers::where('message_id', $message_id)
+            ->where('to_users_id', Auth::id())
+            ->first();
         if ($message_users->is_readed == 0){
             $message_users->update(['is_readed' => 1, 'readed_date' => Carbon::now()]);
-        } else{
-            $message_users->update(['is_readed' => 1]);
         }
-
-        $fromUserAllMessages = DB::table('message_users as a')
-            ->join('messages as m', 'a.message_id', '=', 'm.id')
-            ->join('mes_types as mt', 'm.mes_type', '=', 'mt.message_type')
-            ->select('m.*', 'a.id as mes_user_id', 'a.is_readed', 'a.readed_date', 'mt.title AS message_type')
-            ->where('a.from_users_id', $message->u_id)
-            ->where('a.to_users_id', Auth::id())
-            ->where('a.is_deleted', 0)
-            ->where('m.mes_gen', '!=', $mes_gen)
-            ->orderBy('a.id', 'DESC')
-            ->paginate(10);
 
         // count() //
         @include('count_message.php');
 
-        return view('messages.show',compact('message','departments', 'message_files','to_users','fromUserAllMessages',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('messages.show',compact('model','departments', 'message_files','authAllMessages',
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
-    public function view($mes_gen)
+    public function view($id, $hash)
     {
-        $departments = Department::where('parent_id', '=', 0)->where('status', 1)->orderBy('depart_id', 'ASC')->get();
+        //
+        $model = Message::where('id', $id)->where('mes_gen', $hash)->firstOrFail();
 
-        $message = DB::table('messages as a')
-            ->join('users as u', 'a.user_id', '=', 'u.id')
-            ->join('departments as b', 'u.branch_code', '=', 'b.branch_code')
-            ->select('a.*','u.id as u_id','u.fname','u.lname','u.job_title','b.title as branch')
-            ->where('a.mes_gen', '=', $mes_gen)
-            ->where('b.parent_id', '=', 0)
+        $departments = Department::where('parent_id', '=', 0)->where('status', '=', 1)->orderBy('depart_id', 'ASC')->get();
+
+        $messageForwards = MessageForward::where('new_message_id', $id)->first();
+
+        $message_files = MessageFiles::where('message_id', '=', $id)->orderby('file_extension')->get();
+        if($messageForwards != null && $messageForwards->status != 'reply'){
+            $message_files = MessageFiles::where('message_id', '=', $messageForwards->message_id)->orderby('file_extension')->get();
+        }
+
+        $authAllMessages = MessageUsers::where('from_users_id', $model->user_id)
+            ->where('to_users_id', Auth::id())
+            ->where('is_deleted', 0)
+            ->where('id', '!=', $id)
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+
+        $message_users = MessageUsers::where('message_id', $id)
+            ->where('to_users_id', Auth::id())
             ->first();
-        if (empty($message)) {
-            return response()->view('errors.' . '404', [], 404);
+        if ($message_users->is_readed == 0){
+            $message_users->update(['is_readed' => 1, 'readed_date' => Carbon::now()]);
         }
-
-
-        // Jamshid if the message forwarded display files from orign
-
-        $messageForwards = MessageForward::where('new_message_id','=', $message->id)->first();
-        $message_files = MessageFiles::where('message_id', '=', $message->id)->orderby('file_extension')->get();
-        // print_r($messageForwards->status);die;
-        if($messageForwards != null && $messageForwards->status != 'reply'){
-            $message_files = MessageFiles::where('message_id', '=', $messageForwards->message_id)->orderby('file_extension')->get();
-        }
-
-        $to_users = DB::table('message_users as a')
-            ->join('users as u', 'a.to_users_id', '=', 'u.id')
-            ->select('a.*','u.id','u.lname','u.fname','u.branch_code','u.job_title')
-            ->where('a.message_id', $message->id)
-            ->get();
-
-        $fromUserAllMessages = DB::table('message_users as a')
-            ->join('messages as m', 'a.message_id', '=', 'm.id')
-            ->join('mes_types as mt', 'm.mes_type', '=', 'mt.message_type')
-            ->select('m.*', 'a.id as mes_user_id', 'a.is_readed', 'a.readed_date', 'mt.title AS message_type')
-            ->where('a.from_users_id', $message->u_id)
-            ->where('a.to_users_id', Auth::id())
-            ->where('a.is_deleted', 0)
-            ->where('m.mes_gen', '!=', $mes_gen)
-            ->orderBy('a.id', 'DESC')
-            ->paginate(10);
 
         // count() //
         @include('count_message.php');
 
-        return view('messages.view',compact('message', 'departments','message_files','to_users','fromUserAllMessages',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('messages.view',compact('model', 'message_users','departments','message_files','messageForwards','authAllMessages',
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
-    public function viewEFSent($user_id, $mes_gen)
+    public function viewFESent($id, $hash)
     {
-        $departments = Department::where('parent_id', 0)->where('status', 1)->orderBy('depart_id', 'ASC')->get();
+        //
+        $model = Message::where('id',$id)->where('mes_gen', $hash)->firstOrFail();
 
-        $message = Message::where('user_id', $user_id)->where('mes_gen', $mes_gen)->firstOrFail();
+        $messageForwards = MessageForward::where('new_message_id', $id)->first();
 
-        // Jamshid if the message forwarded display files from orign
-        $messageForwards = MessageForward::where('new_message_id','=', $message->id)->first();
-        $message_files = MessageFiles::where('message_id', '=', $message->id)->orderby('file_extension')->get();
+        $message_files = MessageFiles::where('message_id', $id)->get();
+
         if($messageForwards != null && $messageForwards->status != 'reply'){
-            $message_files = MessageFiles::where('message_id', '=', $messageForwards->message_id)->orderby('file_extension')->get();
+            $message_files = MessageFiles::where('message_id', $messageForwards->message_id)->get();
         }
 
         // count() //
         @include('count_message.php');
 
-        return view('messages.view_sent',compact('message','departments','message_files','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('messages.view_sent',compact('model','message_files','inbox_count','sent_count','all_inbox_count'));
+    }
+
+    public function getBlade(Request $request){
+
+        $type = $request->input('type');
+
+        if ($type == 'compose_search_users')
+        {
+            $users = DB::table('users as a')->where('a.status', 1)->select('a.id', 'a.lname', 'a.fname')->get();
+
+            $blade = view('templates.composeUsers', compact('users', $users))->render();
+        }
+        elseif ($type == 'compose_check_users')
+        {
+            $departments = Department::where('parent_id', 0)->where('status', 1)->orderBy('depart_id', 'ASC')->get();
+
+            $blade = view('templates.composeUsersTree', compact('departments', $departments))->render();
+        }
+        elseif ($type == 'delete')
+        {
+            $blade = view('templates.delSentConfirm')->render();
+        }
+        elseif ($type == 'deleteInbox')
+        {
+            $blade = view('templates.delInboxConfirm')->render();
+        }
+        elseif ($type == 'deleteAll')
+        {
+            $blade = view('templates.delAllConfirm')->render();
+        }
+        elseif ($type == 'files')
+        {
+            $id = $request->input('id');
+
+            $forward = MessageForward::where('new_message_id', $id)->first();
+
+            $forwardFiles = 0;
+
+            if ($forward)
+            {
+                $forwardFiles = $forward->message_id;
+            }
+
+            $files = MessageFiles::whereIn('message_id', [$id, $forwardFiles])->get();
+
+            $blade = view('templates.files', compact('files', $files))->render();
+        }
+        elseif ($type == 'users')
+        {
+            $id = $request->input('id');
+
+            $users = MessageUsers::where('message_id', $id)->get();
+
+            $isRead = MessageUsers::where('message_id', $id)->where('is_readed', 1)->count();
+
+            $blade = view('templates.sentUsers', compact('users', $users, 'isRead', $isRead))->render();
+        }
+        elseif ($type == 'forward')
+        {
+            $id = $request->input('id');
+
+            $model = Message::find($id);
+
+            $departments = Department::where('parent_id', 0)->where('status', 1)->orderBy('depart_id', 'ASC')->get();
+
+            $blade = view('templates.forward', compact('model', 'departments'))->render();
+        }
+        elseif ($type == 'reply')
+        {
+            $id = $request->input('id');
+
+            $model = Message::find($id);
+
+            $blade = view('templates.reply', compact('model', $model))->render();
+        }
+        elseif ($type == 'senderMessages')
+        {
+            $id = $request->input('id');
+
+            $model = Message::find($id);
+
+            $models = MessageUsers::where('from_users_id', $model->user_id)
+                ->where('to_users_id', Auth::id())
+                ->where('is_deleted', 0)
+                ->where('id', '!=', $id)
+                ->orderBy('id', 'DESC')
+                ->paginate(25);
+
+            $blade = view('templates.senderMessages', compact('model', $model, 'models', $models))->render();
+        }
+        else {
+            $blade = '';
+        }
+
+        return response()->json(array('success' => true, 'blade'=>$blade));
+
     }
 
     public function viewControl($mes_gen)
@@ -520,7 +641,7 @@ class MessageController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('messages.view_control',compact('message','departments','message_files','to_users','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('messages.view_control',compact('message','departments','message_files','to_users','inbox_count','sent_count','all_inbox_count'));
     }
 
     public function view_my($mes_gen)
@@ -550,42 +671,22 @@ class MessageController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('messages.view_my',compact('message','message_files','to_users','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('messages.view_my',compact('message','message_files','to_users','inbox_count','sent_count','all_inbox_count'));
     }
 
-    public function downloadFile($file){
-
-        if (file_exists(public_path() . "/FilesFTP/" . $file)) {
-
-            $orgName = MessageFiles::where('file_hash', '=', $file)->first();
-
-            return Response::download(public_path() . "/FilesFTP/".$file,$orgName->file_name);
-
-        } else {
-
-            return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
-        }
-    }
-
-    public function getDownload($id)
+    public function fileDownload($id)
     {
+        //
+        $model = MessageFiles::findOrFail($id);
 
-        $model = MessageFiles::find($id);
+        $path = '/'.$model->file_path.$model->file_hash;
 
-        $file= public_path(). "/FilesFTP/".$model->file_hash;
+        if (Storage::disk('ftp_edo')->exists($path)){
 
-        $headers = array(
-            'Content-Type: application/octet-stream',
-        );
-
-        if(file_exists(public_path() . "/FilesFTP/" . $model->file_hash)){
-
-            return Response::download($file, $model->file_name, $headers);
-
-        } else {
-
-            return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
+            return Storage::disk('ftp_edo')->download($path, $model->file_name);
         }
+
+        return back()->with('errors', 'Ilova (lar) Serverdan topilmadi!');
     }
 
     public function downloadAll($file){
@@ -618,35 +719,37 @@ class MessageController extends Controller
 
     }
 
-    public function previewPdf($file)
+    public function fileView($id)
     {
-        if (file_exists(public_path() . "/FilesFTP/" . $file)) {
+        $model = MessageFiles::findOrFail($id);
 
-            $pathToFile = public_path() . "/FilesFTP/". $file;
+        $path = '/'.$model->file_path.$model->file_hash;
 
-            return response()->file($pathToFile);
+        if (Storage::disk('ftp_edo')->exists($path)){
 
-        } else {
+            $res = Storage::disk('ftp_edo')->get($path);
 
-            return response()->json('Serverdan fayl topilmadi!');
+            if (strtoupper($model->file_extension) == 'PDF'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+
+            } elseif (strtoupper($model->file_extension) == 'PNG' || strtoupper($model->file_extension) == 'JPG' ||
+                strtoupper($model->file_extension) == 'JPEG'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'image/png',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+            } else {
+
+                return Storage::disk('ftp_edo')->download($path, $model->file_name);
+            }
         }
 
-    }
-
-    public function previewJpg($file)
-    {
-
-        $model = MessageFiles::find($file);
-        if (file_exists(public_path() . "/FilesFTP/" . $model->file_hash)) {
-
-            $pathToFile = public_path() . "/FilesFTP/". $model->file_hash;
-
-            return response()->file($pathToFile);
-
-        } else {
-
-            return response()->json('Serverdan fayl topilmadi!');
-        }
+        return response()->json('Ilova (lar) Serverdan topilmadi!');
 
     }
 
@@ -669,14 +772,12 @@ class MessageController extends Controller
             );
     }
 
-    public function destroy($id)
+    public function destroy(Request $request)
     {
         //
-        // message users
-        $messageUsers = MessageUsers::where('message_id', $id)->get();
-        if (!empty($messageUsers)) {
-            MessageUsers::where('message_id', $id)->delete();
-        }
+        $id = $request->input('id');
+
+        $model = Message::find($id);
 
         // message files
         $messageFiles = MessageFiles::where('message_id', $id)->get();
@@ -685,24 +786,39 @@ class MessageController extends Controller
 
             foreach ($messageFiles as $key => $value) {
 
-                $file_path = public_path().'/FilesFTP/'.$value->file_hash;
+                $path = '/'.$value->file_path.$value->file_hash;
 
-                if(file_exists($file_path)){
-                    unlink($file_path);
+                if (Storage::disk('ftp_edo')->exists($path)){
+
+                    Storage::disk('ftp_edo')->delete($path);
                 }
 
             }
             MessageFiles::where('message_id', $id)->delete();
         }
 
-        // model
-        $model = Message::findOrFail($id);
+        // message users
+        $messageUsers = MessageUsers::where('message_id', $id)->get();
+
+        if (!empty($messageUsers)) {
+            MessageUsers::where('message_id', $id)->delete();
+        }
+
+        // message forward
+        $messageForward = MessageForward::where('message_id', $id)->get();
+
+        if (!empty($messageForward)) {
+            MessageForward::where('message_id', $id)->delete();
+        }
 
         $model->delete();
 
+        $blade = view('templates.success')->render();
+
         return response()->json(array(
                 'success' => true,
-                'message'   => 'Row Successfully deleted'
+                'blade'   => $blade,
+                'message'   => 'Message Successfully deleted',
             )
         );
 
