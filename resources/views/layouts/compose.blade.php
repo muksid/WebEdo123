@@ -25,6 +25,8 @@
 
     <link href="{{ asset("/admin-lte/dist/css/skins/_all-skins.min.css") }}" rel="stylesheet" type="text/css">
 
+    <link href="{{ asset("/css/main.css") }}" rel="stylesheet" type="text/css">
+
     <link href="{{ asset('css/treeview.css') }}" rel="stylesheet">
 
     <script src="{{ asset('js/treejquery.js') }}"></script>
@@ -56,6 +58,9 @@
 <!-- bootstrap date picker this is for mes term -->
 <script src="{{ asset("admin-lte/plugins/datepicker/bootstrap-datepicker.js") }}"></script>
 
-@include('layouts.footer')
+<script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
+
 <!-- Bootstrap 3.3.6 button logOut -->
 <script src="{{ asset ("admin-lte/bootstrap/js/bootstrap.min.js") }}"></script>
+
+@include('layouts.footer')

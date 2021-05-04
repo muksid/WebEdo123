@@ -3,7 +3,7 @@
 @section('content')
 
     <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
+
         <section class="content-header">
             <h1>@lang('blade.write_message')
                 <small></small>
@@ -39,30 +39,24 @@
             @endif
         </section>
 
-        <!-- Main content -->
+        <div id="loading" class="loading-gif" style="display: none"></div>
+
         <section class="content">
             <div class="row">
-                <form role="form" method="POST" action="{{ route('ef-group-compose') }}" enctype="multipart/form-data" id="formGroup">
+                <form role="form" method="POST" action="{{ route('post-fe-group-compose') }}" enctype="multipart/form-data" id="formGroup">
                     {{csrf_field()}}
+
                     <div class="col-md-6">
                         <div class="box box-primary">
 
                             <div class="box-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group has-inputError">
-                                            <label class="control-label text-red"><i class="fa fa-search text-red"></i> @lang('blade.search_users')</label>
-                                            <select class="form-control select2" name="to_users[]" multiple="multiple" data-placeholder="@lang('blade.search_users')" style="width: 100%;">
-                                                @foreach($users as $user)
-                                                    <option value="{{ $user->id }}">{{ $user->lname.' '.$user->fname }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <!-- /.form-group -->
-                                    </div>
-                                    <!-- /.col -->
-                                </div>
-                                <!-- /.row -->
+                                <a class="btn btn-block btn-social btn-foursquare btn-lg" id="get_search_users">
+                                    <i class="fa fa-search"></i> @lang('blade.search_users')
+                                </a>
+
+                                <div id="append_search_users"></div>
+
+
                             </div>
 
                             <div class="box-header with-border">
@@ -70,7 +64,7 @@
                                     <a href="{{ url('/groups/create') }}"><i class="fa fa-plus"></i>@lang('blade.groups_create_group')</a>
                                 </h3>
                             </div>
-                            <!-- group buttons -->
+
                             <div class="box">
                                 <div class="box-body">
 
@@ -113,15 +107,16 @@
 
                     <div class="col-md-6">
                         <div class="box box-primary">
+
                             <div class="box-header with-border">
                                 <h3 class="box-title">@lang('blade.write_new_message')</h3>
                             </div>
-                            <!-- /.box-header -->
+
                             <div class="box-body">
                                 <div class="form-group {{ $errors->has('subject') ? 'has-error' : '' }}">
                                     <label>@lang('blade.write_message') <span class=""></span></label>
                                     <input type="text" id="subject" name="subject" value="{{ old('subject') }}"
-                                           class="form-control" placeholder="@lang('blade.subject')" required autofocus>
+                                           class="form-control" placeholder="@lang('blade.subject')" autofocus>
                                     @if ($errors->has('subject'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('subject') }}</strong>
@@ -143,47 +138,6 @@
                                     @if ($errors->has('editor1'))
                                         <span class="text-red" role="alert">
                                         <strong>{{ $errors->first('editor1') }}</strong>
-                                    </span>
-                                    @endif
-
-                                </div>
-
-                                <div class="form-group{{ $errors->has('mes_type') ? ' has-error' : '' }}">
-                                    <label for="mes_type" class="col-md-4 control-label">@lang('blade.type_of_message')</label>
-                                    <select id="mes_type" name="mes_type" class="form-control">
-                                        <option value="other">@lang('blade.others')</option>
-                                        @foreach ($mes_type as $key => $type)
-                                            <option value="{{$type->message_type}}">{{$type->title}}</option>
-                                        @endforeach
-                                    </select>
-                                    @if ($errors->has('mes_type'))
-                                        <span class="help-block">
-                                        <strong>{{ $errors->first('mes_type') }}</strong>
-                                    </span>
-                                    @endif
-
-                                </div>
-
-                                <div class="form-group {{ $errors->has('mes_term') ? 'has-error' : '' }}">
-                                    <label>
-                                        <input type="checkbox" class="user_checkbox mes_term">
-                                        @lang('blade.deadline'):
-                                    </label>
-                                </div>
-
-                                <div id="autoUpdate"
-                                     class="form-group {{ $errors->has('mes_term') ? 'has-error' : '' }}"
-                                     style="display: none">
-                                    <label>@lang('blade.deadline_date'):</label>
-                                    <div class="input-group date">
-                                        <div class="input-group-addon">
-                                            <i class="fa fa-calendar"></i>
-                                        </div>
-                                        <input type="text" name="mes_term" class="form-control pull-right" id="datepicker">
-                                    </div>
-                                    @if ($errors->has('mes_term'))
-                                        <span class="text-red" role="alert">
-                                        <strong>{{ $errors->first('mes_term') }}</strong>
                                     </span>
                                     @endif
 
@@ -227,7 +181,7 @@
                             <!-- /.box-body -->
                             <div class="box-footer">
                                 <div class="pull-right">
-                                    <a href="{{ url('/ef/compose') }}" class="btn btn-flat btn-default"><i class="fa fa-remove"></i> @lang('blade.cancel')</a>
+                                    <a href="{{ url('/fe/group-compose') }}" class="btn btn-flat btn-default"><i class="fa fa-remove"></i> @lang('blade.cancel')</a>
                                     <button type="submit" class="btn btn-flat btn-primary" id="submitBtn"><i class="fa fa-envelope-o"></i> @lang('blade.send')</button>
                                 </div>
                             </div>
@@ -242,13 +196,39 @@
         </section>
         <!-- /.content -->
 
-        <!-- ckeditor -->
+        <!-- ck editor -->
         <script src="{{ asset ("/ckeditor/ckeditor.js") }}"></script>
+
         <script src="{{ asset ("/ckeditor/samples/js/sample.js") }}"></script>
+
         <script type="text/javascript">
+
+            $("#get_search_users").click(function () {
+
+                let id = $(this).val();
+
+                $.ajax({
+                    url: '/fe/getBlade',
+                    type: 'GET',
+                    data: {type: 'compose_search_users'},
+                    dataType: 'json',
+                    beforeSend: function(){
+                        $("#loading").show();
+                    },
+                    success: function(res){
+                        $('#append_search_users').html(res.blade);
+
+                    },
+                    complete:function(res){
+                        $("#loading").hide();
+                    }
+
+                });
+
+            });
+
             CKEDITOR.replace("editor1");
-        </script>
-        <script type="text/javascript">
+
             $(document).ready(function () {
                 // For plus minus click departments
                 $(".btn-success").click(function () {
@@ -345,9 +325,11 @@
                         type: 'POST',
                         data: {_token: CSRF_TOKEN, group_id: group_id},
                         dataType: 'JSON',
-                        success: function (data) {
-                            //console.log(data);
-                            var obj = data;
+                        beforeSend: function(){
+                            $("#loading").show();
+                        },
+                        success: function(res){
+                            var obj = res;
                             var user_input = "";
 
                             $.each(obj['msg'], function (key, val) {
@@ -360,7 +342,11 @@
                                     "</div>" +
                                     "</div>";
                             });
-                            $("#mydiv").html(user_input)   //// For replace with previous one
+                            $("#mydiv").html(user_input);
+
+                        },
+                        complete:function(res){
+                            $("#loading").hide();
                         },
                         error: function () {
                             console.log('error');
@@ -376,11 +362,10 @@
                 })
             });
         </script>
+
         <script src="{{ asset('js/treeview.js') }}"></script>
 
         <script src="{{ asset("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
     </div>
 
 @endsection

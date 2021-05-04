@@ -96,52 +96,49 @@
                                         <tbody>
 
                                         @if($model_files)
-                                            @foreach($model_files as $key => $file)   
+                                            @foreach($model_files as $key => $file)
 
                                                     <tr>
                                                         <th scope="row">{{ $key+1 }}</th>
                                                         <td>
-                                                            @switch($file->file_extension)
-                                                                @case('doc')                                                        
-                                                                @case('docx')                                                        
-                                                                @case('xls')                                                        
-                                                                @case('xlsx')                                                        
-                                                                @case('pptx')                                                        
-                                                                <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
-                                                                    class="text-info text-bold"> 
-                                                                    <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                                                </a>
-                                                                @break
-                                                                @default
-                                                                <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
-                                                                    <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
-                                                                </a>
-                                                                @break
-                                                            @endswitch
-
-                                                        </td>
-                                                        <td>
-                                                            <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
-                                                                @lang('blade.download') <i class="fa fa-download"></i>
+                                                            <a href="#"
+                                                               class="text-info text-bold mailbox-attachment-name"
+                                                               target="_blank"
+                                                               onclick="window.open('<?php echo('/prt-fileView/' . $file->id); ?>',
+                                                                       'modal',
+                                                                       'width=800,height=900,top=30,left=500');
+                                                                       return false;">
+                                                                <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
                                                             </a>
+                                                            <ul class="list-inline pull-right">
+                                                                <li>
+                                                                    <a href="{{ url('prt-fileDownload',['id'=>$file->id]) }}"
+                                                                       class="link-black text-sm"><i
+                                                                                class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                            <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                                )</i>
+
                                                         </td>
                                                         @if($model->status == 1 || $model->status == -1)
                                                         <td style="padding-left: 50px">
-                                                            <a href="{{ route('remove-single-protocol-file', ['id' => $file->id]) }}" class="text-bold text-red"> <i class="fa fa-trash fa-lg"></i></a>
+                                                            <a href="{{ url('prt-fileRemove', ['id' => $file->id]) }}" class="text-bold text-red"> <i class="fa fa-trash fa-lg"></i></a>
                                                         </td>
                                                         @endif
                                                     </tr>
-                                                
+
                                             @endforeach
                                         @endif
 
                                         </tbody>
-                                        
+
                                     </table>
 
                                 </div>
                                 @endif
-                                
+
 
                                 <div class="form-group">
                                     <div class="box-body box-profile">
@@ -388,17 +385,6 @@
                 fileCount += files.length;
                 showFileCount();
             });
-
-
-            // Preview File
-            $('.previewSingleFile').unbind().click(function(){
-
-                let id = $(this).data('id')
-
-                window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
-
-                return false    
-            })
 
         </script>
 

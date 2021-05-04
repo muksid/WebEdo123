@@ -70,13 +70,13 @@ class EdoMessageSubUsersController extends Controller
             }
 
             $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-            
+
             $models->appends ( array (
                 'dep_num'   => $dep_num,
                 'kanc_num'  => $kanc_num,
                 'org_name'  => $org_name,
                 'dep_num'   => $dep_num,
-                'in_num'    => $in_num            
+                'in_num'    => $in_num
             ));
 
             return view('edo.edo-message-sub-users.empTasksInbox',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'));
@@ -100,7 +100,7 @@ class EdoMessageSubUsersController extends Controller
             $org_name   = $request->input('org_name');
             $doc_name   = $request->input('doc_name');
             $in_num     = $request->input('in_num');
-            
+
             $search = EdoMessageSubUsers::where('to_user_id','=', Auth::id())
                 ->whereIn('status', [0,1,2]);
 
@@ -135,13 +135,13 @@ class EdoMessageSubUsersController extends Controller
             }
 
             $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-            
+
             $models->appends ( array (
                 'dep_num'   => $dep_num,
                 'kanc_num'  => $kanc_num,
                 'org_name'  => $org_name,
                 'dep_num'   => $dep_num,
-                'in_num'    => $in_num            
+                'in_num'    => $in_num
             ) );
 
             return view('edo.edo-message-sub-users.empTasksProcess',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'))
@@ -201,13 +201,13 @@ class EdoMessageSubUsersController extends Controller
             }
 
             $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-            
+
             $models->appends ( array (
                 'dep_num'   => $dep_num,
                 'kanc_num'  => $kanc_num,
                 'org_name'  => $org_name,
                 'dep_num'   => $dep_num,
-                'in_num'    => $in_num            
+                'in_num'    => $in_num
             ));
 
             return view('edo.edo-message-sub-users.empTasksClosed',compact('models', 'dep_num', 'kanc_num', 'org_name', 'doc_name', 'in_num'))
@@ -245,13 +245,12 @@ class EdoMessageSubUsersController extends Controller
             ->orderBy('t.sort', 'ASC')
             ->get();
 
-        
         // edo type messages
         $perfUserTypes = EdoTypeMessages::where('type_code', 'performers_in_helper')->get();
 
         $edoUsers = EdoUsers::where('user_id', Auth::id())->firstOrFail();
 
-        $role = EdoUserRoles::where('id', $edoUsers->role_id)->firstOrFail();
+        $role = EdoUserRoles::findOrFail($edoUsers->role_id);
 
         $messageTypes = EdoTypeMessages::where('type_code', $role->role_code)->get();
 
@@ -274,7 +273,7 @@ class EdoMessageSubUsersController extends Controller
             ->where('m.edo_message_id', $model->id)
             ->orderBy('a.sort', 'ASC')
             ->groupBy('m.to_user_id')
-            ->get();        
+            ->get();
 
         $selectedUsers = $perfEmpUsers->implode('to_user_id', ',');
 
@@ -293,8 +292,6 @@ class EdoMessageSubUsersController extends Controller
             ->where('a.status', 1)
             ->orderBy('a.sort', 'ASC')
             ->get();
-        
-        // dd($explodeUsers);
 
         $replyMessage = EdoReplyMessage::where('edo_message_id', $model->id)->get();
 
@@ -688,5 +685,5 @@ class EdoMessageSubUsersController extends Controller
     {
         //
     }
-    
+
 }

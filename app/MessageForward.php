@@ -15,4 +15,9 @@ class MessageForward extends Model
         'title',
         'text'
     ];
+
+    public function message()
+    {
+        return $this->belongsTo(Message::class,'message_id', 'id');
+    }
 }

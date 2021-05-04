@@ -8,6 +8,7 @@ use App\EdoManagementProtocols;
 use App\EdoProtocolFiles;
 use App\EdoUsers;
 use App\User;
+use Carbon\Carbon;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,7 @@ class EdoManagementProtocolsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
@@ -66,7 +67,7 @@ class EdoManagementProtocolsController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -123,7 +124,7 @@ class EdoManagementProtocolsController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function edit($id)
     {
@@ -222,7 +223,7 @@ class EdoManagementProtocolsController extends Controller
         // dd($protocol_dep);
         $user = EdoManagementMembers::where('user_id', Auth::id())->first();
         $edo_user = EdoUsers::where('user_id', Auth::id())->firstOrFail();
-        
+
         $current_user_id = Auth::id();
 
         $type = ($request->input('type')) ? $request->input('type') : 'new';
@@ -238,32 +239,32 @@ class EdoManagementProtocolsController extends Controller
             $reg_num    = $request->input('reg_num');
             $title      = $request->input('title');
             $date       = $request->input('date');
-    
+
 
             $search = EdoManagementProtocolMembers::where('user_id', $current_user_id)
                 ->whereHas('protocol', function($query) use($protocol_dep){
                     $query->where('depart_id', $protocol_dep);
                 });
-            
+
             if($reg_num){
                 $search->whereHas('protocol', function($query) use($reg_num){
 
                     $query->where('stf_number', 'like', '%'.$reg_num.'%');
-                
+
                 });
-            }  
+            }
             if($title){
                 $search->whereHas('protocol', function($query) use($title){
 
                     $query->where('title', 'like', '%'.$title.'%');
-                
+
                 });
-            }  
+            }
             if($date){
                 $search->whereHas('protocol', function($query) use($date){
 
                     $query->where('stf_date', $date);
-                
+
                 });
             }
 
@@ -292,9 +293,9 @@ class EdoManagementProtocolsController extends Controller
                     ->where('user_id', $user->user_id)
                     ->where('status', 2)
                     ->count();
-                
+
                 $type = 'new';
-                
+
             }
             elseif($type == 'on_process')
             {
@@ -310,7 +311,7 @@ class EdoManagementProtocolsController extends Controller
                     ->whereIn('status', [2,-1])
                     ->orderBy('created_at', 'DESC')
                     ->count();
-                
+
                 $new_count          = EdoManagementProtocolMembers::whereHas('protocol', function($query) use($protocol_dep){
                         $query->where('depart_id', $protocol_dep);
                     })
@@ -325,7 +326,7 @@ class EdoManagementProtocolsController extends Controller
                     ->where('status', 2)
                     ->count();
                 $type = 'on_process';
-                
+
             }
             else
             {
@@ -356,14 +357,14 @@ class EdoManagementProtocolsController extends Controller
                     ->where('status', 1)
                     ->count();
                 $type = 'archive';
-                
+
             }
             $models = $search->orderBy('created_at', 'DESC')->paginate(15);
 
             $models->appends ( array (
                 'type'      => $type,
                 'reg_num'   => $reg_num,
-                'title'     => $title,                
+                'title'     => $title,
                 'date'      => $date,
                 'protocol_dep' => $protocol_dep
             ) );
@@ -371,7 +372,7 @@ class EdoManagementProtocolsController extends Controller
 
             return view('edo.edo-management-protocols.hrMemberProtocol',compact('models','protocol_dep', 'type','new_count', 'on_process_count','archive_count',
             'type','reg_num','title','date'));
-        
+
         }
         else
         {
@@ -525,17 +526,21 @@ class EdoManagementProtocolsController extends Controller
 
         if ($request->hasFile('protocol_file')){
             foreach ($request->file('protocol_file') as $file) {
-
-                $file->store('protocol_files', 'public');
+                $today = Carbon::today();
+                $year = $today->year;
+                $month = $today->month;
+                $day = $today->day;
+                $path = 'prt/'.$year.'/'.$month.'/'.$day.'/';
 
                 $newFile                    = new EdoProtocolFiles();
                 $newFile->protocol_id       = $model->id;
+                $newFile->file_path         = $path;
                 $newFile->file_name         = $file->getClientOriginalName();
                 $newFile->file_hash         = $file->hashName();
                 $newFile->file_extension    = $file->extension();
                 $newFile->file_size         = $file->getSize();
+                Storage::disk('ftp_edo')->put($path.$newFile->file_hash, file_get_contents($file->getRealPath()));
                 $newFile->save();
-
             }
 
         }
@@ -763,7 +768,7 @@ class EdoManagementProtocolsController extends Controller
                 $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
                 $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
                 $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
-                
+
             }
             elseif($type == 'on_process')
             {
@@ -771,7 +776,7 @@ class EdoManagementProtocolsController extends Controller
                 $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
                 $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
                 $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
-                
+
             }
             else
             {
@@ -779,15 +784,15 @@ class EdoManagementProtocolsController extends Controller
                 $archive_count      = EdoManagementProtocols::where('depart_id', $department)->where('status', 3)->orderBy('created_at', 'DESC')->count();
                 $on_process_count   = EdoManagementProtocols::where('depart_id', $department)->whereIn('status', [2,-1])->orderBy('created_at', 'DESC')->count();
                 $new_count          = EdoManagementProtocols::where('depart_id', $department)->where('status', 1)->orderBy('created_at', 'DESC')->count();
-                
+
             }
             $models = $search->orderBy('created_at', 'DESC')->paginate(15);
 
             $models->appends ( array (
                 'type'      => $type,
                 'reg_num'   => $reg_num,
-                'title'     => $title,                
-                'date'      => $date                
+                'title'     => $title,
+                'date'      => $date
             ) );
 
         }else {
@@ -825,18 +830,37 @@ class EdoManagementProtocolsController extends Controller
     // Delete Protocol
     public function deleteStfProtocol($id)
     {
-        $model = EdoManagementProtocols::find($id);
-        if($model){
-            $model->delete();
-        }else{
-            return back()->with('error', 'Protocol jadvaldan topilmadi!');
-        }
+        $model = EdoManagementProtocols::findOrFail($id);
+
         $molel_members = EdoManagementProtocolMembers::where('protocol_id', $model->id)->get();
-        if($model) EdoManagementProtocolMembers::where('protocol_id', $model->id)->delete();
-        
+
+        if ($molel_members) {
+            EdoManagementProtocolMembers::where('protocol_id', $model->id)->delete();
+        }
+
+        // protocol files
+        $protocolFiles = EdoProtocolFiles::where('protocol_id', $id)->get();
+
+        if (!empty($protocolFiles)) {
+
+            foreach ($protocolFiles as $key => $value) {
+
+                $path = '/'.$value->file_path.$value->file_hash;
+
+                if (Storage::disk('ftp_edo')->exists($path)){
+
+                    Storage::disk('ftp_edo')->delete($path);
+                }
+
+            }
+            EdoProtocolFiles::where('protocol_id', $id)->delete();
+        }
+
+        $model->delete();
+
         return back()->with('success', 'Protocol muvaffaqiyatli o`chirildi');
     }
-    
+
     // update stf protocol
     public function storeEditStfProtocol(Request $request)
     {
@@ -897,15 +921,20 @@ class EdoManagementProtocolsController extends Controller
 
         if ($request->hasFile('protocol_file')){
             foreach ($request->file('protocol_file') as $file) {
-
-                $file->store('protocol_files', 'public');
+                $today = Carbon::today();
+                $year = $today->year;
+                $month = $today->month;
+                $day = $today->day;
+                $path = 'prt/'.$year.'/'.$month.'/'.$day.'/';
 
                 $newFile                    = new EdoProtocolFiles();
                 $newFile->protocol_id       = $model->id;
+                $newFile->file_path = $path;
                 $newFile->file_name         = $file->getClientOriginalName();
                 $newFile->file_hash         = $file->hashName();
                 $newFile->file_extension    = $file->extension();
                 $newFile->file_size         = $file->getSize();
+                Storage::disk('ftp_edo')->put($path.$newFile->file_hash, file_get_contents($file->getRealPath()));
                 $newFile->save();
 
             }
@@ -944,51 +973,69 @@ class EdoManagementProtocolsController extends Controller
 
     }
 
-    public function downloadProtocolFile($id)
+    public function fileDownload($id)
     {
         $model = EdoProtocolFiles::findOrFail($id);
 
-        $url = storage_path('app/public/protocol_files/'.$model->file_hash);
+        $path = '/'.$model->file_path.$model->file_hash;
 
-        return response()->download($url, $model->file_name);
-    }
+        if (Storage::disk('ftp_edo')->exists($path)){
 
-    public function previewProtocolFile($id)
-    {
-
-        $model = EdoProtocolFiles::findOrFail($id);
-        $url = storage_path('app/public/protocol_files/'.$model->file_hash);
-
-        //
-        if ($url) {
-
-            if($model->file_extension == 'pdf'){
-                return Response::make(file_get_contents($url), 200, [
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; name ="'.$model->file_name.'"'
-                ]);
-            }
-
-            return response()->file($url);
-
-        } else {
-
-            return response()->json('Serverdan fayl topilmadi!');
-
+            return Storage::disk('ftp_edo')->download($path, $model->file_name);
         }
 
+        return back()->with('errors', 'Ilova (lar) Serverdan topilmadi!');
     }
 
-    public function removeSingleProtocolFile($id)
+    public function fileView($id)
     {
         $model = EdoProtocolFiles::findOrFail($id);
 
-        Storage::delete('public/protocol_files/'.$model->file_hash);
+        $path = '/'.$model->file_path.$model->file_hash;
+
+        if (Storage::disk('ftp_edo')->exists($path)){
+
+            $res = Storage::disk('ftp_edo')->get($path);
+
+            if (strtoupper($model->file_extension) == 'PDF'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+
+            } elseif (strtoupper($model->file_extension) == 'PNG' || strtoupper($model->file_extension) == 'JPG' ||
+                strtoupper($model->file_extension) == 'JPEG'){
+
+                return Response::make($res, 200, [
+                    'Content-Type'        => 'image/png',
+                    'Content-Disposition' => 'inline; filename="'.$model->file_name.'"'
+                ]);
+            } else {
+
+                return Storage::disk('ftp_edo')->download($path, $model->file_name);
+            }
+        }
+
+        return response()->json('Ilova (lar) Serverdan topilmadi!');
+
+    }
+
+    public function fileRemove($id)
+    {
+        $model = EdoProtocolFiles::findOrFail($id);
+
+        $path = '/'.$model->file_path.$model->file_hash;
+
+        if (Storage::disk('ftp_edo')->exists($path)){
+
+            Storage::disk('ftp_edo')->delete($path);
+        }
 
         $model->delete();
 
         $msg = "Successfully deleted";
-        
+
         return back()->with('success', $msg);
     }
 
@@ -1055,14 +1102,14 @@ class EdoManagementProtocolsController extends Controller
         $id = $request->input('model_id');
 
         $modelHR = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_id', Auth::id())->first();
-        
+
         if($modelHR){
             $model = EdoManagementProtocols::find($id);
 
             $model->update(['status' => 2]);
-    
+
             $modelMem = EdoManagementProtocolMembers::where('protocol_id', $id);
-    
+
             $modelMem->update(['status' => 1]);
 
             $modelHR = EdoManagementProtocolMembers::where('protocol_id', $id)->where('user_id', Auth::id())->first()->update(['status' => 2]);
@@ -1071,7 +1118,7 @@ class EdoManagementProtocolsController extends Controller
             return response()->json(array(
                 'success' => false,
                 'msg'   => 'Hujjatda siz ishtirok etmagansiz!')
-            ); 
+            );
         }
 
         return response()->json(array(

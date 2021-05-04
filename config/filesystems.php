@@ -63,6 +63,20 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        'ftp_edo' => [
+            'driver'   => 'ftp',
+            'host'     => '172.16.1.123',
+            'username' => 'edo_ftp_fs',
+            'password' => 'edo_ftp_fs',
+
+            // Optional FTP Settings...
+            // 'port'     => 21,
+            // 'root'     => '',
+            // 'passive'  => true,
+            // 'ssl'      => true,
+            // 'timeout'  => 30,
+        ],
+
     ],
 
 ];

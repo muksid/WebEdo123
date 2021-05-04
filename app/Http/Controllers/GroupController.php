@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Group;
 use App\GroupUsers;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Department;
 use App\MessageUsers;
 use App\Message;
 use Auth;
 use DB;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Storage;
 
 
 class GroupController extends Controller
@@ -20,6 +23,32 @@ class GroupController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+
+    // ftp file upload
+    public function ftpFileUpload(Request $request)
+    {
+        $today = Carbon::today();  //Today
+        $year = $today->year;                                         // year int(2016)
+        $month = $today->month;                                        // month int(11)
+        $day = $today->day;
+        $path = '/'.$year.'/'.$month.'/'.$day.'/';
+
+        $img = Input::file('img');
+        if ($img !== null) {
+            Storage::disk('ftp_9')->put($path.$img->getClientOriginalName(), file_get_contents($img->getRealPath()));
+        }
+        if ($request->file('mes_files') != null){
+            foreach ($request->file('mes_files') as $item) {
+                if ($item != 0) {
+
+                    Storage::disk('ftp_9')->put($path.$item->getClientOriginalName(), file_get_contents($item->getRealPath()));
+                }
+            }
+        }
+        return back();
+
+    }
+
     public function index(Request $request)
     {
         $groups = Group::where('user_id', '=', Auth::id())->orderBy('id','DESC')->get();
@@ -27,7 +56,7 @@ class GroupController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('groups.index',compact('groups','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('groups.index',compact('groups','inbox_count','sent_count','all_inbox_count'));
 
     }
 
@@ -38,7 +67,7 @@ class GroupController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('groups.create',compact('departments','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('groups.create',compact('departments','inbox_count','sent_count','all_inbox_count'));
 
     }
 
@@ -97,7 +126,7 @@ class GroupController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('groups.edit',compact('group', 'group_users', 'departments', 'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('groups.edit',compact('group', 'group_users', 'departments', 'inbox_count','sent_count','all_inbox_count'));
 
     }
 

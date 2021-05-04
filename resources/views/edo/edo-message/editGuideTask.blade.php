@@ -4,7 +4,7 @@
 @section('content')
 
     <!-- TRANSLATED -->
-    
+
     <!-- Main content -->
     <section class="content">
         <div class="row">
@@ -80,15 +80,19 @@
                         <strong><i class="fa fa-file margin-r-5"></i> @lang('blade.doc_app') </strong><br><br>
 
                         @foreach ($model->files as $file)
-
-
-                            <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}" class="text-info text-bold"
-                               target="_blank" class="mailbox-attachment-name"
-                               onclick="window.open('<?php echo ('/edoPreView/'. $file->file_hash); ?>',
+                            <a href="#"
+                               class="text-info text-bold mailbox-attachment-name"
+                               target="_blank"
+                               onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
                                        'modal',
                                        'width=800,height=900,top=30,left=500');
-                                       return false;"> <i class="fa fa-search-plus"></i> {{ $file->file_name }}</a>
-                            <a href="{{ route('edo-load',['file'=>$file->file_hash]) }}" class="pull-right"><i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')</a>
+                                       return false;">
+                                <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                            </a>
+                            <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                               class="link-black text-sm"><i
+                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                            </a>
                             <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
                         @endforeach
                         <hr>
@@ -180,7 +184,7 @@
                                                          alt="User Image">
                                                     <span class="pull-right btn-box-tool">
                                                     <select class="form-control" name="performer_user[]">
-                                                        
+
                                                         <option value="{{ $user->mes_type_id }}"selected>
                                                             {{ $user->title_ru }}
                                                         </option>
@@ -191,7 +195,7 @@
 
                                                         @endforeach
                                                     </select>
-                                                    
+
                                                 </span>
                                                 <div class="username">
 
@@ -199,11 +203,11 @@
                                                     <input value="{{ $user->user_id }}" name="to_user_id[]" hidden/>
                                                     <input value="{{ $user->depart_id }}" name="depart_id[]" hidden/>
                                                 </div>
-                                                
+
                                                 <div class="description">
                                                     {{ $user->depart_name }} - {{ $user->job_title }}</div>
                                                 </div>
-                                                
+
                                             </li>
 
                                         @endforeach
@@ -219,7 +223,7 @@
                                                         alt="User Image">
                                                 <span class="pull-right btn-box-tool">
                                                 <select class="form-control" name="performer_user[]">
-                                                    
+
                                                     <option value="{{$all_dep_exists[0]->performerType->id}}"selected>
                                                         {{$all_dep_exists[0]->performerType->title_ru}}
                                                     </option>
@@ -229,9 +233,9 @@
                                                         <option value="{{ $type->id }}">{{ $type->title_ru }}</option>
 
                                                     @endforeach
-                                                    
+
                                                 </select>
-                                                
+
                                             </span>
                                             <div class="username">
 
@@ -241,9 +245,9 @@
                                             </div>
                                             <div class="description">
                                                 - {{ $all_dep_name->job_title }}</div>
-                                            </div>                               
+                                            </div>
                                         </li>
-            
+
                                     @endif
                                     @if($all_filial_exists->count())
                                         <li class="list-group-item listItem{{$all_filial_name->id}} selected-user">
@@ -256,7 +260,7 @@
                                                         alt="User Image">
                                                 <span class="pull-right btn-box-tool">
                                                 <select class="form-control" name="performer_user[]">
-                                                    
+
                                                     <option value="{{$all_filial_exists[0]->performerType->id??''}}"selected>
                                                         {{$all_filial_exists[0]->performerType->title_ru??''}}
                                                     </option>
@@ -266,9 +270,9 @@
                                                         <option value="{{ $type->id }}">{{ $type->title_ru }}</option>
 
                                                     @endforeach
-                                                    
+
                                                 </select>
-                                                
+
                                             </span>
                                             <div class="username">
 
@@ -279,20 +283,20 @@
                                             </div>
                                             <div class="description">
                                                 - {{ $all_filial_name->job_title }}</div>
-                                            </div>                               
+                                            </div>
                                         </li>
-            
+
                                     @endif
                                 </ul>
 
 
-                                
+
                             </div>
 
                             <!-- /.box-body -->
                         </div>
 
-           
+
 
                         <div class="col-md-12 form-panel">
                             <div class="row">
@@ -641,7 +645,7 @@
                 startDate: '-Infinity',
                 autoclose: true
             });
-            
+
             $('#saveResolutionBtn').click(function(e){
                 e.preventDefault();
                 $('#formResolution').submit();

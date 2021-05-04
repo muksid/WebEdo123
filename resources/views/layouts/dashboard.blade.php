@@ -28,6 +28,10 @@
     <!-- AdminLTE Skins. Choose a skin from the css/skins-->
     <link href="{{ asset("/admin-lte/dist/css/skins/_all-skins.min.css") }}" rel="stylesheet" type="text/css">
 
+    <link href="{{ asset("/css/main.css") }}" rel="stylesheet" type="text/css">
+
+    <link href="{{asset('/admin-lte/plugins/select2/select2.min.css')}}" rel="stylesheet">
+
     <script src="{{ asset('js/treejquery.js') }}"></script>
 
 <body class="skin-blue">
@@ -48,3 +52,10 @@
 
 <!-- Bootstrap 3.3.6 button logOut -->
 <script src="{{ asset ("admin-lte/bootstrap/js/bootstrap.min.js") }}"></script>
+
+
+<script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
+
+<link href="{{ asset ("/admin-lte/bootstrap/css/bootstrap-datepicker.css") }}" rel="stylesheet"/>
+
+<script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>

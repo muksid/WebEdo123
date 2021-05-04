@@ -2,7 +2,6 @@
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             @lang('blade.unread_message')
@@ -10,12 +9,12 @@
         <ol class="breadcrumb">
             <li><a href="/home"><i class="fa fa-dashboard"></i> @lang('blade.home_page')</a></li>
             <li><a href="#">@lang('blade.messages')</a></li>
-            <li class="active">@lang('blade.unread_message')</li>
+            <li class="active">@lang('blade.archive_inbox')</li>
         </ol>
 
         @if (count($errors) > 0)
             <div class="alert alert-danger">
-                <strong>@lang('blade.error')</strong> @lang('blade.exist')<br><br>
+                <strong>@lang('blade.error')</strong> @lang('blade.exist').<br><br>
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -47,81 +46,45 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <div class="col-md-1">
-                            <a href="{{ route('ef-compose') }}" class="btn btn-flat btn-info">
+                            <a href="{{ route('fe-compose') }}" class="btn btn-flat btn-info">
                                 <i class="fa fa-pencil"></i> @lang('blade.write_message')</a>
                         </div>
                     </div>
+
                     <div class="box-body">
-                        <form action="{{route('all/search')}}" method="POST" role="search">
-                            {{ csrf_field() }}
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <select name="f" class="form-control select2" style="width: 100%;">
-                                            @if($f == '')
-                                                <option selected="selected" value="">@lang('blade.branch')</option>
-                                            @else
-                                                @php
-                                                    $filial = \App\Department::where('branch_code', $f)->where('parent_id', 0)->first();
-                                                @endphp
-                                                <option selected="selected" value="{{$filial->branch_code}}">{{$filial->title }}</option>
-                                            @endif
-                                            @foreach($filials as $key => $value)
-                                                <option value="{{$value->branch_code}}">{{ $value->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <button type="button" id="search_filter" class="btn btn-primary btn-flat"><i class="fa fa-filter"></i> Filter</button>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <select name="u" class="form-control select2" style="width: 100%;">
-                                            @if($u == '')
-                                                <option selected="selected" value="">@lang('blade.from_whom')</option>
-                                            @else
-                                                @php
-                                                    $user = \App\User::find($u);
-                                                @endphp
-                                                <option selected="selected" value="{{$user->id}}">{{$user->lname .' '. $user->fname}}</option>
-                                            @endif
-                                            @foreach($users as $key => $value)
-                                                <option value="{{$value->user->id??''}}">{{ $value->user->lname??'' }} {{ $value->user->fname??'' }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="t" value="{{$t}}"
-                                               placeholder="@lang('blade.text_message')">
-                                        <input type="text" name="r" value="0" hidden>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-default btn-flat" onclick="location.href='/ef/inbox';"><i class="fa fa-refresh"></i> @lang('blade.reset')</button>
-                                        <button type="submit" class="btn btn-primary btn-flat"><i class="fa fa-search"></i> @lang('blade.search')</button>
-                                    </div>
-                                </div>
-                                <!-- /.col -->
                             </div>
-                            <!-- /.row -->
-                        </form>
+
+                            <div id="search_adv"></div>
+
+                            <div class="col-md-2">
+                                <div class="form-group has-success">
+                                    <input type="text" class="form-control" name="t" id="search_t"
+                                           placeholder="@lang('blade.text_message')">
+                                    <input type="text" name="r" id="search_r" value="0" hidden>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <button type="button" id="search_refresh" class="btn btn-default btn-flat"><i class="fa fa-undo"></i></button>
+                                    <button type="submit" id="search" class="btn btn-success btn-flat"><i class="fa fa-search"></i> @lang('blade.search')</button>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <!-- /.box-header -->
+
+                    <div id="loading" class="loading-gif" style="display: none"></div>
+
                     <div class="box-body">
-                        <div class="table-responsive mailbox-messages">
-                            <div class="mailbox-controls">
-                                <div class="pull-right">
-                                    @lang('blade.delete_selected')
-                                    <button type="button" title="O`chirish" class="text-red delete-all" data-url="">
-                                        <i class="glyphicon glyphicon-trash"></i>
-                                    </button>
-                                    <!-- /.btn-group -->
-                                </div>
-                                <!-- /.pull-right -->
-                            </div>
-                            <b>@lang('blade.overall'){{': '. $models->total()}} @lang('blade.group_edit_count').</b>
-                            <table class="table table-hover table-striped">
+                        <div class="table-responsive mailbox-messages" id="search_table">
+
+                            <b id="search_total">@lang('blade.overall'){{': '. $models->total()}} @lang('blade.group_edit_count').</b>
+                            <table id="example1" class="table table-hover table-striped">
                                 <thead>
                                 <tr>
                                     <th>#</th>
@@ -129,268 +92,273 @@
                                     <th><i class="fa fa-user"></i> @lang('blade.from_whom')</th>
                                     <th><i class="fa fa-link"></i> @lang('blade.position')</th>
                                     <th><i class="fa fa-text-height"></i> @lang('blade.subject')</th>
-                                    <th><i class="fa fa-hourglass-start"></i> @lang('blade.deadline')</th>
-                                    <th><i class="fa fa-tag"></i> @lang('blade.type_message')</th>
-                                    <th><i class="fa fa-paperclip"></i></th>
-                                    <th><i class="fa fa-clock-o"></i> @lang('blade.received_date')</th>
+                                    <th><i class="fa fa-clock-o"></i> @lang('blade.sent_date')</th>
+                                    <th><i class="fa fa-paperclip"></i> @lang('blade.file')</th>
                                     <th>
-                                        <button type="button" class="btn btn-default btn-sm checkbox-toggle">
-                                            <i class="fa fa-check-square-o text-red"></i></button>
+                                        <button type="button" class="btn btn-outline-danger checkbox-toggle">
+                                            <i class="fa fa-trash-o text-red"></i> <strong class="text-maroon">Barchasini belgilash</strong>
+                                        </button>
+                                        <div class="pull-right">
+                                            <button type="button" class="btn btn-danger btn-flat deleteMessage" data-url="">
+                                                <i class="fa fa-trash-o"></i> @lang('blade.delete_selected')
+                                            </button>
+                                        </div>
                                     </th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <?php $i = 1; ?>
+                                <?php $i = 1;?>
                                 @if($models->count())
-                                @foreach ($models as $key => $model)
-                                    <?php $color = 'style="color: red"'; ?>
-                                    @if($model->message->mes_term == 0)
-                                        <?php $color = ''; ?>
-                                    @endif
-                                    <tr <?php echo $color ?>>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $model->user->filial->title??'' }}</td>
-                                        <td><a href="{{ route('messages.show',
-                                            ['mes_gen' => $model->message->mes_gen,
-                                            'id' => $model->message->id]) }}">
-                                                {{ $model->user->lname .' '. $model->user->fname?? '' }}</a>
-                                        </td>
-                                        <td style="font-size: 12px">
-                                            @php
-                                            echo wordwrap($model->user->department->title??'', 40, "<br />")
-                                            @endphp
-                                        </td>
-                                        <td>
-                                            {!! \Illuminate\Support\Str::words($model->message->subject, 5, ' ...') !!}
-                                        </td>
-                                        <td>
-                                                @if($model->message->mes_term == 0)
-                                                    @lang('blade.no_deadline')
-                                                @else
-                                                    {{ \Carbon\Carbon::parse($model->mes_term)->format('d M, Y') }}
-
-                                                    @php
-                                                        $diffValue = round((strtotime($model->message->mes_term?? '') - time()) / (3600*24))
-                                                    @endphp
-
-                                                    @if($diffValue > 0)
-                                                        <span class="text-green"> {{ '+'.$diffValue }} </span>
-                                                    @else
-                                                        <span class="text-red"> {{ $diffValue }} </span>
-                                                    @endif
-
-                                                @endif
-                                        </td>
-                                        <td>{{ $model->message->messageType->title?? '' }}</td>
-                                        <td><button type="button" value="{{ $model->message->id }}" class="btn btn-link get_files"><i class="fa fa-paperclip"></i></button></td>
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($model->created_at)->format('d M,y H:i') }}
-                                        </td>
-                                        <td>
-                                            <input type="checkbox" class="checkbox" data-id="{{$model->id}}">
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                    @foreach ($models as $key => $model)
+                                        <tr>
+                                            <td>{{ $i++ }}</td>
+                                            <td>{{ $model->user->filial->title??'' }}</td>
+                                            <td>
+                                                <a href="{{route('fe-view',['id'=>$model->message->id, 'mes_gen'=>$model->message->mes_gen])}}">
+                                                    {{ $model->user->lname??''}} {{$model->user->fname??'' }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="text-sm">{!! wordwrap($model->user->department->title??'', 80, "<br />") !!}</span>
+                                            </td>
+                                            <td>
+                                                {!! \Illuminate\Support\Str::words($model->message->subject??'', 5, ' ...') !!}
+                                            </td>
+                                            <td>
+                                                {{ \Carbon\Carbon::parse($model->created_at)->format('d M, Y H:i') }}
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-flat btn-primary getFiles"
+                                                        value="{{ $model->message_id }}">
+                                                    <i class="fa fa-paperclip"></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" class="checkbox checkbox-checked" data-id="{{$model->id}}">
+                                            </td>
+                                        </tr>
+                                    @endforeach
 
                                 @else
-                                    <td class="text-red text-center" colspan="10"><i class="fa fa-search"></i>
-                                        <b>@lang('blade.not_found')</b></td>
+                                    <td colspan="8" class="text-red text-center"><i class="fa fa-search"></i>
+                                        <b>@lang('blade.not_found')</b>
+                                    </td>
                                 @endif
                                 </tbody>
                             </table>
-                            <span class="paginate">{{ $models->links() }}</span>
+                            <nav>{{ $models->appends(Request::except('page'))->links() }}</nav>
                         </div>
                     </div>
-                    <!-- /.box-body -->
+
                 </div>
                 <!-- /.box -->
             </div>
             <!-- /.col -->
         </div>
-        <!-- /.row -->
-        <div id="myModal" class="modal fade">
-            <div class="modal-dialog modal-confirm" style="overflow-y: scroll; max-height:50%;  margin-top: 50px; margin-bottom:50px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title"><i class="fa fa-user text-green"></i> Xatga biriktirilgan fayllar</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-left" id="mydiv"></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success btn-block" data-dismiss="modal">Yopish</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div id="deleteModal" class="modal fade">
-            <div class="modal-dialog modal-confirm" style="margin-top: 50px; margin-bottom:50px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title"><i class="fa fa-trash text-red"></i> O`chirish</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-left deletedDiv">O`chirish uchun kamida bitta xatni tanlang</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary btn-block" data-dismiss="modal">Yopish</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Select2 -->
-        <script src="/admin-lte/plugins/select2/select2.full.min.js"></script>
-
-        <script>
-            $(".select2").select2();
-
-            // For post mes file ajax
-            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-
-            $(".get_files").click(function () {
-                var message_id = $(this).val();
-                $.ajax({
-                    url: '/get-files-modal',
-                    type: 'POST',
-                    data: {_token: CSRF_TOKEN, message_id: message_id},
-                    dataType: 'JSON',
-                    success: function (data) {
-                        console.log(data);
-                        var obj = data;
-                        var files = "";
-                        $.each(obj['msg'], function (key, val) {
-                            key++;
-                            files +=
-                                "<div class='box-comment'>" +
-                                "<div class='comment-text'>" +
-                                "<span class='username'>" +key+ ". "+"<i class='fa fa-image text-green'></i> " +val.file_name+
-                                "<span class='text-muted pull-right'>"+val.file_size+" KB</span>"+
-                                "</span>" +"<br/><br/>"+
-                                "</div>" +
-                                "</div>";
-                        });
-                        $("#myModal").modal('show');
-                        //alert(users);
-                        $("#mydiv").html(files)   //// For replace with previous one
-                    },
-                    error: function () {
-                        console.log('error');
-                    }
-                });
-            });
-            // End //
-
-            // for multiple delete checkbox //
-            $(function () {
-                //Enable iCheck plugin for checkboxes
-                //iCheck for checkbox and radio inputs
-                $('.mailbox-messages input[type="checkbox"]').iCheck({
-                    checkboxClass: 'icheckbox_flat-blue',
-                    radioClass: 'iradio_flat-blue'
-                });
-
-                //Enable check and uncheck all functionality
-                $(".checkbox-toggle").click(function () {
-                    var clicks = $(this).data('clicks');
-                    if (clicks) {
-                        //Uncheck all checkboxes
-                        $(".mailbox-messages input[type='checkbox']").iCheck("uncheck");
-                        $(".fa", this).removeClass("fa-check-square-o").addClass('fa-square-o');
-                    } else {
-                        //Check all checkboxes
-                        $(".mailbox-messages input[type='checkbox']").iCheck("check");
-                        $(".fa", this).removeClass("fa-square-o").addClass('fa-check-square-o');
-                    }
-                    $(this).data("clicks", !clicks);
-                });
-
-            });
-
-            $(document).ready(function () {
-
-                $('.delete-all').on('click', function(e) {
-
-                    var idsArr = [];
-
-                    $(".checkbox:checked").each(function() {
-
-                        idsArr.push($(this).attr('data-id'));
-
-                    });
-
-                    if(idsArr.length <=0) {
-
-                        $("#deleteModal").modal('show');
-
-                    }  else {
-
-                        if(confirm("Haqiqatan ham tanlangan xatlarni o`chirmoqchimisiz?")) {
-
-                            var strIds = idsArr.join(",");
-
-                            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-
-                            $.ajax({
-
-                                url: '/delete-multiple',
-                                type: 'POST',
-                                data: {_token: CSRF_TOKEN, ids: strIds},
-                                dataType: 'JSON',
-                                success: function (data) {
-
-                                    if (data['status']==true) {
-
-                                        $(".checkbox:checked").each(function() {
-
-                                            $(this).parents("tr").remove();
-
-                                        });
-
-                                        $("#deleteModal").modal('show');
-
-                                        $(".deletedDiv").html(data['msg'])
-
-                                    } else {
-
-                                        alert('Xatolik yuz berdi!!');
-                                    }
-                                },
-
-                                error: function (data) {
-                                    alert(data.responseText);
-                                }
-                            });
-                        }
-                    }
-                });
-
-                $('[data-toggle=confirmation]').confirmation({
-
-                    rootSelector: '[data-toggle=confirmation]',
-
-                    onConfirm: function (event, element) {
-
-                        element.closest('form').submit();
-
-                    }
-
-                });
-
-            });
-            // end //
-
-        </script>
-
-        <!-- jQuery 2.2.3 -->
-        <script src="{{ asset ("admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
-
-        <!-- AdminLTE App -->
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
-        <!-- iCheck -->
-        <script src="{{ asset("/admin-lte/plugins/iCheck/icheck.min.js") }}"></script>
+        <div id="blade_append"></div>
 
     </section>
-    <!-- /.content -->
+
+    <script src="{{ asset ("admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+
+    <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
+
+    <script>
+
+        $(".getFiles").click(function () {
+
+            let id = $(this).val();
+
+            $.ajax({
+                url: '/fe/getBlade',
+                type: 'GET',
+                data: {id: id, type: 'files'},
+                dataType: 'json',
+                beforeSend: function(){
+                    $("#loading").show();
+                },
+                success: function(res){
+                    $('#blade_append').html(res.blade);
+                    $('#filesModal').modal('show');
+
+                },
+                complete:function(res){
+                    $("#loading").hide();
+                }
+
+            });
+
+        });
+
+        $(".select2").select2();
+
+        $(".deleteMessage").click(function () {
+
+            let id = $(this).val();
+
+            $.ajax({
+                url: '/fe/getBlade',
+                type: 'GET',
+                data: {type: 'deleteAll'},
+                dataType: 'json',
+                beforeSend: function(){
+                    $("#loading").show();
+                },
+                success: function(res){
+                    $('#blade_append').html(res.blade);
+                    $('#ConfirmModal').data('id', id).modal('show');
+
+                },
+                complete:function(res){
+                    $("#loading").hide();
+                }
+
+            });
+
+        });
+
+        $('#search_filter').click(function(){
+
+            $.ajax({
+                type : 'get',
+                url : '/fe/get-filial',
+                data :{'user_type' : 'inbox'},
+                beforeSend: function(){
+                    $("#loading").show();
+                },
+                success: function(res){
+                    //console.log(res);
+                    $('#search_adv').html(res);
+
+                },
+                complete:function(res){
+                    $("#loading").hide();
+                }
+            });
+        });
+
+        $('#search_refresh').click(function(){
+
+            $('#search_adv').empty();
+
+            $('#search_t').val('');
+
+            let filial = $('#search_f').val();
+            let user = $('#search_u').val();
+            let text = $('#search_t').val();
+            let read = $('#search_r').val();
+
+            $.ajax({
+                type : 'get',
+                url : '/fe/all-inbox',
+                data:{
+                    'filial':filial,
+                    'user'  :user,
+                    'text'  :text,
+                    'read'  :read,
+                },
+                beforeSend: function(){
+                    $("#loading").show();
+                },
+                success: function(res){
+                    //console.log(res);
+                    $('#search_table').html(res);
+
+                },
+                complete:function(res){
+                    $("#loading").hide();
+                }
+            });
+
+
+        });
+
+        $('#search_t').keydown(function(event){
+
+            var keyCode = (event.keyCode ? event.keyCode : event.which);
+            if (keyCode === 13) {
+
+                $('#search').trigger('click');
+
+            }
+        });
+
+        $('#search').click(function(){
+
+            let filial = $('#search_f').val();
+            let user = $('#search_u').val();
+            let text = $('#search_t').val();
+            let read = $('#search_r').val();
+
+            let s_start = $('#s_start').val();
+            let s_end = $('#s_end').val();
+
+            $.ajax({
+                type : 'get',
+                url : '/fe/all-inbox',
+                data:{
+                    'filial':filial,
+                    'user'  :user,
+                    'text'  :text,
+                    'read'  :read,
+                    's_start'  :s_start,
+                    's_end'  :s_end,
+                },
+                beforeSend: function(){
+                    $("#loading").show();
+                },
+                success: function(res){
+                    console.log(res)
+                    $('#search_table').html(res);
+
+                },
+                complete:function(res){
+                    $("#loading").hide();
+                }
+            });
+        })
+
+        $(function () {
+
+            $('.mailbox-messages input[type="checkbox"]').iCheck({
+                checkboxClass: 'icheckbox_flat-blue',
+                radioClass: 'iradio_flat-blue'
+            });
+
+            $(".deleteMessage").hide();
+
+            $(".checkbox-toggle").click(function () {
+
+
+                var clicks = $(this).data('clicks');
+                if (clicks) {
+                    $(".deleteMessage").hide(200);
+                    //Uncheck all checkboxes
+                    $(".mailbox-messages input[type='checkbox']").iCheck("uncheck");
+                    $(".fa", this).removeClass("fa-check-square-o").addClass('fa-square-o');
+
+                } else {
+                    //if ($('input:checkbox:checked').length !== 0){
+                        $(".deleteMessage").show(300);
+                    //}
+                    //Check all checkboxes
+                    $(".mailbox-messages input[type='checkbox']").iCheck("check");
+                    $(".fa", this).removeClass("fa-square-o").addClass('fa-check-square-o');
+                }
+                $(this).data("clicks", !clicks);
+            });
+
+            $(".iCheck-helper").click(function() {
+                var numberNotChecked = $('input:checkbox:checked').length;
+                if(numberNotChecked > 0) {
+                    $(".deleteMessage").show(300);
+                } else {
+                    $(".deleteMessage").hide(200);
+                }
+            });
+
+        });
+    </script>
+
 @endsection

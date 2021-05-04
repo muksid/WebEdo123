@@ -7,9 +7,11 @@ use App\EdoMessageSubUsers;
 use App\EdoMessageUsers;
 use App\EdoReplyMessage;
 use App\EdoReplyMessageFile;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class EdoReplyMessageController extends Controller
 {
@@ -44,14 +46,29 @@ class EdoReplyMessageController extends Controller
         if ($request->file('files') != null) {
             foreach ($request->file('files') as $item) {
                 if ($item != 0) {
+                    $today = Carbon::today();
+                    $year = $today->year;
+                    $month = $today->month;
+                    $day = $today->day;
+                    $path = 'edo/'.$year.'/'.$month.'/'.$day.'/';
+
                     $message_files = new EdoReplyMessageFile();
+
                     $message_files->edo_reply_message_id = $model->id;
+
+                    $message_files->file_path = $path;
+
                     $message_files->file_hash = $model->id . '_' . Auth::id(). '_' . date('mdYHis') . uniqid() .
                         '.' . $item->getClientOriginalExtension();
+
                     $message_files->file_size = $item->getSize();
-                    $item->move(public_path() . '/FilesEDO2/', $message_files->file_hash);
+
+                    Storage::disk('ftp_edo')->put($path.$message_files->file_hash, file_get_contents($item->getRealPath()));
+
                     $message_files->file_name = $item->getClientOriginalName();
+
                     $message_files->file_extension = $item->getClientOriginalExtension();
+
                     $message_files->save();
                 }
             }
@@ -154,7 +171,7 @@ class EdoReplyMessageController extends Controller
             }else{
                 $message = 'Sizda <b class="text-red">'.count($modelCheckRejected).'</b> ta rad qilinmagan javob xatlari mavjud!';
             }
-            
+
         }
 
 
@@ -311,8 +328,8 @@ class EdoReplyMessageController extends Controller
     {
         //
         $edo_message_users_id = $request->input('id');
-        
-        
+
+
 
         $edoMessageUser = EdoMessageUsers::where('id',$edo_message_users_id)->first();
 
@@ -329,11 +346,11 @@ class EdoReplyMessageController extends Controller
         // $model = EdoMessageSubUsers::where('edo_message_id', $edoMessageUser->edo_message_id)
         //     ->where('from_user_id', $edoMessageUser->to_user_id)
         //     ->get();
-            
+
         if(!count($model)){
             $model = null;
         }
-   
+
 
         return response()->json(array(
                 'success' => true,
@@ -368,7 +385,7 @@ class EdoReplyMessageController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
 
     // cancel reply
@@ -381,8 +398,11 @@ class EdoReplyMessageController extends Controller
 
         foreach($modelFiles as $file) {
 
-            if(file_exists(public_path() . '/FilesEDO2/' . $file->file_hash)) {
-                unlink(public_path() . '/FilesEDO2/' . $file->file_hash);
+            $path = '/'.$file->file_path.$file->file_hash;
+
+            if (Storage::disk('ftp_edo')->exists($path)){
+
+                Storage::disk('ftp_edo')->delete($path);
             }
 
         }
@@ -405,8 +425,11 @@ class EdoReplyMessageController extends Controller
 
         foreach($modelFiles as $file) {
 
-            if(file_exists(public_path() . '/FilesEDO2/' . $file->file_hash)) {
-                unlink(public_path() . '/FilesEDO2/' . $file->file_hash);
+            $path = '/'.$file->file_path.$file->file_hash;
+
+            if (Storage::disk('ftp_edo')->exists($path)){
+
+                Storage::disk('ftp_edo')->delete($path);
             }
 
         }

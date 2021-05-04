@@ -189,29 +189,26 @@
                                             <tr>
                                                 <th scope="row">{{ $key+1 }}</th>
                                                 <td>
-                                                    @switch($file->file_extension)
-                                                        @case('doc')
-                                                        @case('docx')
-                                                        @case('xls')
-                                                        @case('xlsx')
-                                                        @case('pptx')
-                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}"
-                                                            class="text-info text-bold">
-                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                                        </a>
-                                                        @break
-                                                        @default
-                                                        <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}">
-                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
-                                                        </a>
-                                                        @break
-                                                    @endswitch
-
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold">
-                                                        @lang('blade.download') <i class="fa fa-download"></i>
+                                                    <a href="#"
+                                                       class="text-info text-bold mailbox-attachment-name"
+                                                       target="_blank"
+                                                       onclick="window.open('<?php echo('/prt-fileView/' . $file->id); ?>',
+                                                               'modal',
+                                                               'width=800,height=900,top=30,left=500');
+                                                               return false;">
+                                                        <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
                                                     </a>
+                                                    <ul class="list-inline pull-right">
+                                                        <li>
+                                                            <a href="{{ url('prt-fileDownload',['id'=>$file->id]) }}"
+                                                               class="link-black text-sm"><i
+                                                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                        )</i><br>
+
                                                 </td>
                                             </tr>
 
@@ -273,13 +270,6 @@
                                             @if($value->status == 1)
                                             <img class="attachment-img stf-img-center-image pull-right" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @if($value->user_id == \Illuminate\Support\Facades\Auth::id())
-
-                                                <!-- <a href="{{ route('confirm-protocol', $value->id) }}" type="submit" class="btn btn-dropbox pull-right">
-                                                    <i class="glyphicon glyphicon-ok"></i> @lang('blade.approve')
-                                                </a>
-                                                <button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#cancelModal">
-                                                    <i class="fa fa-ban"></i> @lang('blade.cancel')
-                                                </button> -->
                                             @endif
                                             @elseif($value->status == -1)
                                                 <span class="label label-danger"> Rad etildi</span>
@@ -531,13 +521,6 @@
                         let id = $(this).data('id')
                         $('#protocol_id_to_cancel').val(id)
                         let i = $('#protocol_id_to_cancel').val(id)
-                    })
-                    // Preview File
-                    $('.previewSingleFile').unbind().click(function(){
-                        let id = $(this).data('id')
-                        window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
-
-                        return false
                     })
                 });
             </script>

@@ -99,31 +99,31 @@ class EdoMessageJournalsController extends Controller
       {
           //
           $edoUsers  = EdoUsers::where('user_id','=', Auth::id())->first();
-  
+
           $edoUsersManager  = EdoUsers::where('user_manager', $edoUsers->user_id)->first();
-  
+
           $edoUsersChild  = EdoUsers::where('user_child', $edoUsers->user_id)->first();
-  
+
           // manager
           if ($edoUsersManager == null){
               $manager = 0;
           } else {
               $manager = $edoUsersManager->user_id;
           }
-  
+
           // child
           if ($edoUsersChild == null){
               $child = 0;
           } else {
               $child = $edoUsersChild->user_id;
           }
-  
+
           // search filter
           $r = Input::get ( 'r' );
           $t = Input::get ( 't' );
-  
+
           if($r != '' || $t != ''){
-  
+
               $models = EdoMessageJournal::whereHas('message', function ($query) use ($t,$r) {
                   $query->where('from_name', 'like', '%' . $t . '%');
                   $query->where('in_number', 'like', '%' . $r . '%');
@@ -132,7 +132,7 @@ class EdoMessageJournalsController extends Controller
                   ->where('status', 2)
                   ->orderBy('updated_at', 'DESC')
                   ->paginate(25);
-  
+
               $models->appends ( array (
                   'r' => Input::get ( 'r' ),
                   't' => Input::get ( 't' )
@@ -142,17 +142,17 @@ class EdoMessageJournalsController extends Controller
                       compact('models','r','t'))
                       ->withDetails ( $models )->withQuery ( $r, $t );
           }
-  
+
           $models = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $manager, $child])
               ->where('status', 2)
-              
+
               ->orderBy('updated_at', 'DESC')
               ->paginate(25);
-  
+
           return view('edo.edo-message-journals.guideTaskChange',
               compact('models','r','t'))
               ->with('i', (request()->input('page', 1) - 1) * 25);
-  
+
       }
 
     public function guideTasksClosed()
@@ -218,52 +218,48 @@ class EdoMessageJournalsController extends Controller
              ->where('journal_type', 'inbox')
              ->where('status', 1)
              ->get();
- 
+
              // search filter
              $j  = Input::get ( 'j'  );
              $r  = Input::get ( 'r'  );
              $i_r= Input::get ( 'i_r');
              $t  = Input::get ( 't'  );
-             
+
              $search = EdoMessageJournal::where('depart_id', $edoUsers->department_id);
- 
+
              if($j)  $search->where('edo_journal_id', 'like', '%'.$j.'%');
- 
+
              if($r)  $search->where('in_number', $r);
- 
+
              if($i_r){
                  $search->whereHas('message', function($query) use($i_r){
                      $query->where('out_number', $i_r );
                  });
              }
- 
+
              if($t){
                  $search->whereHas('message', function($query) use($t){
                      $query->where('from_name', 'like', '%'.$t.'%');
                  });
              }
- 
- 
+
+
              $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-             
-             
+
+
              $models->appends ( array (
                  'j'   => $j,
                  'r'   => $r,
                  'i_r' => $i_r,
                  't'   => $t
              ) );
- 
- 
+
+
              return view('edo.edo-message-journals.sent',
                  compact('models','j','r','i_r','t','journals'))
                  ->with('i', (request()->input('page', 1) - 1) * 25);
 
              break;
-        
-
-           
-        
         default:
             return response()->view('errors.' . '404', [], 404);
             break;
