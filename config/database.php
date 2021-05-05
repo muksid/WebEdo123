@@ -43,15 +43,33 @@ return [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
+<<<<<<< HEAD
             'database' => env('DB_DATABASE', 'edotest'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', 'root'),
+=======
+            'database' => env('DB_DATABASE', 'medo'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', 'edo!@#$'),
+>>>>>>> master
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'strict' => false,
             'engine' => null,
+        ],
+
+        'mysql_uw' => [
+            'driver'    => 'mysql',
+            'host'      => env('DB_EXT_HOST', '127.0.0.1'),
+            'database'  => env('DB_EXT_DATABASE', 'uw_turonbank_13'),
+            'username'  => env('DB_EXT_USERNAME', 'root'),
+            'password'  => env('DB_EXT_PASSWORD', ''),
+            'charset'   => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix'    => '',
+            'strict'    => false,
         ],
 
         'pgsql' => [

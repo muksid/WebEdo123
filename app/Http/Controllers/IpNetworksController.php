@@ -24,7 +24,7 @@ class IpNetworksController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('ip-networks.index',compact('models','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('ip-networks.index',compact('models','inbox_count','sent_count','all_inbox_count'));
     }
     public function test()
     {
@@ -34,7 +34,7 @@ class IpNetworksController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('ip-networks.test',compact('inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('ip-networks.test',compact('inbox_count','sent_count','all_inbox_count'));
     }
 
 
@@ -69,13 +69,13 @@ class IpNetworksController extends Controller
             ));
             if (count($models) > 0)
                 return view('ip-networks.allIpNetworks',
-                    compact('models', 'q', 'f', 's', 'filials', 'inbox_count', 'sent_count', 'term_inbox_count', 'all_inbox_count'))
+                    compact('models', 'q', 'f', 's', 'filials', 'inbox_count', 'sent_count', 'all_inbox_count'))
                     ->withDetails($models)->withQuery($q);
         }
 
 
         return view('ip-networks.allIpNetworks',
-            compact('models','filials','q','f','s','inbox_count','sent_count','term_inbox_count','all_inbox_count'))
+            compact('models','filials','q','f','s','inbox_count','sent_count','all_inbox_count'))
             ->with('i', (request()->input('page', 1) - 1) * 25);
 
     }
@@ -93,7 +93,7 @@ class IpNetworksController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('ip-networks.create', compact('users','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('ip-networks.create', compact('users','inbox_count','sent_count','all_inbox_count'));
     }
 
     /**
@@ -153,7 +153,7 @@ class IpNetworksController extends Controller
             return response()->view('errors.' . '404', [], 404);
         }
 
-        return view('ip-networks.edit',compact('model', 'users','inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+        return view('ip-networks.edit',compact('model', 'users','inbox_count','sent_count','all_inbox_count'));
     }
 
     /**

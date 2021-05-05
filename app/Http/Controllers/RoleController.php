@@ -31,10 +31,10 @@ class RoleController extends Controller
         $result["total"] = $row[0];
 
         $sql = "select a.loan_id,a.filial_code,a.client_code,a.client_name,a.claim_number,a.loan_number,a.committee_number,
-        a.currency,a.contract_code,a.summ_loan,a.contract_date,d.ln_type_code,a.product_id,d.ln_type_name,d.ln_status_name 
+        a.currency,a.contract_code,a.summ_loan,a.contract_date,d.ln_type_code,a.product_id,d.ln_type_name,d.ln_status_name
         from ln_card a
         join dwh_Loan_Card d on a.loan_id = d.loan_id
-        where 1=1 
+        where 1=1
         order by a.loan_id desc OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY ";
 
         $rs = oci_parse($conn, $sql);
@@ -57,7 +57,7 @@ class RoleController extends Controller
         @include('count_message.php');
 
         return view('roles.index', compact('roles',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
     public function ora()
@@ -122,7 +122,7 @@ and a.rnk = 1
         @include('count_message.php');
 
         return view('roles.ora', compact('roles','result',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
     public function store(Request $request)

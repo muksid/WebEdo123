@@ -227,7 +227,7 @@
                 <div class="col-md-4">
                     <div class="form-group{{ $errors->has('job_date') ? ' has-error' : '' }}">
                         <label>@lang('blade.position_date') <span style="color:red">*</span> </label>
-                        <input type="date" name="job_date" class="form-control" placeholder="" value="">
+                        <input type="date" name="job_date" class="form-control" value="{{ date('Y-m-d') }}">
                     </div>
                 </div>
                 <div class="col-md-4">

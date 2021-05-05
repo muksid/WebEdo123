@@ -26,7 +26,7 @@ class DepartmentController extends Controller
         @include('count_message.php');
 
         return view('departments.index',compact('departments','allDepartments',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
 
     }
 
@@ -41,7 +41,7 @@ class DepartmentController extends Controller
         @include('count_message.php');
 
         return view('departments.create',compact('filial',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
 
     }
     public function userDepartment(Request $request){
@@ -127,7 +127,7 @@ class DepartmentController extends Controller
         @include('count_message.php');
 
         return view('departments.show',compact('department',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
     public function edit(Department $department)
@@ -140,7 +140,7 @@ class DepartmentController extends Controller
         // count() //
         @include('count_message.php');
         return view('departments.edit',compact('filials', 'department','departments',
-            'inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            'inbox_count','sent_count','all_inbox_count'));
     }
 
     public function update(Request $request, Department $department)

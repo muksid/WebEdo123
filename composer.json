@@ -13,8 +13,13 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
+<<<<<<< HEAD
         "simplesoftwareio/simple-qrcode": "^4.2",
         "yajra/laravel-datatables-oracle": "^9.15"
+=======
+        "yajra/laravel-datatables-oracle": "^9.15",
+      "ext-json": "*"
+>>>>>>> master
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

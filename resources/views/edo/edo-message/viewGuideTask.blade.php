@@ -98,90 +98,35 @@
                         <strong><i class="fa fa-paperclip margin-r-5"></i> @lang('blade.doc_app') </strong><br><br>
 
                         @foreach ($model->files as $file)
-
                             <div id="fileId_{{$file->id}}">
-
-                                <?php $file_ext = strtolower($file->file_extension) ?>
-                                @switch($file_ext)
-                                    @case('jpg')
-                                    @case('jpeg')
-                                    @case('png')
-                                        <a href="{{ route('edoPreViewImg',['imgId'=>$file->id]) }}"
-                                            class="text-info text-bold mailbox-attachment-name"
-                                            target="_blank"
-                                            onclick="window.open('<?php echo('/edoPreViewImg/' . $file->id); ?>',
-                                                'modal',
-                                                'width=800,height=900,top=30,left=500');
-                                                return false;">
-                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }}
+                                <a href="#"
+                                   class="text-info text-bold mailbox-attachment-name"
+                                   target="_blank"
+                                   onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
+                                           'modal',
+                                           'width=800,height=900,top=30,left=500');
+                                           return false;">
+                                    <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                                </a>
+                                <ul class="list-inline pull-right">
+                                    <li>
+                                        <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                                           class="link-black text-sm"><i
+                                                    class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
                                         </a>
-                                        <ul class="list-inline pull-right">
-                                            <li>
-                                                <a href="{{ route('edo-load',['file'=>$file->id]) }}"
-                                                class="link-black text-sm"><i
-                                                            class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                                </a>
-                                            </li>
-                                            <li> |</li>
-                                            <li class="pull-right">
-                                                <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
-                                                    <i class="fa fa-trash"></i> @lang('blade.delete')
-                                                </button>
-                                            </li>
-                                        </ul>
-                                        @break
-
-                                    @case('pdf')
-                                        <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}"
-                                            class="text-info text-bold mailbox-attachment-name"
-                                            target="_blank"
-                                            onclick="window.open('<?php echo('/edoPreView/' . $file->file_hash); ?>',
-                                                    'modal',
-                                                    'width=800,height=900,top=30,left=500');
-                                                    return false;"> 
-                                                    <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                        </a>
-                                        <ul class="list-inline pull-right">
-                                            <li>
-                                                <a href="{{ route('edo-load',['file'=>$file->id]) }}"
-                                                class="link-black text-sm"><i
-                                                            class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                                </a>
-                                            </li>
-                                            <li> |</li>
-                                            <li class="pull-right">
-                                                <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
-                                                    <i class="fa fa-trash"></i> @lang('blade.delete')
-                                                </button>
-                                            </li>
-                                            
-                                        </ul>
-                                    @break
-
-                                    @default
-                                        <a  class="text-info text-bold mailbox-attachment-name"> 
-                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                        </a>
-                                        <ul class="list-inline pull-right">
-                                            <li>
-                                                <a href="{{ route('edo-load',['file'=>$file->id]) }}" class="link-black text-sm">
-                                                    <i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                                </a>
-                                            </li>
-                                            <li> |</li>
-                                            <li class="pull-right">
-                                                <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
-                                                    <i class="fa fa-trash"></i> @lang('blade.delete')
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    @break
-
-                                @endswitch
-                                <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
-
-                            </div>
-
+                                    </li>
+                                    @if($role->id === 2)
+                                        <li> |</li>
+                                        <li class="pull-right">
+                                            <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
+                                                <i class="fa fa-trash"></i> @lang('blade.delete')
+                                            </button>
+                                        </li>
+                                    @endif
+                                </ul>
+                                <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                    )</i><br><br>
+                            </div><br>
                         @endforeach
 
                         <div class="col-md-12">
@@ -1027,7 +972,7 @@
                 e.preventDefault();
                 $('#formResolution').submit();
                 $(this).attr("disabled",true)
-                
+
             })
         </script>
     </section>

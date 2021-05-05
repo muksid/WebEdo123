@@ -1,8 +1,6 @@
 @extends('layouts.edo.dashboard')
 @section('content')
-
     <div class="content-header">
-        <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
                 @switch($model->protocol_type)
@@ -28,7 +26,6 @@
                 <li><a href="#"><i class="fa fa-dashboard"></i> @lang('blade.home')</a></li>
                 <li class="active">@lang('blade.hr_orders')</li>
             </ol>
-
             @if (count($errors) > 0)
                 <div class="alert alert-danger">
                     <strong>Xatolik!</strong> Errors.<br><br>
@@ -77,19 +74,10 @@
                                 {{ $model->stf_number??'' }}  <span style="margin-left: 1%">{{ date('d-m-Y', strtotime($model->stf_date)) }}</span>
                             </h4>
                              @endif
-                            <!--
-                            <div class="box-tools pull-right">
-                                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Orqaga">
-                                    <i  class="fa fa-chevron-left"></i>
-                                </a>
-                                <a href="#" class="btn btn-box-tool" data-toggle="tooltip" title="Keyingisi">
-                                    <i class="fa fa-chevron-right"></i>
-                                </a>
-                            </div> -->
                         </div>
 
                         <div class="box-body">
-                            
+
                             <div class="mailbox-read-message" style="padding: 0 11% !important;">
                                 <?php echo $model->text ?? ''; ?>
                             </div>
@@ -115,10 +103,10 @@
                                         @endif
                                         <span class="description-header text-right stf-vertical-middle" style="padding-left:20px">
                                             _____________ {{ $guide->user->substrUserName($guide->user_id) }}
-                                        </span> 
+                                        </span>
                                     @endif
                                 </div>
-                                   
+
 
                                 @if(in_array('bank_apparat', json_decode(Auth::user()->roles)) && $model->status == 1)
                                     <div class="box-footer">
@@ -196,42 +184,39 @@
                                 <tbody>
 
                                 @if($model_files)
-                                    @foreach($model_files as $key => $file)   
+                                    @foreach($model_files as $key => $file)
 
                                             <tr>
                                                 <th scope="row">{{ $key+1 }}</th>
                                                 <td>
-                                                    @switch($file->file_extension)
-                                                        @case('doc')                                                        
-                                                        @case('docx')                                                        
-                                                        @case('xls')                                                        
-                                                        @case('xlsx')                                                        
-                                                        @case('pptx')                                                        
-                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
-                                                            class="text-info text-bold"> 
-                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                                        </a>
-                                                        @break
-                                                        @default
-                                                        <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
-                                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
-                                                        </a>
-                                                        @break
-                                                    @endswitch
+                                                    <a href="#"
+                                                       class="text-info text-bold mailbox-attachment-name"
+                                                       target="_blank"
+                                                       onclick="window.open('<?php echo('/prt-fileView/' . $file->id); ?>',
+                                                               'modal',
+                                                               'width=800,height=900,top=30,left=500');
+                                                               return false;">
+                                                        <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                                                    </a>
+                                                    <ul class="list-inline pull-right">
+                                                        <li>
+                                                            <a href="{{ url('prt-fileDownload',['id'=>$file->id]) }}"
+                                                               class="link-black text-sm"><i
+                                                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                        )</i><br>
 
                                                 </td>
-                                                <td>
-                                                    <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
-                                                        @lang('blade.download') <i class="fa fa-download"></i>
-                                                    </a>
-                                                </td>
                                             </tr>
-                                        
+
                                     @endforeach
                                 @endif
 
                                 </tbody>
-                                
+
                             </table>
 
                         </div>
@@ -253,10 +238,23 @@
                                         <div class="description-block">
                                             @if($value->user_role == 3)
                                                 <div class="col-sm">
-                                                    <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span> 
+                                                    <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span>
                                                 </div>
                                                 <br>
                                             @endif
+                                            @if($value->user_role == 4)
+                                                <div class="col-sm">
+                                                    <span class="text-bold">@lang('blade.suggested_protocol_member')</span>
+                                                </div>
+                                                <br>
+                                            @endif
+                                            @if($value->user_role == 4)
+                                                <div class="col-sm">
+                                                    <span class="text-bold">@lang('blade.suggested_protocol_member')</span>
+                                                </div>
+                                                <br>
+                                            @endif
+<<<<<<< HEAD
                                             @if($value->user_role == 4)
                                                 <div class="col-sm">
                                                     <span class="text-bold">@lang('blade.suggested_protocol_member')</span> 
@@ -264,19 +262,24 @@
                                                 <br>
                                             @endif
                                             <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
+=======
+                                            @if($value->user_id == 74)
+                                                    <span class="text-bold">«Таклиф этилган»</span><br>
+                                                    <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
+>>>>>>> master
                                                 {{ $value->user->substrUserName($value->user_id) }} _____________
                                             </span>
+                                                @else
+
+                                                    <span class="description-header text-left stf-vertical-middle" style="padding-right: 15%">
+                                                {{ $value->user->substrUserName($value->user_id) }} _____________
+                                            </span>
+
+                                            @endif
 
                                             @if($value->status == 1)
                                             <img class="attachment-img stf-img-center-image pull-right" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @if($value->user_id == \Illuminate\Support\Facades\Auth::id())
-
-                                                <!-- <a href="{{ route('confirm-protocol', $value->id) }}" type="submit" class="btn btn-dropbox pull-right">
-                                                    <i class="glyphicon glyphicon-ok"></i> @lang('blade.approve')
-                                                </a>
-                                                <button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#cancelModal">
-                                                    <i class="fa fa-ban"></i> @lang('blade.cancel')
-                                                </button> -->
                                             @endif
                                             @elseif($value->status == -1)
                                                 <span class="label label-danger"> Rad etildi</span>
@@ -285,15 +288,13 @@
                                             @elseif($value->status == 0)
                                                 <img class="attachment-img stf-img-center-image" src="{{ url('/FilesQR/image_icon.png') }}" style="height: 65px; width:auto">
                                             @else
-                                            
+
                                                 {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$value->managementMembers->qr_name.
                                                     '/'.$value->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}
                                             @endif
                                         </div>
                                     </div>
                                     <hr style="margin-top: 5px; margin-bottom: 5px">
-
-                                    <!-- /.col -->
                                 @endforeach
                             </div>
                         </div>
@@ -530,26 +531,12 @@
                         let id = $(this).data('id')
                         $('#protocol_id_to_cancel').val(id)
                         let i = $('#protocol_id_to_cancel').val(id)
-
                     })
-
-                    // Preview File
-                    $('.previewSingleFile').unbind().click(function(){
-
-                        let id = $(this).data('id')
-
-                        window.open('/edo/preview-protocol-file/' + id, 'modal', 'width=800,height=900,top=30,left=500')
-
-                        return false
-                    })
-
                 });
             </script>
 
         </section>
         <!-- /.content -->
     </div>
-
-
 @endsection
 

@@ -28,14 +28,17 @@
                 <li class="active">protocol</li>
             </ol>
 
-            @if (count($errors) > 0)
-                <div class="alert alert-danger">
-                    <strong>Xatolik!</strong> Errors.<br><br>
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+            @if(session('errors'))
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">
+                                    <h4 class="modal-title"> {{ session('errors') }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         <!-- Message Succes -->
@@ -107,7 +110,7 @@
                                             {!! QrCode::size(70)->generate('https://online.turonbank.uz:3347/acc/'.$guide->managementMembers->qr_name.
                                                     '/'.$guide->managementMembers->qr_hash.'/'.$model->id.'/'.substr($model->protocol_hash, 0,4) ); !!}                                        @endif
                                             <span class="description-header text-right stf-vertical-middle" style="padding-left:30px">
-                                                _____________ {{ $guide->user->substrUserName($guide->user_id) }} 
+                                                _____________ {{ $guide->user->substrUserName($guide->user_id) }}
                                             </span>
                                     </div>
 
@@ -145,42 +148,39 @@
                                     <tbody>
 
                                     @if($model_files)
-                                        @foreach($model_files as $key => $file)   
+                                        @foreach($model_files as $key => $file)
 
                                                 <tr>
                                                     <th scope="row">{{ $key+1 }}.</th>
                                                     <td>
-                                                        @switch($file->file_extension)
-                                                            @case('doc')                                                        
-                                                            @case('docx')                                                        
-                                                            @case('xls')                                                        
-                                                            @case('xlsx')                                                        
-                                                            @case('pptx')                                                        
-                                                            <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" 
-                                                                class="text-info text-bold"> 
-                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                                            </a>
-                                                            @break
-                                                            @default
-                                                            <a href="#" class="text-info text-bold previewSingleFile" data-id="{{ $file->id }}"> 
-                                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }} -  {{ $file->file_extension }}
-                                                            </a>
-                                                            @break
-                                                        @endswitch
+                                                        <a href="#"
+                                                           class="text-info text-bold mailbox-attachment-name"
+                                                           target="_blank"
+                                                           onclick="window.open('<?php echo('/prt-fileView/' . $file->id); ?>',
+                                                                   'modal',
+                                                                   'width=800,height=900,top=30,left=500');
+                                                                   return false;">
+                                                            <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                                                        </a>
+                                                        <ul class="list-inline pull-right">
+                                                            <li>
+                                                                <a href="{{ url('prt-fileDownload',['id'=>$file->id]) }}"
+                                                                   class="link-black text-sm"><i
+                                                                            class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                            )</i><br>
 
                                                     </td>
-                                                    <td>
-                                                        <a href="{{ route('download-protocol-file', ['id' => $file->id]) }}" class="text-bold"> 
-                                                            @lang('blade.download') <i class="fa fa-download"></i>
-                                                        </a>
-                                                    </td>
                                                 </tr>
-                                            
+
                                         @endforeach
                                     @endif
 
                                     </tbody>
-                                    
+
                                 </table>
 
                             </div>
@@ -190,7 +190,22 @@
                     <div class="col-md-5">
                         <div class="box box-primary">
                             <div class="box-body">
+<<<<<<< HEAD
                                 <h4>@lang('blade.members'):</h4>
+=======
+                                @switch($model->protocol_type)
+                                    @case(3)
+                                    @case(11)
+                                        <h4>@lang('blade.committe_members'):</h4>
+                                        @break
+                                    @case(24)
+                                        <h4>@lang('blade.management_members'):</h4>
+                                        @break
+                                    @default
+                                        @break
+                                @endswitch
+
+>>>>>>> master
                                 <hr>
                                 <div class="row">
                                     @foreach($model->viewMembers as $key => $value)
@@ -198,7 +213,7 @@
                                             <div class="description-block">
                                                 @if($value->user_role == 3)
                                                     <div class="col-sm">
-                                                        <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span> 
+                                                        <span class="text-bold">@lang('blade.prepared_by'): «{{ $value->user->department->title??'' }}»</span>
                                                     </div>
                                                     <br>
                                                 @endif
@@ -209,7 +224,7 @@
                                                     <br>
                                                 @endif
                                                 <span class="description-header text-left stf-vertical-middle" style="padding-right: 65px">
-                                                    {{ $value->user->substrUserName($value->user_id) }} _____________ 
+                                                    {{ $value->user->substrUserName($value->user_id) }} _____________
                                                 </span>
 
                                                 @if($value->status == 1)
@@ -236,7 +251,7 @@
                                                         </button>
                                                     @endif
                                             @else
-                                                <?php 
+                                                <?php
                                                     $guide_qr_name = $guide->managementMembers->qr_name??'';
                                                     $guide_qr_hash = $guide->managementMembers->qr_hash??'';
                                                 ?>

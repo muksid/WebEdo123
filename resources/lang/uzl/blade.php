@@ -36,8 +36,8 @@ return [
     'receive'       => 'Qabul qilish',
     'reject'        => 'Rad qilish',
     'close'         => 'Yopish',
-    
-    
+
+
     'new'               => 'Yangi',
     'search_users'      => 'Xodimlarni izlash',
     'write_new_message' => 'Yangi xat yozish',
@@ -54,7 +54,7 @@ return [
     'error_check'       => 'Ma`lumotlarni qaytadan tekshiring',
     'exist'             => 'Mavjud',
     'to_send_choose'    => 'Xat jo`natish uchun xodimlarni tanlashingiz kerak.',
-    'select_users'      => 'Xodimlarni tanlang',    
+    'select_users'      => 'Xodimlarni tanlang',
     'messages'          => 'Xatlar',
     'branch'            => 'Filial',
     'from_whom'         => 'Kimdan',
@@ -85,7 +85,7 @@ return [
     'read_control'      => 'Nazoratdagi xatlar',
     'senders'           => 'Xat jo`natgan xodimlar',
     'receivers'         => 'Xat jo`natilgan xodimlar', // RECIEVED
-    'from_spesific_user'=> 'dan kelgan barcha xatlar',  
+    'from_spesific_user'=> 'dan kelgan barcha xatlar',
     'sent_to'           => 'Xat jo`natilgan xodimlar',
 
 
@@ -124,7 +124,7 @@ return [
     'term_message'  => 'Muddatli xatlar',
     'archive_inbox' => 'Kiruvchi arxiv',
     'chat'          => 'Chat',
-    'trash_message' => 'Savat', 
+    'trash_message' => 'Savat',
     'iabs'          => 'IABS',  // added to sidebar 2020-05-21 14:19:34
     'sidebar_dep'   => 'Departamentlar',
     'sidebar_users' => 'Foydalanuvchilar',
@@ -206,15 +206,15 @@ return [
     'enter_pass_at_least_6' => 'Parol kiriting (kamida 6 ta)',
     'repeat_pass'           => 'Parolni takrorlang',
 
-    
-    /*   Group index   */ 
+
+    /*   Group index   */
     'groups_my_groups'      => 'Mening guruhlarim',
     'groups_table'          =>  'jadval',
     'groups_nav_groups'     => 'Guruhlar',
     'groups_group_table'    => 'Guruh jadvali',
     'groups_create_group'   => 'Guruh yaratish',
     'group_table_title'     => 'Sarlavha',
-    'group_table_title_ru'  => 'Sarlavha RU', 
+    'group_table_title_ru'  => 'Sarlavha RU',
     'group_table_date'      => 'Sana',
     'group_table_user_count'=> 'Foydalanuvchilar soni',
     'group_table_status'    => 'Holati',
@@ -226,7 +226,7 @@ return [
     'group_edit_add_users'  => 'Boshqa xodimlarni qo`shing',
     'group_edit_status'     => 'Holatni belgilang',
 
-    
+
     /* Group create */
     'group_create_add_users' => 'Guruhga kiruvchi xodimlarni belgilang.',
     'to_create_group_choose' => 'Guruh yaratish uchun xodimlarni belgilashingiz kerak.',
@@ -244,7 +244,7 @@ return [
     'suggested_protocol_member' => 'Taklif etilgan qo`mita a`zosi',
 
     /***        EDO      ***/
-    
+
     // edo-message
     'edo'               => 'EDO',
     'user'              => 'Foydalanuvchi',
@@ -265,7 +265,7 @@ return [
     'inbox_doc'         => 'Kelgan hujjatlar',
     'journals'          => 'Jurnallar',
     'journal'           => 'Jurnal',
-    'to_resolution'     => 'Rezolyutsiyaga', 
+    'to_resolution'     => 'Rezolyutsiyaga',
     'on_process'        => 'Jarayonda',
     'sent'              => 'Yuborilgan',
     'dep_staff'         => 'Departament hodimlari',
@@ -294,7 +294,7 @@ return [
     'summary'           => 'Qisqa mazmuni',
 
     // Guide
-    'reg_journal'           => 'Ro`yxatga olish daftari', 
+    'reg_journal'           => 'Ro`yxatga olish daftari',
     'doc_form'              => 'Hujjat shakli',
     'incoming_letter'       => 'Kiruvchi xat',
     'doc_app'               => 'Hujjat ilovalari',
@@ -303,9 +303,9 @@ return [
     'sender'                => 'Yuboruvchi',
     'date'                  => 'Sana',
     'status'                => 'Holati',
-    'direct_task'           => 'Vazifani yo`naltirish',      
+    'direct_task'           => 'Vazifani yo`naltirish',
     'add_mini_task'         => 'Ustixat qo`shish',
-    'execution_time'        => 'Ijro muddati', 
+    'execution_time'        => 'Ijro muddati',
     'at_least_3_letters'    => 'Eng kamida 3 ta harf kiriting',
     'reply_letters'         => 'Javob xatlari',
     'not_found_reply_letters'  => 'Javob xatlari topilmadi',
@@ -365,7 +365,7 @@ return [
     'not_detected'              => 'Aniqlanmadi',
     'rejected_task'             => 'Rad etilgan vazifa',
     'reject_task'               => 'Vazifani rad etish',
-    // viewDirctDepartTaskProcs    
+    // viewDirctDepartTaskProcs
     'reply_doc'                 => 'Javob xati',
     'send_message'              => 'Xabarni yuborish',
     'approve_reply'             => 'Javob xatini tasdiqlash',
@@ -375,7 +375,7 @@ return [
     //  Edo users
     'user_create'               => 'Foydalanuvchi qo`shish',
     'users'                     => 'Foydalanuvchilar',
-    // 'err_user_create'           => 'User yaratishda xatolik mavjud',  
+    // 'err_user_create'           => 'User yaratishda xatolik mavjud',
     'full_name'                 => 'To`liq ismi',
     'dep'                       => 'Departament',
     // helper task index
@@ -428,7 +428,7 @@ return [
     'my_orders'                => 'Buyruqlarim',
     'strategy_orders'          => 'Strateg protokol',
     'kazna_protocols'          => 'Kazna protokol',
-    
+
     // 2020-09-15 10:43:20 Addition
     'incoming_num_doc'  => 'Kiruvchi hujjat raqami',
     'incoming_date_doc' => 'Kiruvchi hujjat sanasi',
@@ -442,8 +442,13 @@ return [
 
     // 2020-09-29 10:55:07 compose
     'with_respect'      => 'Hurmat bilan',
+<<<<<<< HEAD
     'appeals'           => 'Murojatlar',
     
+=======
+
+
+>>>>>>> master
     // 2020-10-8
 
     'rejected'          => 'Rad etildi',

@@ -32,6 +32,7 @@ class HomeController extends Controller
         // count() //
         @include('count_message.php');
 
+<<<<<<< HEAD
         $user = Auth::user()->roles;
 
         if(in_array('admin', json_decode(Auth::user()->roles))){
@@ -150,6 +151,10 @@ class HomeController extends Controller
             compact('index','currentMessage', 'user', 'lastConversationUsers', 'unReadMessages',
                 'inbox_count','sent_count','term_inbox_count','all_inbox_count', 'chatUnReadCount','allActiveUsers'))
             ->with('i', (request()->input('page', 1) - 1) * 20);
+=======
+        return view('home', compact('inbox_count','sent_count','all_inbox_count',
+            'allActiveUsers'));
+>>>>>>> master
     }
 
     public function  getMessage(){
@@ -163,7 +168,7 @@ class HomeController extends Controller
         @include('count_message.php');
 
         return view('storage',
-            compact('inbox_count','sent_count','term_inbox_count','all_inbox_count'));
+            compact('inbox_count','sent_count','all_inbox_count'));
     }
 
 }

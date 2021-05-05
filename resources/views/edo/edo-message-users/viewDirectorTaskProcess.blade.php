@@ -110,65 +110,25 @@
                         <strong><i class="fa fa-file margin-r-5"></i> @lang('blade.doc_app') </strong><br><br>
 
                         @foreach ($model->files as $file)
-                            <?php $file_ext = strtolower($file->file_extension) ?>
-                            @switch($file_ext)
-                                @case('jpg')
-                                @case('jpeg')
-                                @case('png')
-                                    <a href="{{ route('edoPreViewImg',['imgId'=>$file->id]) }}"
-                                        class="text-info text-bold mailbox-attachment-name"
-                                        target="_blank"
-                                        onclick="window.open('<?php echo('/edoPreViewImg/' . $file->id); ?>',
-                                            'modal',
-                                            'width=800,height=900,top=30,left=500');
-                                            return false;">
-                                            <i class="fa fa-search-plus"></i> {{ $file->file_name }}
+                            <a href="#"
+                               class="text-info text-bold mailbox-attachment-name"
+                               target="_blank"
+                               onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
+                                       'modal',
+                                       'width=800,height=900,top=30,left=500');
+                                       return false;">
+                                <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                            </a>
+                            <ul class="list-inline pull-right">
+                                <li>
+                                    <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                                       class="link-black text-sm"><i
+                                                class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
                                     </a>
-                                    <ul class="list-inline pull-right">
-                                        <li>
-                                            <a href="{{ route('edo-load',['file'=>$file->id]) }}"
-                                            class="link-black text-sm"><i
-                                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                            </a>
-                                        </li>
-                                    </ul>
-                                    @break
-
-                                @case('pdf')
-                                    <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}"
-                                        class="text-info text-bold mailbox-attachment-name"
-                                        target="_blank"
-                                        onclick="window.open('<?php echo('/edoPreView/' . $file->file_hash); ?>',
-                                                'modal',
-                                                'width=800,height=900,top=30,left=500');
-                                                return false;"> 
-                                                <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                    </a>
-                                    <ul class="list-inline pull-right">
-                                        <li>
-                                            <a href="{{ route('edo-load',['file'=>$file->id]) }}"
-                                            class="link-black text-sm"><i
-                                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                            </a>
-                                        </li>
-                                    </ul>
-                                @break
-
-                                @default
-                                    <a  class="text-info text-bold mailbox-attachment-name"> 
-                                        <i class="fa fa-search-plus"></i> {{ $file->file_name }}
-                                    </a>
-                                    <ul class="list-inline pull-right">
-                                        <li>
-                                            <a href="{{ route('edo-load',['file'=>$file->id]) }}" class="link-black text-sm">
-                                                <i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
-                                            </a>
-                                        </li>
-                                    </ul>
-                                @break
-
-                            @endswitch
-                            <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
+                                </li>
+                            </ul>
+                            <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                )</i><br><br>
                         @endforeach
                         <hr>
                         <p class="text-bold text-center">{{ $model->title }}</p>
@@ -195,14 +155,14 @@
                             <div class="box-header with-border bg-info">
                                 <div class="user-block ">
                                     <img class="img-circle" src="{{ asset("/admin-lte/dist/img/user.png") }}" alt="user">
-                                    
+
                                         <span class="username">{{ $value->replyDirector->lname.' '.$value->replyDirector->fname }}.</span>
                                         <p> {{ $value->replyDirector->department->title??''.' - '.$value->replyDirector->job_title??'' }}</p>
                                 </div>
                                 <!-- /.user-block -->
                                 <div class="box-tools">
                                     <button type="button" id=""  onClick="collapseBox({{$value->replyDirectorDepartment->depart_id}})" class="btn btn-box-tool text-red" >
-                                        <i id="" 
+                                        <i id=""
                                             class="plusMinus{{$value->replyDirectorDepartment->depart_id}} {{ ($value->replyDirectorDepartment->depart_id == (Auth::user()->department->depart_id??'')) ? 'fa fa-minus':'fa fa-plus'  }}">
                                         </i>
                                     </button>
@@ -246,14 +206,25 @@
                                                     <div class="attachment-block clearfix">
                                                         @foreach($reply->files as $file)
                                                             <div class="attachment-heading">
-                                                                <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}" class="text-info text-bold"
-                                                                target="_blank" class="mailbox-attachment-name"
-                                                                onclick="window.open('<?php echo ('/edoPreView/'. $file->file_hash); ?>',
-                                                                        'modal',
-                                                                        'width=800,height=900,top=30,left=500');
-                                                                        return false;"> <i class="fa fa-search-plus"></i> {{ $file->file_name }}</a>
-                                                                <a href="{{ route('edo-reply-load',['file'=>$file->file_hash]) }}" class="pull-right"><i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')</a>
-                                                                <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
+                                                                <a href="#"
+                                                                   class="text-info text-bold mailbox-attachment-name"
+                                                                   target="_blank"
+                                                                   onclick="window.open('<?php echo('/edo-fileReplyView/' . $file->id); ?>',
+                                                                           'modal',
+                                                                           'width=800,height=900,top=30,left=500');
+                                                                           return false;">
+                                                                    <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                                                                </a>
+                                                                <ul class="list-inline pull-right">
+                                                                    <li>
+                                                                        <a href="{{ url('edo-fileReplyDownload',['id'=>$file->id]) }}"
+                                                                           class="link-black text-sm"><i
+                                                                                    class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                                <i class="text-red">({{ $file->size($file->file_size)??'' }}
+                                                                    )</i><br><br>
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -262,7 +233,7 @@
 
                                                 @if($reply->status == 0)
                                                     <div id="rec{{$reply->id}}"></div>
-                                                    
+
                                                     @if( $reply->replyDirectorDepartment->depart_id == Auth::user()->department->depart_id)
                                                         @switch(Auth::user()->edoUsers())
                                                             @case ('director_department')
@@ -282,20 +253,20 @@
                                                                         {{ method_field('DELETE') }}
                                                                         <button type="submit" class="btn btn-danger btn-xs"
                                                                                 style="">
-                                                                            <i class="fa fa-trash"></i> 
+                                                                            <i class="fa fa-trash"></i>
                                                                             @lang('blade.delete')
                                                                         </button>
                                                                     </form>
-                                                                @endif    
+                                                                @endif
 
                                                             @break
                                                                 @default
                                                                     @break
                                                             @endswitch
-                                                            
-                                                    
+
+
                                                     @endif
-                                                
+
                                                 @elseif($reply->status == 1)
                                                     <span class="label label-primary"><i class="fa fa-hourglass-start"></i> @lang('blade.on_process')</span>
 
@@ -310,7 +281,7 @@
                                                                     {{ csrf_field() }}
                                                                     {{ method_field('DELETE') }}
                                                                         <button type="submit" class="btn btn-danger btn-xs">
-                                                                            <i class="fa fa-trash"></i> 
+                                                                            <i class="fa fa-trash"></i>
                                                                             @lang('blade.delete')
                                                                         </button>
                                                                 </form>
@@ -361,7 +332,7 @@
                                         </div>
                                     @endif
                                 @endforeach
-                                
+
                             </div>
                         </div>
                     @endforeach
@@ -416,13 +387,13 @@
                                                     <i class="fa fa-check-circle"></i> Qabul qilish va yopish
                                                 </button>
                                             @elseif(count($replyMessage))
-                                                
+
                                                 @switch($role->role_code)
                                                     @case('director_department')
                                                     @case('deputy_of_director')
                                                     @case('filial_manager')
                                                     @foreach($replyMessage as $key => $r)
-                                                    
+
                                                         @if( $r->replyDirectorDepartment->depart_id == Auth::user()->department->depart_id )
                                                             <button type="button" value="{{$model->id}}" id="replyConfirm"
                                                                     class="btn btn-bitbucket pull-right">
@@ -432,7 +403,7 @@
                                                         @endif
                                                     @endforeach
 
-                                                    
+
                                                     @break;
                                                     @default
                                                     @break;
@@ -451,14 +422,14 @@
                     <!-- /.box -->
                     @if($model->edoMessageUsersOrdinary->sub_status == 3)
                         <h4 class="text-center text-green text-bold">
-                            <i class="fa fa-check-circle"></i> @lang('blade.task_closed') 
+                            <i class="fa fa-check-circle"></i> @lang('blade.task_closed')
                         </h4>
                     @endif
                     @if(($model->edoMessageUsersOrdinary->sub_status??0) == '2')
                         <h4 class="text-center text-green text-bold">
                             <i class="fa fa-check-circle"></i> @lang('blade.sent_to_approve')
                         </h4>
-                    @endif  
+                    @endif
 
                 </div>
                 <!-- /.box -->
@@ -534,9 +505,9 @@
                             <h4 class="modal-title" id="req-message"></h4>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" onclick="window.location.href='/reply-confirm/{{$model->id}}/{{$messageUsers->to_user_id}}/{{$messageUsers->depart_id}}'" 
+                            <button type="button" onclick="window.location.href='/reply-confirm/{{$model->id}}/{{$messageUsers->to_user_id}}/{{$messageUsers->depart_id}}'"
                                 id="mConfirm" class="btn btn-success" data-dismiss="modal">
-                                <i class="fa fa-check-circle"></i> 
+                                <i class="fa fa-check-circle"></i>
                                 @lang('blade.approve')
                             </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('blade.close')</button>
@@ -668,7 +639,7 @@
                                         @case(12)
                                         @case(18)
                                             <li class="list-group-item">
-                                                {{ $key++.'. '.$user->toSubUser->lname??'' }} {{ $user->toSubUser->fname??'' }} 
+                                                {{ $key++.'. '.$user->toSubUser->lname??'' }} {{ $user->toSubUser->fname??'' }}
                                                 <span class="pull-right badge bg-aqua">
                                                     {{ $user->edoTypeMessage->title_ru??'' }}
                                                 </span>
@@ -677,12 +648,12 @@
 
                                                     @foreach($perfSubUsers as $k => $sub_user)
                                                         @if( $sub_user->from_user_id == $user->to_user_id )
-                                                        
+
                                                             <li class="list-group-item bg-gray-active">
-                                                                {{ $key2++.'. '.$sub_user->toSubUser->lname??'' }} {{ $sub_user->toSubUser->fname??'' }} 
+                                                                {{ $key2++.'. '.$sub_user->toSubUser->lname??'' }} {{ $sub_user->toSubUser->fname??'' }}
                                                                 <span class="pull-right badge bg-aqua">{{ $sub_user->edoTypeMessage->title_ru??'' }}</span>
                                                             </li>
-                                            
+
                                                         @endif
 
                                                     @endforeach
@@ -693,7 +664,7 @@
 
                                         @default
                                         @break
-                                        
+
                                     @endswitch
                                 @endif
                             @endforeach
@@ -721,7 +692,7 @@
                                     {{ $model->subUserOrdinary->created_at->format('d-m-Y H:i')??'Null' }}
                                     <span class="pull-right">{{ $messageUsers->director->job_title??'' }}</span>
                                 </h5>
-                            
+
                         </div>
 
                         <div class="box-footer">
@@ -768,14 +739,14 @@
             }
 
             function collapseBox(id){
-                
+
                 $(document).ready(function () {
 
                     $(".userReplyBox"+id).toggle();
 
 
                     var className = $('.plusMinus'+id).attr('class');
-                    
+
                     if(className != ('plusMinus'+id+' fa fa-plus')){
 
                         $('.plusMinus'+id).removeClass('plusMinus'+id +' fa fa-minus').addClass('plusMinus'+id +' fa fa-plus');

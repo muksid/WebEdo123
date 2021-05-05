@@ -19,9 +19,13 @@
                                 Strategiya Hujjatlari
                             @break
                         @endswitch
+<<<<<<< HEAD
                         
                         <small>@lang('blade.groups_table')</small>
                     </h3> 
+=======
+                    </h3>
+>>>>>>> master
                 </div>
                 <div class="col-sm-1" align="center">
                     <form action="{{ url('edo/hr-member-protocols/'.$protocol_dep) }}" method="post">
@@ -44,7 +48,10 @@
                         <button type="submit" class="btn btn-success"> @lang('blade.archive') [{{ $archive_count }}] </button>
                     </form>
                 </div>
+<<<<<<< HEAD
                 
+=======
+>>>>>>> master
             </div>
         </div>
 
@@ -84,8 +91,11 @@
         <div class="row">
             <div class="col-xs-12">
 
+<<<<<<< HEAD
             
 
+=======
+>>>>>>> master
                 <div class="box box-primary">
                     <div class="box-header">
                         <div class="col-md-1">
@@ -113,7 +123,10 @@
                                             <input type="date" class="form-control" name="date" value="{{ $date??'' }}" placeholder="@lang('blade.reg_date_only')">
                                         </div>
                                     </div>
+<<<<<<< HEAD
                                     
+=======
+>>>>>>> master
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <a href="{{ url('/edo/hr-member-protocols/'.$protocol_dep) }}" class="btn btn-default btn-flat"><i class="fa fa-refresh"></i> @lang('blade.reset')</a>
@@ -148,7 +161,14 @@
                                     <td>{{ $i++ }}</td>
                                     <td class="text-green">{{ $model->protocol->user->lname??'' }} {{ $model->protocol->user->fname??'' }}</td>
                                     <td style="color:grey">
+<<<<<<< HEAD
                                         {{ $model->protocol->stf_number??'(Пусто)' }} 
+=======
+                                        {{ $model->protocol->stf_number??'(Пусто)' }}
+
+                                        {{ $model->protocol->stf_number??'(Пусто)' }}
+
+>>>>>>> master
                                         @if($model->protocol->stf_date??null)
                                             {{ (new DateTime($model->protocol->stf_date??''))->format('d-m-Y') }}
                                         @endif
