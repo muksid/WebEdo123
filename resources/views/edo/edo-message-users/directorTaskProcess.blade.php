@@ -120,7 +120,7 @@
                            <?php $i = 1 ?>
                            @if($models->count())
                             @foreach ($models as $key => $model)
-                                <tr>
+                                <tr class="{{ ($model->helper->term_date) ? 'bg-yellow':'' }}">
                                     <td>{{ $i++ }}</td>
                                     <td class="text-green" style="min-width: 150px">
                                         {{$model->signatureUser->lname.' '.$model->signatureUser->fname}}

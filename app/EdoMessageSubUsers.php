@@ -34,11 +34,18 @@ class EdoMessageSubUsers extends Model
         return $this->belongsTo(EdoMessageJournal::class, 'edo_mes_jrls_id');
     }
 
+    // helper message
+    public function helper()
+    {
+        return $this->belongsTo(EdoHelperMessage::class, 'edo_message_id','edo_message_id');
+    }
+
     // sub helper message
     public function subHelper()
     {
-        return $this->belongsTo(EdoHelperSubMessage::class, 'edo_mes_jrls_id','edo_message_journals_id');
+        return $this->belongsTo(EdoHelperSubMessage::class, 'edo_mes_jrls_id','edo_message_journals_id')->where('depart_id', Auth::user()->department->depart_id);
     }
+
 
     public function signatureUser()
     {
