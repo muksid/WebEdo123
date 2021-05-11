@@ -115,6 +115,8 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('fe-fileDownload/{id}','MessageController@fileDownload');
 
+    Route::get('fe-fileDownloadAll/{message_id}','MessageController@fileDownloadAll')->name('fe-download-all');
+
     Route::get('fe-fileView/{id}','MessageController@fileView');
 
     Route::get('fe/getBlade','MessageController@getBlade');
@@ -139,7 +141,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('fe/getSentUsers','MessageUsersController@getSentUsers');
 
     #Route::get('fe/term-inbox','MessageUsersController@termInbox')->name('fe-term-inbox');
-    #Route::get('load-all/{file}','MessageController@downloadAll')->name('load-all');
 
     // Message users search
     #Route::any('all-search','MessageUsersController@search')->name('all/search');

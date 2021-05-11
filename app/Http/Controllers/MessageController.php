@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
 use Response;
 use Illuminate\Support\Facades\Auth;
+use ZipArchive;
 
 class MessageController extends Controller
 {
@@ -689,35 +690,66 @@ class MessageController extends Controller
         return back()->with('errors', 'Ilova (lar) Serverdan topilmadi!');
     }
 
-    public function downloadAll($file){
-
-        $files = MessageFiles::where('message_id', $file)->get();
-        if (empty($file)) {
+    public function fileDownloadAll($message_id){
+       
+        $models = MessageFiles::where('message_id', $message_id)->get();
+        if (empty($message_id)) {
             return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
         }
 
-        $zip_name  = './FilesFTP/' . 'zip_all_' . $files[0]->file_name.'.zip';
+        $ftp_server = '172.16.2.9';
+        $ftp_user_name = 'ftp_9';
+        $ftp_user_pass = 'ftp_9';
 
-        $zip = new \ZipArchive;
+        // set up basic connection
+        $conn_id = ftp_connect($ftp_server);
 
-        if ($zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+        // login with username and password
+        $login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+        
+        // try to download $server_file and save to $local_file
+        foreach ($models as $key => $model) {
+            
+            // define some variables
+            $local_file = 'storage/'.$model->file_hash;
+            $server_file = $model->file_path.$model->file_hash;
+            $path = '/'.$model->file_path.$model->file_hash;
+            
+            if(Storage::disk('ftp_edo')->exists($path)) ftp_get($conn_id, $local_file, $server_file, FTP_BINARY); 
+        }  
 
-            foreach($files as $file){
+        // close the connection
+        ftp_close($conn_id);
 
-                $zip->addFile(public_path() . "/FilesFTP/" . $file->file_hash, $file->file_name);
+        $first_file_word    = explode(' ',trim($models[0]->file_name)); 
+        $zip_download_name  = 'zip_all_' . $first_file_word[0].'_' .date('d-m-Y h-i-s').'.zip';
+        $zip_name           = storage_path('app/public').'/'.$zip_download_name ;
 
+
+        $zip = new ZipArchive;
+
+        if ($zip->open($zip_name, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+            foreach($models as $model){
+
+                $zip->addFile(storage_path('app/public').'/'. $model->file_hash, $model->file_name);
             }
-
+            
             $zip->close();
 
-            return response()->download(public_path() . "/" . $zip_name)->deleteFileAfterSend(true);
+            // Delete temporary files from local
+            foreach ($models as $key => $model) {
+                unlink(storage_path('app/public').'/'. $model->file_hash);
+            }
+            return response()->download($zip_name, $zip_download_name )->deleteFileAfterSend(true);
+    
         } else {
 
             return response()->json('Yuklashda xatolik');
 
         }
-
+        
     }
+
 
     public function fileView($id)
     {

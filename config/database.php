@@ -43,9 +43,9 @@ return [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'medo'),
+            'database' => env('DB_DATABASE', 'edotest'),
             'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', 'edo!@#$'),
+            'password' => env('DB_PASSWORD', 'root'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -56,7 +56,7 @@ return [
 
         'mysql_uw' => [
             'driver'    => 'mysql',
-            'host'      => env('DB_EXT_HOST', '127.0.0.1'),
+            'host'      => env('DB_EXT_HOST', '172.16.2.13'),
             'database'  => env('DB_EXT_DATABASE', 'uw_turonbank_13'),
             'username'  => env('DB_EXT_USERNAME', 'root'),
             'password'  => env('DB_EXT_PASSWORD', ''),
