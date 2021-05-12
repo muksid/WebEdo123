@@ -109,7 +109,7 @@
                                 @if($messageForwards && $messageForwards->status === 'reply')
                                     <a href="{{route('fe-view-sent',['id'=>$messageForwards->message->id??'','mes_gen'=>$messageForwards->message->mes_gen??''])}}">
                                        <i class="fa fa-hand-o-right"></i> {{ $messageForwards->message->subject??'' }}
-                                    </a> ...ga javob hati
+                                    </a> ...ga javob xati
                                 @endif
                             </h3>
 
