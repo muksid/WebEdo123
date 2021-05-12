@@ -232,6 +232,27 @@ class MessageController extends Controller
                     $message_foward->save();
                 }
             }
+            if ($request->file('mes_files') != null) {
+                foreach ($request->file('mes_files') as $file) {
+                    if ($file != 0) {
+                        $today = Carbon::today();
+                        $year = $today->year;
+                        $month = $today->month;
+                        $day = $today->day;
+                        $path = 'fe/'.$year.'/'.$month.'/'.$day.'/';
+    
+                        $message_files = new MessageFiles();
+                        $message_files->message_id = $model->id;
+                        $message_files->file_path = $path;
+                        $message_files->file_hash = $model->id.'_'.$auth->getAuthIdentifier().'_'.date('dmYHis').uniqid().'.'.$file->getClientOriginalExtension();
+                        $message_files->file_size = $file->getSize();
+                        Storage::disk('ftp_edo')->put($path.$message_files->file_hash, file_get_contents($file->getRealPath()));
+                        $message_files->file_name = $file->getClientOriginalName();
+                        $message_files->file_extension = $file->getClientOriginalExtension();
+                        $message_files->save();
+                    }
+                }
+            }
 
         }
 
@@ -549,16 +570,16 @@ class MessageController extends Controller
         {
             $id = $request->input('id');
 
-            $forward = MessageForward::where('new_message_id', $id)->first();
+            // $forward = MessageForward::where('new_message_id', $id)->first();
 
-            $forwardFiles = 0;
+            // $forwardFiles = 0;
 
-            if ($forward)
-            {
-                $forwardFiles = $forward->message_id;
-            }
+            // if ($forward)
+            // {
+            //     $forwardFiles = $forward->message_id;
+            // }
 
-            $files = MessageFiles::whereIn('message_id', [$id, $forwardFiles])->get();
+            $files = MessageFiles::where('message_id', $id)->get();
 
             $blade = view('templates.files', compact('files', $files))->render();
         }
