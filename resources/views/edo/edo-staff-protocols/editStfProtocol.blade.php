@@ -151,12 +151,17 @@
                                                         <img class="img-circle img-bordered-sm" src="{{ asset("/admin-lte/dist/img/user.png") }}" alt="user">
                                                         <span class="pull-right btn-box-tool user_role" style="display: block;">
                                                             <select class="form-control" name="user_role[]">
-                                                                @if($user->user_role == 1)
-                                                                    <option value="1">Boshqaruv Raisi</option>
-                                                                    <option value="2">Boshqaruv a`zolari</option>
+                                                                @if($user->user_sort == 1)
+                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="2">@lang('blade.members')</option>
+                                                                    <option value="4">@lang('blade.suggested_member')</option>
                                                                 @else
-                                                                    <option value="2">Boshqaruv a`zolari</option>
-                                                                    <option value="1">Boshqaruv Raisi</option>
+                                                                    @if($user->user->department->depart_id == Auth::user()->department->depart_id??'')
+                                                                        <option value="3">@lang('blade.confirming_person')</option>
+                                                                    @endif
+                                                                    <option value="2">@lang('blade.members')</option>
+                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="4">@lang('blade.suggested_member')</option>
                                                                 @endif
 
                                                             </select>
