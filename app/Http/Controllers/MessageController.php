@@ -713,14 +713,15 @@ class MessageController extends Controller
 
     public function fileDownloadAll($message_id){
        
+
         $models = MessageFiles::where('message_id', $message_id)->get();
         if (empty($message_id)) {
             return back()->with('notFiles', 'Serverdan fayllar topilmadi!');
         }
 
-        $ftp_server = '172.16.2.9';
-        $ftp_user_name = 'ftp_9';
-        $ftp_user_pass = 'ftp_9';
+        $ftp_server     = config("filesystems.disks.ftp_edo.host");
+        $ftp_user_name  = config('filesystems.disks.ftp_edo.username');
+        $ftp_user_pass  = config('filesystems.disks.ftp_edo.password');
 
         // set up basic connection
         $conn_id = ftp_connect($ftp_server);
