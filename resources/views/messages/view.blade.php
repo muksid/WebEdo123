@@ -101,10 +101,15 @@
                         <div class="mailbox-read-message">
                             <h3 class="box-title">
                                 @lang('blade.text'):
-                                @if($messageForwards)
+                                @if($messageForwards && $messageForwards->status === 'forward')
                                     <a href="{{route('fe-view-sent',['id'=>$messageForwards->message->id??'','mes_gen'=>$messageForwards->message->mes_gen??''])}}">
                                        <i class="fa fa-hand-o-right"></i> {{ $messageForwards->message->subject??'' }}
-                                    </a> ...ga javob hati
+                                    </a> ...dan yo'naltirilgan
+                                @endif
+                                @if($messageForwards && $messageForwards->status === 'reply')
+                                    <a href="{{route('fe-view-sent',['id'=>$messageForwards->message->id??'','mes_gen'=>$messageForwards->message->mes_gen??''])}}">
+                                       <i class="fa fa-hand-o-right"></i> {{ $messageForwards->message->subject??'' }}
+                                    </a> ...ga javob xati
                                 @endif
                             </h3>
 
@@ -141,10 +146,13 @@
 
                             @endforeach
                         </ul>
-                        <div class="pull-right">
-                            {{--@if(isset($file))
-                                <a href="{{ route('load-all',['file'=>$file->message_id]) }}" class="btn btn-default allDownload"><i class="fa fa-download"></i> @lang('blade.download_all')</a>
-                            @endif--}}
+                        <div class="pull-left">
+                            @if(isset($file))
+                                <a href="{{ route('fe-download-all',['message_id'=>$file->message_id]) }}" class="btn btn-default">
+                                    <i class="fa fa-download"></i> 
+                                    @lang('blade.download_all')
+                                </a>
+                            @endif
                         </div>
 
                     </div>

@@ -126,7 +126,17 @@
 
                             @endforeach
                         </ul>
+                        <div class="pull-left">
+                            @if(isset($file))
+                                <a href="{{ route('fe-download-all',['message_id'=>$file->message_id]) }}" class="btn btn-default">
+                                    <i class="fa fa-download"></i> 
+                                    @lang('blade.download_all')
+                                </a>
+                            @endif
+                        </div>
+
                     </div>
+
 
                     <div id="blade_append"></div>
 

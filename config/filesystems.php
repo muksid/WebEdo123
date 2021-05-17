@@ -65,9 +65,9 @@ return [
 
         'ftp_edo' => [
             'driver'   => 'ftp',
-            'host'     => '172.16.1.123',
-            'username' => 'edo_ftp_fs',
-            'password' => 'edo_ftp_fs',
+            'host'     => '172.16.2.9',
+            'username' => 'ftp_9',
+            'password' => 'ftp_9',
 
             // Optional FTP Settings...
             // 'port'     => 21,

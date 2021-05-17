@@ -122,7 +122,7 @@
                             <?php $i = 1 ?>
                            
                             @foreach ($models as $key => $model)
-                                <tr>
+                                <tr class="{{ ($model->helper->term_date??'') ? 'bg-yellow':'' }}">
                                     <td>{{ $models->firstItem()+$key }}</td>
                                     <td class="text-bold">{{ $model->depInboxJournal->in_number??'' }}{{ $model->depInboxJournal->in_number_a??'' }}</td>
 
@@ -151,9 +151,13 @@
                                         @endif
                                     </td>
                                     <td>
+                                        @if($model->helper->term_date)
+                                            <span class="text-maroon">@lang('blade.office'): {{ \Carbon\Carbon::parse($model->helper->term_date??'')->format('d-M-Y')  }}</span>
+                                        @endif
                                         @if(!empty($model->subHelper->term_date))
-                                        <span class="text-maroon">{{ \Carbon\Carbon::parse($model->subHelper->term_date??'')->format('d-M-Y')  }}</span>
-                                        @else
+                                            <span class="text-maroon">@lang('blade.dep'): {{ \Carbon\Carbon::parse($model->subHelper->term_date??'')->format('d-M-Y')  }}</span>
+                                        @endif
+                                        @if(empty($model->subHelper->term_date) && empty($model->helper->term_date))
                                             <i class="text-muted">(Muddat yo`q)</i>
                                         @endif
                                     </td>
