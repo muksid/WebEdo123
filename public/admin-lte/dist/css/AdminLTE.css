@@ -62,6 +62,38 @@ body {
   max-height: 750px;
   border: 1px solid #1a2226;
 }
+
+@media only screen and (max-width:1250px) {
+
+  body {
+    font-size: small;
+  }
+  .nav > li > a {
+    position: relative;
+    display: block;
+    padding: 8px 12px;
+  }
+  .main-header .logo {
+    height: 40px !important;
+    font-size: 18px !important;
+    line-height: 40px !important;
+    padding: 0 12px !important;
+  }
+  .main-header .navbar {
+    min-height: 40px !important;
+  }
+  .sidebar-toggle{
+    padding: 11px !important;
+  }
+  
+  .navbar-custom-menu .navbar-nav > li > a {
+    padding-top: 10px !important;
+    padding-bottom: 11px !important;
+    line-height: 20px !important;
+    font-size: smaller;
+  }
+}
+
 @media only screen and (max-height:850px) {
   /* For tablets: */
   .sidebar-menu{
@@ -70,12 +102,16 @@ body {
   .main-footer{
     padding: 12px;
   }
+
+  body {
+    font-size: small;
+  }
   
 }
 @media only screen and (max-height:800px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 650px;
+    max-height: 620px;
   }
   .main-footer{
     padding: 10px !important;
@@ -86,7 +122,7 @@ body {
 @media only screen and (max-height:750px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 600px;
+    max-height: 570px;
   }
   .main-footer{
     padding: 8px !important;
@@ -96,7 +132,7 @@ body {
 @media only screen and (max-height:700px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 550px;
+    max-height: 520px;
     font-size: small;
   }
   .main-footer{
@@ -106,7 +142,7 @@ body {
 @media only screen and (max-height:650px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 500px;
+    max-height: 470px;
     font-size: small;
   }
   .main-footer{
@@ -116,7 +152,7 @@ body {
 @media only screen and (max-height:600px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 450px;
+    max-height: 420px;
   }
   .main-footer{
     padding: 4px !important;
@@ -126,7 +162,7 @@ body {
 @media only screen and (max-height:550px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 400px;
+    max-height: 370px;
   }
   .main-footer{
     padding: 3px !important;
@@ -136,7 +172,8 @@ body {
 @media only screen and (max-height:500px) {
   /* For tablets: */
   .sidebar-menu{
-    max-height: 370px;
+    max-height: 320px;
+    font-size: 12px;
   }
   .main-footer{
     padding: 2px !important;
@@ -144,6 +181,20 @@ body {
   }
 }
 
+@media only screen and (max-height:450px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 270px;
+  }
+}
+
+@media only screen and (max-height:400px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 220px;
+  }
+
+}
 
 /* width */
 ::-webkit-scrollbar {
@@ -664,11 +715,6 @@ a:focus {
   .navbar-custom-menu .navbar-nav {
     margin: 0;
     float: left;
-  }
-  .navbar-custom-menu .navbar-nav > li > a {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    line-height: 20px;
   }
 }
 @media (max-width: 767px) {
