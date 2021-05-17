@@ -59,9 +59,92 @@ body {
   overflow-y: auto !important;
   overflow-x: hidden !important;
   white-space: inherit;
-  max-height: 700px;
+  max-height: 750px;
   border: 1px solid #1a2226;
 }
+@media only screen and (max-height:850px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 700px;
+  }
+  .main-footer{
+    padding: 12px;
+  }
+  
+}
+@media only screen and (max-height:800px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 650px;
+  }
+  .main-footer{
+    padding: 10px !important;
+    font-size: small;
+  }
+}
+
+@media only screen and (max-height:750px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 600px;
+  }
+  .main-footer{
+    padding: 8px !important;
+    font-size: small;
+  }
+}
+@media only screen and (max-height:700px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 550px;
+    font-size: small;
+  }
+  .main-footer{
+    padding: 7px !important;
+  }
+}
+@media only screen and (max-height:650px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 500px;
+    font-size: small;
+  }
+  .main-footer{
+    padding: 5px !important;
+  }
+}
+@media only screen and (max-height:600px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 450px;
+  }
+  .main-footer{
+    padding: 4px !important;
+    font-size: small;
+  }
+}
+@media only screen and (max-height:550px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 400px;
+  }
+  .main-footer{
+    padding: 3px !important;
+    font-size: small;
+  }
+}
+@media only screen and (max-height:500px) {
+  /* For tablets: */
+  .sidebar-menu{
+    max-height: 370px;
+  }
+  .main-footer{
+    padding: 2px !important;
+    font-size: small;
+  }
+}
+
+
 /* width */
 ::-webkit-scrollbar {
   width: 10px;
