@@ -151,15 +151,13 @@
         </section>
         <!-- /.content -->
 
+        
         <!-- jQuery 2.2.3 -->
         <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
-        <!-- AdminLTE App -->
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
 
         <!-- jQuery UI 1.11.4 -->
         <script src="{{ asset ("/admin-lte/dist/js/jquery-ui.min.js") }}"></script>
 
         <!-- Dashboard style clicked -->
-        <script src="{{ asset ("/admin-lte/dist/js/pages/dashboard.js") }}"></script>
 @endsection

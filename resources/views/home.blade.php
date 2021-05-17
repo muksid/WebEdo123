@@ -52,8 +52,6 @@
 
         <script src="{{ asset("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
 
-        <script src="{{ asset("/admin-lte/dist/js/app.min.js") }}"></script>
-
         <!-- jQuery UI 1.11.4 -->
         <script src="/admin-lte/dist/js/jquery-ui.min.js"></script>
         <!-- Slimscroll -->
