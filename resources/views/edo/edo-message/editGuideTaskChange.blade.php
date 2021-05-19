@@ -80,17 +80,128 @@
                         <strong><i class="fa fa-file margin-r-5"></i> @lang('blade.doc_app') </strong><br><br>
 
                         @foreach ($model->files as $file)
+                               <a href="#"
+                                  class="text-info text-bold mailbox-attachment-name"
+                                  target="_blank"
+                                  onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
+                                          'modal',
+                                          'width=800,height=900,top=30,left=500');
+                                          return false;">
+                                   <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                               </a>
+                               <ul class="list-inline pull-right">
+                                   <li>
+                                       <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                                          class="link-black text-sm"><i
+                                                   class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                       </a>
+                                   </li>
+                                  
+                                   @if(Auth::user()->edoUsers() === 'office' || Auth::user()->edoUsers() === 'helper')
+                                       <li> |</li>
+                                       <li class="pull-right">
+                                           <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
+                                               <i class="fa fa-trash"></i> @lang('blade.delete')
+                                           </button>
+                                       </li>
+                                   @endif
+                               </ul>
+                            <i class="text-red">({{ $file->size($file->file_size)??'' }})</i><br><br>
 
-
-                            <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}" class="text-info text-bold"
-                               target="_blank" class="mailbox-attachment-name"
-                               onclick="window.open('<?php echo ('/edoPreView/'. $file->file_hash); ?>',
-                                       'modal',
-                                       'width=800,height=900,top=30,left=500');
-                                       return false;"> <i class="fa fa-search-plus"></i> {{ $file->file_name }}</a>
-                            <a href="{{ route('edo-load',['file'=>$file->file_hash]) }}" class="pull-right"><i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')</a>
-                            <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
+                            
                         @endforeach
+                        @if(Auth::user()->edoUsers() === 'helper')
+                                <div class="col-md-12">
+                                    <div class="alert" id="message" style="display: none"></div>
+                                    <form method="post" id="fileUpload" enctype="multipart/form-data">
+                                        {{ csrf_field() }}
+                                        <div class="form-group">
+                                            <table class="table">
+                                                <tr>
+                                                    <td width="30">
+                                                        <input type="file" name="message_file[]" id="message_file"
+                                                            multiple/>
+                                                        <input type="text" name="model_id" value="{{ $model->id }}" hidden/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="textarea" name="comments" id="comments"
+                                                            placeholder="Comment..." style="width:100%" required/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right">
+                                                        <button type="submit" name="upload" id="upload"
+                                                                class="btn btn-flat btn-xs btn-info">
+                                                            <i class="fa fa-upload"></i> @lang('blade.upload_file')
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </form>
+                                    <hr>
+                                    <div id="ConfirmModal" class="modal fade text-danger" role="dialog">
+                                        <div class="modal-dialog modal-sm">
+                                            <!-- Modal content-->
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;
+                                                    </button>
+                                                    <h4 class="modal-title text-center">O`chirishni tasdiqlash</h4>
+                                                </div>
+                                                <div class="modal-body">
+
+                                                    <p class="text-center">Siz xatni o`chirmoqchimisiz? Izoh qoldiring!</p>
+
+                                                    <textarea id="delete_comment" name="" rows="3" cols="35"
+                                                            style="resize: none"></textarea>
+
+                                                </div>
+                                                <div class="modal-footer">
+
+                                                    <center>
+                                                        <button type="button" class="btn btn-success" data-dismiss="modal">
+                                                            Bekor
+                                                            qilish
+                                                        </button>
+
+                                                        <button type="button" href="#" id="yesDelete"
+                                                                class="btn btn-danger">
+                                                            Ha, O`chirish
+                                                        </button>
+                                                    </center>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal fade" id="successModal" tabindex="-1" role="dialog"
+                                        aria-labelledby="myModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-sm">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-aqua-active">
+                                                    <h4 class="modal-title">
+                                                        File <i class="fa fa-check-circle"></i>
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h5>File Successfully deleted</h5>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-info closeModal"
+                                                            data-dismiss="modal"><i
+                                                                class="fa fa-check-circle"></i> Ok
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            @endif
                         <hr>
                         <p class="text-bold text-center">{{ $model->title }}</p>
                         <?php echo $model->text ?? 'null';  ?>
@@ -655,6 +766,86 @@
             $(this).attr("disabled",true)
             
         })   
+
+        // file upload
+        $('#fileUpload').on('submit', function (event) {
+
+            let comment = 'Без комментариев'
+
+            if (comment === '') {
+
+                console.log("Без комментариев")
+
+            } else {
+                event.preventDefault();
+                var fd = new FormData(this);
+
+                $.ajax({
+                    url: "{{ url('/edo-message-file/upload') }}",
+                    method: "POST",
+                    data: fd,
+                    dataType: 'JSON',
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.success == true) { // if true (1)
+                            location.reload();
+                        }
+                        $('#message').css('display', 'block')
+                        $('#message').html(data.message)
+                        $('#message').addClass(data.class_name)
+                    }
+                })
+            }
+
+        })
+
+
+        // file delete
+        $('.deleteFile').on('click', function (e) {
+            e.preventDefault();
+            var id = $(this).data("id");
+
+            $('#ConfirmModal').data('id', id).modal('show');
+
+        })
+
+        $('#yesDelete').click(function () {
+
+            let token = $('meta[name="csrf-token"]').attr('content')
+
+            let id = $('#ConfirmModal').data('id')
+
+            let comment = $('#delete_comment').val()
+
+            if (comment === '') {
+
+                $('#delete_comment').css("border", "3px solid red")
+
+            } else {
+                $('#fileId_' + id).remove();
+
+                $.ajax(
+                    {
+                        url: '/edo-message-file/delete/' + id,
+                        type: 'GET',
+                        dataType: "JSON",
+                        data: {
+                            "id": id,
+                            "_token": token,
+                            "comments": comment
+                        },
+                        success: function (data) {
+                            //console.log(data);
+                            $('#successModal').modal('show')
+                        }
+                    });
+
+                $('#ConfirmModal').modal('hide')
+
+            }
+        })
         </script>
     </section>
     <!-- /.content -->

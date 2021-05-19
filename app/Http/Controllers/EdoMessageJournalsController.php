@@ -243,9 +243,7 @@ class EdoMessageJournalsController extends Controller
                  });
              }
 
-
              $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-
 
              $models->appends ( array (
                  'j'   => $j,
