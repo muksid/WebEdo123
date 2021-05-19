@@ -202,7 +202,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('edo-fileReplyView/{id}','EdoMessageController@fileReplyView');
 
     # Jamshid To change Receivers
-    Route::get('/edo/edit-g-task-change/{id}', 'EdoMessageController@editGuideTaskChange')->name('edit-guide-task-change');
+    Route::any('/edo/edit-g-task-change/{id}', 'EdoMessageController@editGuideTaskChange')->name('edit-guide-task-change');
 
     Route::post('create-g-s_task','EdoMessageController@storeCreateGuideTask')->name('create-g-s_task');
 

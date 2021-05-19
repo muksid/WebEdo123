@@ -890,13 +890,11 @@
                 // file upload
                 $('#fileUpload').on('submit', function (event) {
 
-                    // var comment = $('#delete_comment').val();
-                    var comment = 'aaaaaaaaaaaaaa';
+                    var comment = 'Без комментариев';
 
                     if (comment === '') {
 
-                        // $('#delete_comment').css("border","3px solid red");
-                        console.log("HOLALDSSDFLASLDFSDFASDFL");
+                        console.log("Без комментариев");
 
                     } else {
                         event.preventDefault();

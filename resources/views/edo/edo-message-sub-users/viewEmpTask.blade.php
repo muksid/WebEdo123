@@ -150,7 +150,7 @@
                                                    class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
                                        </a>
                                    </li>
-                                   @if($role->id === 2)
+                                   @if(Auth::user()->edoUsers === 'office')
                                        <li> |</li>
                                        <li class="pull-right">
                                            <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
