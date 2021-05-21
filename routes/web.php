@@ -229,7 +229,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/edo/g-tasks/g-process','EdoMessageUsersController@guideTaskGProcess')->name('guide-tasks-g-process');
 
     Route::get('/edo/g-tasks/resolution','EdoMessageJournalsController@guideTaskResolution')->name('guide-tasks-resolution');
-
+    
     Route::post('redirect-task','EdoMessageJournalsController@redirectTask')->name('redirect-task');
 
     Route::get('/edo/g-tasks/redirect','EdoMessageJournalsController@guideTasksRedirect')->name('g-tasks-redirect');
@@ -246,7 +246,7 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/edo/tasks/control','EdoMessageJournalsController@control')->name('/edo/tasks/control');
 
-    Route::get('/edo/office-tasks/sent','EdoMessageJournalsController@officeTasksSent')->name('office-tasks-sent');
+    Route::any('/edo/office-tasks/sent','EdoMessageJournalsController@officeTasksSent')->name('office-tasks-sent');
 
     Route::get('director-confirm/{m_id}/{u_id}/{mu_id}', 'EdoMessageJournalsController@directorConfirm');
 

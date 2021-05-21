@@ -397,7 +397,7 @@
                                 @endswitch
                             @endif
 
-                            @if(count($model->replyTasks) && ($model->journalUser->status==2 && $model->journalUser->guideUser->user_id == Auth::id()))
+                            @if(count($model->replyTasks) && ($model->journalUser->status??'') ==2 && ($model->journalUser->guideUser->user_id??0) == Auth::id())
                                 <button type="button" value="{{$model->id}}" id="taskConfirm"
                                         class="btn btn-bitbucket pull-right">
                                     <i class="fa fa-check-circle"></i> @lang('blade.approve_and_close_task')

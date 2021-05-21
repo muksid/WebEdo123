@@ -1168,16 +1168,16 @@ class EdoMessageController extends Controller
     {
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
         # If user kanc or helper
-        switch($edoUsers->role_id){
-            case(1):
-            case(2):
-            case(3):
-            case(4):
-            case(6):
-            case(17):
-            case(18):
-            case(19):
-            case(20):
+        switch(Auth::user()->edoUsers()){
+            case 'guide':
+            case 'office':
+            case 'helper':
+            case 'director_department':
+            case 'admin':
+            case 'deputy_of_director':
+            case 'dep_helper':
+            case 'guide_manager':
+
                 $model = EdoMessage::where('message_hash', $slug)->firstOrFail();
 
                 $users = DB::table('edo_users as a')

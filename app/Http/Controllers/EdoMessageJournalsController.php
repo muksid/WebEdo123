@@ -200,61 +200,85 @@ class EdoMessageJournalsController extends Controller
         return view('edo.edo-message-journals.control',compact('models'));
     }
 
-    public function officeTasksSent()
+    public function officeTasksSent(Request $request)
     {
         //
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
+        
+        // Guide and its managers
+        $to_whom = EdoUsers::whereIn('role_id', [1,20])->orderBy('status', 'DESC')->orderBy('sort', 'ASC')->get();
+
         # If user kanc or helper
-        switch($edoUsers->role_id){
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 17:
-            case 18:
-            case 19:
+        switch(Auth::user()->edoUsers()){
+            case 'office':
+            case 'helper':
+            case 'director_department':
+            case 'control':
+            case 'deputy_of_director':
+            case 'dep_helper':
              // journal
              $journals = EdoJournals::where('depart_id', $edoUsers->department_id)
              ->where('journal_type', 'inbox')
              ->where('status', 1)
              ->get();
 
-             // search filter
-             $j  = Input::get ( 'j'  );
-             $r  = Input::get ( 'r'  );
-             $i_r= Input::get ( 'i_r');
-             $t  = Input::get ( 't'  );
+             if($request->all()){
 
-             $search = EdoMessageJournal::where('depart_id', $edoUsers->department_id);
+                $j = $request->input("j");
+                $u = $request->input("u");
+                $t = $request->input("t");
+                
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+                
+                if($j || $u || $t || $s_start || $s_end){
 
-             if($j)  $search->where('edo_journal_id', 'like', '%'.$j.'%');
+                    // search filter
+                    $search = EdoMessageJournal::where('depart_id', $edoUsers->department_id);
 
-             if($r)  $search->where('in_number', $r);
+                    if($j)  $search->where('edo_journal_id', $j);
 
-             if($i_r){
-                 $search->whereHas('message', function($query) use($i_r){
-                     $query->where('out_number', $i_r );
-                 });
+                    if($u){
+                        $search->where('to_user_id', $u);
+                    }  
+                    if ($t){
+                        $search->whereHas('message', function ($query) use ($t) {
+                            $query->where('from_name', 'like', '%' . $t . '%');
+                            $query->orWhere('title', 'like', '%' . $t . '%');
+                            $query->orWhere('in_number', 'like', '%' . $t . '%');
+                            $query->orWhere('out_number', 'like', '%' . $t . '%');
+                            $query->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $t . '%');
+                        });
+                    }
+                    if($s_start || $s_end){
+                        $search->whereHas('message', function($query) use($s_start,$s_end){
+                        $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                    });
+                    }
+
+                    $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+
+                    $models->appends ( array (
+                        'j'       => $j,
+                        'u'       => $u,
+                        't'       => $t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    
+                    return view('edo.edo-message-journals.sent',
+                    compact('models','j','u','t','s_start','s_end','journals','to_whom'))
+                    ->with('i', (request()->input('page', 1) - 1) * 25);
+                }
+
              }
+             
+             
 
-             if($t){
-                 $search->whereHas('message', function($query) use($t){
-                     $query->where('from_name', 'like', '%'.$t.'%');
-                 });
-             }
-
-             $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-
-             $models->appends ( array (
-                 'j'   => $j,
-                 'r'   => $r,
-                 'i_r' => $i_r,
-                 't'   => $t
-             ) );
-
+             $models = EdoMessageJournal::where('depart_id', $edoUsers->department_id)->orderBy('created_at', 'DESC')->paginate(25);
 
              return view('edo.edo-message-journals.sent',
-                 compact('models','j','r','i_r','t','journals'))
+                 compact('models','journals','to_whom'))
                  ->with('i', (request()->input('page', 1) - 1) * 25);
 
              break;

@@ -4,6 +4,7 @@
 
     <!-- TRANSLATED -->
 
+
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
@@ -66,10 +67,10 @@
                             <form action="{{route('office-tasks-sent')}}" method="POST" role="search">
                                 {{ csrf_field() }}
                                 <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
+                                <div class="col-md-2">
+                                        <div class="form-group has-success">
                                             <select name="j" class="form-control" style="width: 100%;">
-                                                @if($j == '')
+                                                @if(($j??'') == '')
                                                     <option selected="selected" value="">Journalni tanlang</option>
                                                 @else
                                                     @php
@@ -83,27 +84,51 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-1">
-                                        <div class="form-group has-success">
-                                            <input type="number" class="form-control" name="r" value="{{$r}}"
-                                                   placeholder="@lang('blade.in_num')" min="0">
-                                            <input type="text" name="s" value="1" hidden>
+                                    <div class="col-md-2 has-success">
+                                        <div class="form-group">
+                                            <select name="u" class="form-control" style="width: 100%;">                                                
+                                                @if(($u??'') == '')
+                                                    <option selected="selected" value=""> @lang('blade.to_whom') </option>
+                                                @else
+                                                    @php
+                                                        $edo_user = \App\EdoUsers::where('user_id', $u)->first();
+                                                    @endphp
+                                                    <option value="{{$edo_user->user_id}}" selected="selected">{{$edo_user->user->substrUserName($edo_user->user_id)??'' }}</option>
+                                                @endif
+                                                
+
+
+                                                @foreach($to_whom as $key => $value)
+                                                    <option class="{{ ($value->status != 1) ? 'text-red':'' }}" value="{{$value->user_id}}">
+                                                        {{ $value->user->substrUserName($value->user_id)??'' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     
                                     <div class="col-md-2">
                                         <div class="form-group has-success">
-                                            <input type="text" class="form-control" name="t" value="{{$t}}"
-                                                   placeholder="@lang('blade.sender_organization')">
+                                            <input type="text" class="form-control" name="t" value="{{$t??''}}"
+                                                   placeholder="@lang('blade.text')">
                                         </div>
                                     </div>
 
-                                    <div class="col-md-1">
-                                        <div class="form-group has-success">
-                                            <input type="text" class="form-control" name="i_r" value="{{$i_r}}"
-                                                   placeholder="@lang('blade.out_num')">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <button type="button" class="btn btn-default" id="daterange-btn">
+                                                        <span>
+                                                            <i class="fa fa-calendar"></i> Davr oraliq
+                                                        </span>
+                                                    <i class="fa fa-caret-down"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
+                                    <input name="s_start" id="s_start" value="{{$s_start??''}}" hidden>
+                                    <input name="s_end" id="s_end" value="{{$s_end??''}}" hidden>
+
                                     
                                     <div class="col-md-3">
                                         <div class="form-group">
@@ -284,11 +309,76 @@
         </div>
 
         <!-- jQuery 2.2.3 -->
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/daterangepicker.js") }}"></script>
+        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
+
+        
 
         <script>
+
+        
+
+
             // edit journal number
             $(document).ready(function () {
+
+                $(function () {
+                    $(".select2").select2();
+                });
+
+                //Date picker
+                $('#datepicker').datepicker({
+                    autoclose: true
+                });
+               
+                $('.input-datepicker').datepicker({
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+                $('.input-daterange').datepicker({
+                    todayBtn: 'linked',
+                    forceParse: false,
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+
+                //Date range as a button
+                $('#daterange-btn').daterangepicker(
+                    {
+                        ranges: {
+                            'Bugun': [moment(), moment()],
+                            'Kecha': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Ohirgi 7 kun': [moment().subtract(6, 'days'), moment()],
+                            'Ohirgi 30 kun': [moment().subtract(29, 'days'), moment()],
+                            'Bu oyda': [moment().startOf('month'), moment().endOf('month')],
+                            'O`tgan oyda': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment().subtract(29, 'days'),
+                        endDate: moment()
+                    },
+                    function (start, end) {
+                        var s_start = start.format('YYYY-MM-DD');
+
+                        var s_end = end.format('YYYY-MM-DD');
+
+                        $('#s_start').val(s_start);
+                        $('#s_end').val(s_end);
+
+                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                    }
+                );
+
+         
+
+
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
