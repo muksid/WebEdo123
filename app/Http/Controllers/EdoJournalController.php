@@ -74,7 +74,7 @@ class EdoJournalController extends Controller
             }
 
             //
-            $models = $search->orderBy('in_number', 'DESC')->paginate(25);
+            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
 
 
             $models->appends ( array (

@@ -57,8 +57,7 @@ class EdoMessageJournal extends Model
         return $this->hasOne(User::class, 'id','to_user_id')
             ->join('departments as d', 'users.depart_id', 'd.id')
             ->select(DB::raw('CONCAT(lname, " ", fname) AS full_name'),'users.id as user_id','users.job_title','d.title')
-            ->where('d.parent_id', 1)
-            ->where('users.status', 1);
+            ->where('d.parent_id', 1);
     }
 
     // redirect tasks
