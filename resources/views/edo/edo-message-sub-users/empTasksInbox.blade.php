@@ -56,36 +56,29 @@
                         <form action="{{route('e-tasks-inbox')}}" method="POST" role="search">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-md-1">
+                                <div class="col-md-4">
                                     <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="dep_num" value="{{ $dep_num??'' }}"
-                                               placeholder="Деп №">
+                                        <input type="text" class="form-control" name="search_t" value="{{ $search_t??'' }}"
+                                               placeholder="@lang('blade.text')">
                                     </div>
                                 </div>
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="kanc_num" value="{{ $kanc_num??'' }}"
-                                               placeholder="Kanc №">
-                                    </div>
-                                </div>
+                                
                                 <div class="col-md-2">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="org_name" value="{{ $org_name??'' }}"
-                                               placeholder="@lang('blade.sender_organization')">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-default" id="daterange-btn">
+                                                    <span>
+                                                        <i class="fa fa-calendar"></i> Davr oraliq
+                                                    </span>
+                                                <i class="fa fa-caret-down"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="doc_name" value="{{ $doc_name??'' }}"
-                                               placeholder="@lang('blade.doc_name')">
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="in_num" value="{{ $in_num??'' }}"
-                                               placeholder="Исх. №">
-                                    </div>
-                                </div>
+                                <input name="s_start" id="s_start" value="{{$s_start??''}}" hidden>
+                                <input name="s_end" id="s_end" value="{{$s_end??''}}" hidden>
+
+
                                 
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -124,7 +117,7 @@
                             @foreach ($models as $key => $model)
                                 <tr class="{{ ($model->helper->term_date??'') ? 'bg-yellow':'' }}">
                                     <td>{{ $models->firstItem()+$key }}</td>
-                                    <td class="text-bold">{{ $model->depInboxJournal->in_number??'' }}{{ $model->depInboxJournal->in_number_a??'' }}</td>
+                                    <td class="text-bold">{{ $model->message->depInboxJournal->in_number??'' }}{{ $model->message->depInboxJournal->in_number_a??'' }}</td>
 
                                     <td class="text-maroon" style="min-width: 100px">
                                         {{mb_substr($model->signatureUser->fname??'', 0, 1).'.'.$model->signatureUser->lname??''}}
@@ -195,11 +188,66 @@
             <!-- /.col -->
         </div>
         <!-- /.row -->
+
         <!-- jQuery 2.2.3 -->
-        <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
+
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/daterangepicker.js") }}"></script>
+        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>        
         <script>
             $(function () {
                 $("#example1").DataTable();
+
+                //Date picker
+                $('#datepicker').datepicker({
+                    autoclose: true
+                });
+               
+                $('.input-datepicker').datepicker({
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+                $('.input-daterange').datepicker({
+                    todayBtn: 'linked',
+                    forceParse: false,
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+
+                //Date range as a button
+                $('#daterange-btn').daterangepicker(
+                    {
+                        ranges: {
+                            'Bugun': [moment(), moment()],
+                            'Kecha': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Ohirgi 7 kun': [moment().subtract(6, 'days'), moment()],
+                            'Ohirgi 30 kun': [moment().subtract(29, 'days'), moment()],
+                            'Bu oyda': [moment().startOf('month'), moment().endOf('month')],
+                            'O`tgan oyda': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment().subtract(29, 'days'),
+                        endDate: moment()
+                    },
+                    function (start, end) {
+                        var s_start = start.format('YYYY-MM-DD');
+
+                        var s_end = end.format('YYYY-MM-DD');
+
+                        $('#s_start').val(s_start);
+                        $('#s_end').val(s_end);
+
+                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                    }
+                );
+
+                
+         
             });
         </script>
     </section>

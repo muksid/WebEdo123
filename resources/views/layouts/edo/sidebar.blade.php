@@ -608,14 +608,14 @@
                 @endif
 
                 @if(in_array('kazna', json_decode(Auth::user()->roles)))
-                <li>
-                    <a href="{{ route('edo-staff-protocols') }}">
-                        <i class="fa fa-check-square-o"></i> <span> @lang('blade.kazna_protocols')</span>
-                        <span class="pull-right-container">
-                            <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
-                        </span>
-                    </a>
-                </li>
+                    <li>
+                        <a href="{{ route('edo-staff-protocols') }}">
+                            <i class="fa fa-check-square-o"></i> <span> @lang('blade.kazna_protocols')</span>
+                            <span class="pull-right-container">
+                                <small class="label pull-right bg-red"> {{ Auth::user()->hasManyProtocols() }}</small>
+                            </span>
+                        </a>
+                    </li>
                 @else
                     @if(Auth::user()->protocolMember)
                     <li>

@@ -155,7 +155,7 @@ class EdoMessageJournalsController extends Controller
 
       }
 
-    public function guideTasksClosed()
+    public function guideTasksClosed(Request $request)
     {
         //
         $edoUsers  = EdoUsers::where('user_id','=', Auth::id())->first();
@@ -178,10 +178,44 @@ class EdoMessageJournalsController extends Controller
             $child = $edoUsersChild->user_id;
         }
 
+        $search_t = $request->input('search_t');
+        $s_start = $request->input("s_start");
+        $s_end = $request->input("s_end");
+
+        if($search_t || $s_start || $s_end){
+
+            $search = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $manager, $child])
+                ->where('status', 3);
+            if($search_t){
+                $search->whereHas('message', function ($query) use ($search_t) {
+
+                    $query->where('from_name', 'like', '%'.$search_t.'%');
+                    $query->orWhere('title', 'like', '%'.$search_t.'%');
+                    $query->orWhere('in_number', 'like', '%'.$search_t.'%'); 
+                    $query->orWhere('out_number', 'like', '%'.$search_t.'%'); 
+
+                });
+
+            }
+            if($s_start || $s_end){
+                $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+            }
+            
+            $models = $search->orderBy('updated_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'search_t'=> $search_t,
+                's_start' => $s_start,
+                's_end'   => $s_end
+            ) );
+            return view('edo.edo-message-journals.guideTaskClosed',compact('models','search_t','s_start','s_end'));
+        
+        }
+
         $models = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $manager, $child])
             ->where('status', 3)
             ->orderBy('updated_at', 'DESC')
-            ->get();
+            ->paginate(25);
 
         return view('edo.edo-message-journals.guideTaskClosed',compact('models'));
     }
@@ -222,16 +256,14 @@ class EdoMessageJournalsController extends Controller
              ->where('status', 1)
              ->get();
 
-             if($request->all()){
+             $j = $request->input("j");
+             $u = $request->input("u");
+             $t = $request->input("t");
+             
+             $s_start = $request->input("s_start");
+             $s_end = $request->input("s_end");
 
-                $j = $request->input("j");
-                $u = $request->input("u");
-                $t = $request->input("t");
-                
-                $s_start = $request->input("s_start");
-                $s_end = $request->input("s_end");
-                
-                if($j || $u || $t || $s_start || $s_end){
+             if($j || $u || $t || $s_start || $s_end){
 
                     // search filter
                     $search = EdoMessageJournal::where('depart_id', $edoUsers->department_id);
@@ -252,8 +284,8 @@ class EdoMessageJournalsController extends Controller
                     }
                     if($s_start || $s_end){
                         $search->whereHas('message', function($query) use($s_start,$s_end){
-                        $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
-                    });
+                            $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                        });
                     }
 
                     $models = $search->orderBy('created_at', 'DESC')->paginate(25);
@@ -269,12 +301,10 @@ class EdoMessageJournalsController extends Controller
                     return view('edo.edo-message-journals.sent',
                     compact('models','j','u','t','s_start','s_end','journals','to_whom'))
                     ->with('i', (request()->input('page', 1) - 1) * 25);
-                }
+                
 
              }
              
-             
-
              $models = EdoMessageJournal::where('depart_id', $edoUsers->department_id)->orderBy('created_at', 'DESC')->paginate(25);
 
              return view('edo.edo-message-journals.sent',
@@ -295,56 +325,125 @@ class EdoMessageJournalsController extends Controller
      * @return \Illuminate\Http\Response
      */
     // pomoshnikdagi hatlar
-    public function guideTaskInbox()
+    public function guideTaskInbox(Request $request)
     {
         //
         $edoUsers  = EdoUsers::where('user_id','=', Auth::id())->first();
 
         $edoUsersChild  = EdoUsers::where('user_child', $edoUsers->user_id)->first();
 
+        $search_t = $request->input('search_t');
+        $s_start = $request->input("s_start");
+        $s_end = $request->input("s_end");
+
+        if($search_t || $s_start || $s_end){
+
+            ($edoUsersChild == null) ? 
+            $search = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id])->whereIn('status', ['-1',0]):
+            $search = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $edoUsersChild->user_id])->whereIn('status', ['-1',0]);
+
+
+            if($search_t){
+                $search->whereHas('message', function ($query) use ($search_t) {
+
+                    $query->where('from_name', 'like', '%'.$search_t.'%');
+                    $query->orWhere('title', 'like', '%'.$search_t.'%');
+                    $query->orWhere('in_number', 'like', '%'.$search_t.'%'); 
+                    $query->orWhere('out_number', 'like', '%'.$search_t.'%'); 
+
+                });
+
+            }
+            if($s_start || $s_end){
+                $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+            }
+            
+            $models = $search->orderBy('updated_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'search_t'=> $search_t,
+                's_start' => $s_start,
+                's_end'   => $s_end
+            ) );
+            return view('edo.edo-message-journals.guideTaskInbox',compact('models','search_t','s_start','s_end'));
+        
+        }
+
         if ($edoUsersChild == null){
+            
             $models = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id])
                 ->whereIn('status', ['-1',0])
                 ->orderBy('id', 'DESC')
-                ->get();
+                ->paginate(25);
         } else {
             $models = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $edoUsersChild->user_id])
                 ->whereIn('status', ['-1',0])
                 ->orderBy('id', 'DESC')
-                ->get();
+                ->paginate(25);
         }
 
         return view('edo.edo-message-journals.guideTaskInbox',compact('models'));
     }
 
     // tasdiqlashga
-    public function guideTaskResolution()
+    public function guideTaskResolution(Request $request)
     {
         //
         $edoUsers  = EdoUsers::where('user_id','=', Auth::id())->first();
 
         $edoUsersManager  = EdoUsers::where('user_manager', $edoUsers->user_id)->first();
-
+        
         $edoUsersChild  = EdoUsers::where('user_child', $edoUsers->user_id)->first();
-
+        
         // manager
-        if ($edoUsersManager == null){
-            $manager = 0;
-        } else {
-            $manager = $edoUsersManager->user_id;
+        ($edoUsersManager == null) ? $manager = 0:$manager = $edoUsersManager->user_id;
+        
+        // child
+        ($edoUsersChild == null) ?$child = 0:$child = $edoUsersChild->user_id;
+
+        $search_t = $request->input('search_t');
+        $s_start = $request->input("s_start");
+        $s_end = $request->input("s_end");
+
+        if($search_t || $s_start || $s_end){
+
+            ($edoUsersChild == null) ? 
+            $search = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id])->where('status', 1):
+            $search = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $edoUsersChild->user_id])->where('status',1);
+
+
+            if($search_t){
+                $search->whereHas('message', function ($query) use ($search_t) {
+
+                    $query->where('from_name', 'like', '%'.$search_t.'%');
+                    $query->orWhere('title', 'like', '%'.$search_t.'%');
+                    $query->orWhere('in_number', 'like', '%'.$search_t.'%'); 
+                    $query->orWhere('out_number', 'like', '%'.$search_t.'%'); 
+
+                });
+
+            }
+            if($s_start || $s_end){
+                $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+            }
+            
+            $models = $search->orderBy('updated_at', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'search_t'=> $search_t,
+                's_start' => $s_start,
+                's_end'   => $s_end
+            ) );
+            return view('edo.edo-message-journals.guideTaskResolution',compact('models','search_t','s_start','s_end'));
+        
         }
 
-        // child
-        if ($edoUsersChild == null){
-            $child = 0;
-        } else {
-            $child = $edoUsersChild->user_id;
-        }
+        
 
         $models = EdoMessageJournal::whereIn('to_user_id', [$edoUsers->user_id, $manager, $child])
             ->where('status', 1)
-            ->orderBy('id', 'DESC')
-            ->get();
+            ->orderBy('updated_at', 'DESC')
+            ->paginate(25);
 
         return view('edo.edo-message-journals.guideTaskResolution',compact('models'));
     }
@@ -383,12 +482,46 @@ class EdoMessageJournalsController extends Controller
     }
 
     // redirect Tasks
-    public function guideTasksRedirect()
+    public function guideTasksRedirect(Request $request)
     {
+        $search_t = $request->input('search_t');
+        $s_start = $request->input("s_start");
+        $s_end = $request->input("s_end");
+
+        if($search_t || $s_start || $s_end){
+
+            $search = EdoRedirectMessage::where('user_id', Auth::id())->orWhere('from_guide_id', Auth::id())
+            ->where('status', 1);
+            if($search_t){
+                $search->whereHas('message', function ($query) use ($search_t) {
+
+                    $query->where('from_name', 'like', '%'.$search_t.'%');
+                    $query->orWhere('title', 'like', '%'.$search_t.'%');
+                    $query->orWhere('in_number', 'like', '%'.$search_t.'%'); 
+                    $query->orWhere('out_number', 'like', '%'.$search_t.'%'); 
+
+                });
+
+            }
+            if($s_start || $s_end){
+                    $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+            }
+            
+            $models = $search->orderBy('id', 'DESC')->paginate(25);
+            
+            $models->appends ( array (
+                'search_t'=> $search_t,
+                's_start' => $s_start,
+                's_end'   => $s_end
+            ) );
+            return view('edo.edo-message-journals.guideTaskRedirect',compact('models','search_t','s_start','s_end'));
+        
+        }
+
         $models = EdoRedirectMessage::where('user_id', Auth::id())->orWhere('from_guide_id', Auth::id())
             ->where('status', 1)
             ->orderBy('id', 'DESC')
-            ->get();
+            ->paginate(25);
 
         return view('edo.edo-message-journals.guideTaskRedirect',
             compact('models'));

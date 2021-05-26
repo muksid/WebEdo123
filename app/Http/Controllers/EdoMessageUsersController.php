@@ -145,211 +145,325 @@ class EdoMessageUsersController extends Controller
     }
 
 
-    public function directorTasksReg()
+    public function directorTasksReg(Request $request)
     {
         //
         $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
 
-        switch ($edoUsers->userRole->role_code){
-          case 'director_department':
-          case 'guide_manager':
-          case 'deputy_of_director':
-          case 'dep_helper':
-          case 'filial_office':
-        //   deputy_of_director
-            $allDepart = EdoMessageUsers::where('status', 1)
-                ->where('depart_id', 1)
-                ->orderBy('created_at', 'DESC')
-                ->get();
+        switch (Auth::user()->edoUsers()){
+            case 'director_department':
+            case 'guide_manager':
+            case 'deputy_of_director':
+            case 'dep_helper':
+            case 'filial_office':
 
-            $models = EdoMessageUsers::where('status', 1)
-                ->whereIn('depart_id', [$edoUsers->department_id,1])
-                ->orderBy('created_at', 'DESC')
-                ->paginate(100);
+                $search_t = $request->input('search_t');
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
 
-            break;
-            default;
-                return $edoUsers->userRole->role_code;
+                if($search_t || $s_start || $s_end){
+
+                    $search = EdoMessageUsers::where('status', 1)->where('depart_id', $edoUsers->department_id);
+
+                    if($search_t){
+                        $search->whereHas('message', function ($query) use ($search_t) {
+
+                            $query->where('from_name', 'like', '%'.$search_t.'%');
+                            $query->orWhere('title', 'like', '%'.$search_t.'%');
+                            $query->orWhere('in_number', 'like', '%'.$search_t.'%'); 
+                            $query->orWhere('out_number', 'like', '%'.$search_t.'%'); 
+
+                        });
+
+                    }
+                    if($s_start || $s_end){
+                            $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                    }
+                    
+                    $models = $search->orderBy('id', 'DESC')->paginate(25);
+                    
+                    $models->appends ( array (
+                        'search_t'=> $search_t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    return view('edo.edo-message-users.directorTaskReg',compact('models','search_t','s_start','s_end'));
+                
+                }
+
+                $models = EdoMessageUsers::where('status', 1)
+                    ->where('depart_id', $edoUsers->department_id)
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(25);
+
+                return view('edo.edo-message-users.directorTaskReg',compact('models'));
+
                 break;
-
-        }
-
-        return view('edo.edo-message-users.directorTaskReg',compact('models', 'allDepart'))
-            ->with('i', (request()->input('page', 1) - 1) * 25);
-    }
-
-    public function directorTasksInbox()
-    {
-        //
-        $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
-        $department = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrfail();
-
-
-        if ($edoUsers->userRole->role_code == 'director_department' ||
-            $edoUsers->userRole->role_code == 'guide_manager' ||
-            $edoUsers->userRole->role_code == 'deputy_of_director' ||
-            $edoUsers->userRole->role_code == 'dep_helper' ||
-            $edoUsers->userRole->role_code == 'filial_manager' ||
-            $edoUsers->userRole->role_code == 'filial_office'){
-            $models = EdoMessageUsers::where('status' ,2)
-                //->join('edo_dep_inbox_journals as b', 'edo_message_users.edo_message_id', '=', 'b.edo_message_id')
-                //->where('status' ,2)
-                ->where('edo_message_users.depart_id' ,$department->department_id)
-                ->orderBy('created_at', 'DESC')
-                ->get();
-        } else {
-            return response()->view('errors.' . '404', [], 404);
-        }
-
-        return view('edo.edo-message-users.directorTaskInbox',compact('models'));
-    }
-
-    public function directorTasksProcess()
-    {
-        //
-        $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
-        $department = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrfail();
-        // dd($edoUsers->department_id);
-        switch ($edoUsers->userRole->role_code){
-            case ('director_department');
-            case ('guide_manager');
-            case ('deputy_of_director');
-            case ('dep_helper');
-            case ('filial_manager');
-            case ('filial_office');
-
-            $search = EdoMessageUsers::where('depart_id', $department->department_id)
-                ->where('status' ,3)
-                ->where('sub_status' ,'!=', 3);
-
-            $ofc = Input::get ( 'ofc' );
-            $f = Input::get ( 'f' );
-            $t = Input::get ( 't' );
-            $r = Input::get ( 'r' );
-
-            if($ofc) {
-                $search->whereHas('journal', function ($query) use ($ofc) {
-
-                    $query->where('in_number', 'like', '%'.$ofc.'%');
-
-                });
-            }
-            if($f) {
-                $search->whereHas('message', function ($query) use ($f) {
-
-                    $query->where('from_name', 'like', '%'.$f.'%');
-
-                });
-            }
-            if($t) {
-                $search->whereHas('message', function ($query) use ($t) {
-
-                    $query->where('title', 'like', '%'.$t.'%');
-
-                });
-            }
-            if($r) {
-                $search->whereHas('message', function ($query) use ($r) {
-
-                    $query->where('in_number', 'like', '%'.$r.'%');
-
-                });
-            }
-
-            $models = $search->orderBy('id', 'DESC')
-                ->paginate(25);
-
-            $models->appends ( array (
-                'ofc' => Input::get ( 'ofc' ),
-                'f' => Input::get ( 'f' ),
-                't' => Input::get ( 't' ),
-                'd' => Input::get ( 'd' )
-            ) );
-
-            break;
             default;
                 return response()->view('errors.' . '404', [], 404);
                 break;
 
         }
-        return view('edo.edo-message-users.directorTaskProcess',compact('models','ofc','f','t','r'));
-
     }
 
-    public function directorTasksClosed()
+    public function directorTasksInbox(Request $request)
     {
         //
         $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
-        $department = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrfail();
 
+        switch(Auth::user()->edoUsers()){
+            case 'guide_manager':
+            case 'office':
+            case 'helper':
+            case 'control':
+            case 'director_department':
+            case 'deputy_of_director':
+            case 'dep_helper':
+            case 'filial_manager':
+            case 'filial_office':
 
-        if ($edoUsers->userRole->role_code == 'director_department' ||
-            $edoUsers->userRole->role_code == 'guide_manager' ||
-            $edoUsers->userRole->role_code == 'deputy_of_director' ||
-            $edoUsers->userRole->role_code == 'dep_helper' ||
-            $edoUsers->userRole->role_code == 'filial_manager' ||
-            $edoUsers->userRole->role_code == 'filial_office'){
-            $models = EdoMessageUsers::where('depart_id', $department->department_id)
-                ->where('sub_status' ,3)
-                ->orderBy('id', 'DESC')
-                ->get();
-        } else {
-            return response()->view('errors.' . '404', [], 404);
+                $search_t = $request->input('search_t');
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+        
+                if($search_t || $s_start || $s_end){
+
+                    $search = EdoMessageUsers::where('status' ,2)
+                    ->where('edo_message_users.depart_id' ,$edoUsers->department_id);
+
+                    if($search_t){
+                        $search->whereHas('message', function ($query) use ($search_t) {
+
+                            $query->where('from_name', 'like', '%'.$search_t.'%');
+                            $query->orWhere('title', 'like', '%'.$search_t.'%');
+                            $query->orWhere('in_number', 'like', '%'.$search_t.'%');
+                            $query->orWhere('out_number', 'like', '%'.$search_t.'%');
+                            $query->whereHas('depInboxJournal', function ($q) use ($search_t) {
+
+                                $q->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $search_t . '%');
+    
+                            });  
+                        });
+
+                    }
+                    if($s_start || $s_end){
+                        $search->whereHas('message', function($query) use($s_start,$s_end){
+                            $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                        });
+                    }
+                    $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+                    
+                    $models->appends ( array (
+                        'search_t'=> $search_t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    return view('edo.edo-message-users.directorTaskInbox',compact('models','search_t','s_start','s_end'));
+                }
+
+                $models = EdoMessageUsers::where('status' ,2)
+                    ->where('edo_message_users.depart_id' ,$edoUsers->department_id)
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+                    
+                return view('edo.edo-message-users.directorTaskInbox',compact('models'));
+                
+                break;
+
+            default:
+                return response()->view('errors.' . '404', [], 404);
+                break;
         }
 
-        return view('edo.edo-message-users.directorTaskClosed',compact('models'));
 
     }
 
-    public function directorTasksJournal()
+    public function directorTasksProcess(Request $request)
     {
         //
-        $edoUsers  = EdoUsers::where('user_id', Auth::id())->firstOrFail();
+        $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
 
-        $department = EdoUsers::where('user_id', Auth::id())->firstOrfail();
+        switch (Auth::user()->edoUsers()){
+            case ('director_department'):
+            case ('guide_manager'):
+            case ('deputy_of_director'):
+            case ('dep_helper'):
+            case ('filial_manager'):
+            case ('filial_office'):
 
-        if ($edoUsers->userRole->role_code == 'dep_helper' || $edoUsers->userRole->role_code == 'filial_office'){
+                $search_t = $request->input('search_t');
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+        
+                if($search_t || $s_start || $s_end){
 
-            $search = EdoDepInboxJournals::where('depart_id', $department->department_id);
+                    $search = EdoMessageUsers::where('depart_id', $edoUsers->department_id)
+                        ->where('status' ,3)
+                        ->where('sub_status' ,'!=', 3);
 
-            $ofc = Input::get ( 'ofc' );
-            $f = Input::get ( 'f' );
-            $t = Input::get ( 't' );
-            $r = Input::get ( 'r' );
-            $d = Input::get ( 'd' );
+                    if($search_t){
+                        $search->whereHas('message', function ($query) use ($search_t) {
 
-            if($ofc) {
-                $search->where('in_number', $ofc);
-            }
-            if($f) {
-                $search->where('from_name', 'LIKE', '%'.$f.'%');
-            }
-            if($t) {
-                $search->where('title', 'LIKE', '%'.$t.'%');
-            }
-            if($r) {
-                $search->whereHas('message', function ($query) use ($r) {
+                            $query->where('from_name', 'like', '%'.$search_t.'%');
+                            $query->orWhere('title', 'like', '%'.$search_t.'%');
+                            $query->orWhere('in_number', 'like', '%'.$search_t.'%');
+                            $query->orWhere('out_number', 'like', '%'.$search_t.'%');
+                            $query->whereHas('depInboxJournal', function ($q) use ($search_t) { #DepInboxJournal
 
-                    $query->where('in_number', 'LIKE', '%'.$r.'%');
+                                $q->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $search_t . '%');
+    
+                            });  
+                        });
 
-                });
-            }
-            if($d) {
-                $search->whereHas('message', function ($query) use ($d) {
+                    }
+                    if($s_start || $s_end){
+                        $search->whereHas('message', function($query) use($s_start,$s_end){
+                            $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                        });
+                    }
+                    
+                    $models = $search->orderBy('id', 'DESC')->paginate(25);
+                    
+                    $models->appends ( array (
+                        'search_t'=> $search_t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    return view('edo.edo-message-users.directorTaskProcess',compact('models','search_t','s_start','s_end'));
+                
+                }
 
-                    $query->where('out_number', 'LIKE', '%'.$d.'%');
+                $models = EdoMessageUsers::where('depart_id', $edoUsers->department_id)
+                    ->where('status' ,3)
+                    ->where('sub_status' ,'!=', 3)
+                    ->orderBy('id', 'DESC')
+                    ->paginate(25);
 
-                });
-            }
+                return view('edo.edo-message-users.directorTaskProcess',compact('models'));
+                break;
+            default;
+                return response()->view('errors.' . '404', [], 404);
+                break;
 
-            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
-
-        } else {
-            return response()->view('errors.' . '404', [], 404);
         }
 
-        return view('edo.edo-message-users.directorTaskJournal',compact('models','ofc','f','t','r','d'));
+    }
 
+    public function directorTasksClosed(Request $request)
+    {
+        //
+        $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
+
+        switch (Auth::user()->edoUsers()){
+            case ('director_department'):
+            case ('guide_manager'):
+            case ('deputy_of_director'):
+            case ('dep_helper'):
+            case ('filial_manager'):
+            case ('filial_office'):
+
+                $search_t = $request->input('search_t');
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+        
+                if($search_t || $s_start || $s_end){
+
+                    $search = EdoMessageUsers::where('depart_id', $edoUsers->department_id)
+                        ->where('sub_status' , 3);
+
+                    if($search_t){
+                        $search->whereHas('message', function ($query) use ($search_t) {
+
+                            $query->where('from_name', 'like', '%'.$search_t.'%');
+                            $query->orWhere('title', 'like', '%'.$search_t.'%');
+                            $query->orWhere('in_number', 'like', '%'.$search_t.'%');
+                            $query->orWhere('out_number', 'like', '%'.$search_t.'%');
+                            $query->whereHas('depInboxJournal', function ($q) use ($search_t) { #DepInboxJournal
+
+                                $q->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $search_t . '%');
+    
+                            });  
+                        });
+
+                    }
+                    if($s_start || $s_end){
+                        $search->whereBetween('created_at', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                    }
+                    
+                    $models = $search->orderBy('id', 'DESC')->paginate(25);
+                    
+                    $models->appends ( array (
+                        'search_t'=> $search_t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    return view('edo.edo-message-users.directorTaskClosed',compact('models','search_t','s_start','s_end'));
+                
+                }
+
+                $models = EdoMessageUsers::where('depart_id', $edoUsers->department_id)
+                    ->where('sub_status', 3)
+                    ->orderBy('id', 'DESC')
+                    ->paginate(25);
+
+                    return view('edo.edo-message-users.directorTaskClosed',compact('models'));
+                break;
+            default;
+                return response()->view('errors.' . '404', [], 404);
+                break;
+
+        }
+    }
+
+    public function directorTasksJournal(Request $request)
+    {
+        //
+        $edoUsers  = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
+
+        switch (Auth::user()->edoUsers()){
+            case ('dep_helper'):
+            case ('filial_office'):
+
+                $search_t = $request->input('search_t');
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+
+                if($search_t || $s_start ||$s_end){
+
+                    $search = EdoDepInboxJournals::where('depart_id', $edoUsers->department->depart_id);
+                    if($search_t){
+                        $search->where(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $search_t . '%');
+                        $search->orWhere('from_name', 'like','%'.$search_t.'%');
+                        $search->orWhere('title', 'like','%'.$search_t.'%');
+                        $search->orWhereHas('message', function ($query) use ($search_t) {
+                            $query->where('in_number', 'LIKE', '%'.$search_t.'%');
+                            $query->orWhere('out_number', 'LIKE', '%'.$search_t.'%');
+    
+                        });
+                    }
+    
+                    if($s_start || $s_end){
+                        $search->whereHas('message', function($query) use($s_start,$s_end){
+                            $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                        });
+                    }
+    
+                    $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+                    
+                    return view('edo.edo-message-users.directorTaskJournal',compact('models','search_t','s_start','s_end'));
+
+                }else{
+                    
+                    $models = EdoDepInboxJournals::where('depart_id', $edoUsers->department->depart_id)->orderBy('created_at', 'DESC')->paginate(25);
+                    
+                    return view('edo.edo-message-users.directorTaskJournal',compact('models'));
+                }
+
+                break;
+            default:
+                return response()->view('errors.' . '404', [], 404);
+                break;
+        }
     }
     /**
      * Show the form for creating a new resource.
@@ -388,7 +502,7 @@ class EdoMessageUsersController extends Controller
             ->get();
 
         // reg journals
-        $department = EdoUsers::where('user_id', $messageUser->to_user_id)->firstOrFail();
+        $department = EdoUsers::where('user_id', $messageUser->to_user_id)->where('status',1)->firstOrFail();
 
         $regJournals = EdoDepInboxJournals::where('depart_id', $department->department_id)->orderBy('id', 'DESC')->first();
 

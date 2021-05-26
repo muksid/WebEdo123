@@ -87,4 +87,9 @@ class EdoMessageSubUsers extends Model
     public function mesUsers(){
         return $this->hasOne(EdoMessageUsers::class, 'edo_message_id','edo_message_id')->where('depart_id', Auth::user()->department->depart_id);
     }
+
+    public function depInboxJournal()
+    {
+        return $this->hasOne(EdoDepInboxJournals::class, 'edo_message_id','id');
+    }
 }

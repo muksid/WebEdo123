@@ -222,17 +222,17 @@ Route::group(['middleware' => ['auth']], function() {
     // Edo message journals
     Route::resource('edo-message-journals','EdoMessageJournalsController');
 
-    Route::get('/edo/g-tasks/inbox','EdoMessageJournalsController@guideTaskInbox')->name('guide-tasks-inbox');
+    Route::any('/edo/g-tasks/inbox','EdoMessageJournalsController@guideTaskInbox')->name('guide-tasks-inbox');
 
     Route::get('/edo/g-tasks/g-inbox','EdoMessageUsersController@guideTaskGInbox')->name('guide-tasks-g-inbox');
 
     Route::get('/edo/g-tasks/g-process','EdoMessageUsersController@guideTaskGProcess')->name('guide-tasks-g-process');
 
-    Route::get('/edo/g-tasks/resolution','EdoMessageJournalsController@guideTaskResolution')->name('guide-tasks-resolution');
+    Route::any('/edo/g-tasks/resolution','EdoMessageJournalsController@guideTaskResolution')->name('guide-tasks-resolution');
     
     Route::post('redirect-task','EdoMessageJournalsController@redirectTask')->name('redirect-task');
 
-    Route::get('/edo/g-tasks/redirect','EdoMessageJournalsController@guideTasksRedirect')->name('g-tasks-redirect');
+    Route::any('/edo/g-tasks/redirect','EdoMessageJournalsController@guideTasksRedirect')->name('g-tasks-redirect');
 
     Route::post('get-journal-number', 'EdoMessageJournalsController@getJournalNumber')->name('get-journal-number');
 
@@ -242,7 +242,7 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::get('/edo/g-tasks/sent','EdoMessageJournalsController@guideTasksSent')->name('g-tasks-sent');
 
-    Route::get('/edo/g-tasks/closed','EdoMessageJournalsController@guideTasksClosed')->name('g-tasks-closed');
+    Route::any('/edo/g-tasks/closed','EdoMessageJournalsController@guideTasksClosed')->name('g-tasks-closed');
 
     Route::get('/edo/tasks/control','EdoMessageJournalsController@control')->name('/edo/tasks/control');
 
@@ -266,11 +266,11 @@ Route::group(['middleware' => ['auth']], function() {
     // Edo message users
     Route::resource('edo-message-users','EdoMessageUsersController');
 
-    Route::get('/edo/d-tasks/reg', 'EdoMessageUsersController@directorTasksReg')->name('d-tasks-reg');
+    Route::any('/edo/d-tasks/reg', 'EdoMessageUsersController@directorTasksReg')->name('d-tasks-reg');
 
-    Route::get('/edo/d-tasks/inbox', 'EdoMessageUsersController@directorTasksInbox')->name('d-tasks-inbox');
+    Route::any('/edo/d-tasks/inbox', 'EdoMessageUsersController@directorTasksInbox')->name('d-tasks-inbox');
 
-    Route::get('/edo/d-tasks/closed', 'EdoMessageUsersController@directorTasksClosed')->name('d-tasks-closed');
+    Route::any('/edo/d-tasks/closed', 'EdoMessageUsersController@directorTasksClosed')->name('d-tasks-closed');
 
     Route::get('/edo/view-d-task/{id}/{slug}', 'EdoMessageUsersController@viewDirectorTask')->name('view-d-task');
 
