@@ -250,6 +250,7 @@ class EdoMessageJournalsController extends Controller
             case 'control':
             case 'deputy_of_director':
             case 'dep_helper':
+            case 'guide_manager':
              // journal
              $journals = EdoJournals::where('depart_id', $edoUsers->department_id)
              ->where('journal_type', 'inbox')

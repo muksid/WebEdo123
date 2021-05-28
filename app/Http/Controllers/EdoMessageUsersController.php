@@ -308,11 +308,7 @@ class EdoMessageUsersController extends Controller
                             $query->orWhere('title', 'like', '%'.$search_t.'%');
                             $query->orWhere('in_number', 'like', '%'.$search_t.'%');
                             $query->orWhere('out_number', 'like', '%'.$search_t.'%');
-                            $query->whereHas('depInboxJournal', function ($q) use ($search_t) { #DepInboxJournal
 
-                                $q->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $search_t . '%');
-    
-                            });  
                         });
 
                     }

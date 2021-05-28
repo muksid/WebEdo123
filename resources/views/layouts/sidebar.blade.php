@@ -88,138 +88,134 @@
                         </a></li>
                 </ul>
             </li>
+                
+            @if(in_array("admin", json_decode(Auth::user()->roles)))
 
-            @foreach(json_decode(Auth::user()->roles) as $user)
-                @switch($user)
+                <li class="treeview {{$active}}">
+                    <a href="#"><i class="fa fa-wrench"></i> <span>Administrator</span>
+                        <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                    </a>
+                    <ul class="treeview-menu">
 
-                    @case('admin')
+                        <li class=" {{$active_admin_d}}">
+                            <a href="{{ url('/admin/departments') }}">
+                                <i class="fa fa-bank"></i> <span> @lang('blade.sidebar_dep')</span>
+                            </a>
+                        </li>
+                        <li class=" {{$active_admin_r}}">
+                            <a href="{{ url('/admin/roles') }}">
+                                <i class="fa fa-wrench"></i> <span>Role</span>
+                            </a>
+                        </li>
+                        <li class=" {{$active_admin_u}}">
+                            <a href="{{ url('/admin/users') }}">
+                                <i class="fa fa-users"></i> <span>@lang('blade.sidebar_users')</span>
+                            </a>
+                        </li>
+                        <li class=" {{$active_admin_i}}">
+                            <a href="{{ route('it-admin-ip-networks') }}">
+                                <i class="fa fa-laptop"></i> <span>Ip networks</span>
+                            </a>
+                        </li>
 
-                    <li class="treeview {{$active}}">
-                        <a href="#"><i class="fa fa-wrench"></i> <span>Administrator</span>
-                            <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
+                    </ul>
+                </li>
+                <li class="treeview">
+                    <a href="#"><i class="fa fa-database"></i> <span>Control DB</span><span
+                                class="pull-right-container">
                         </span>
-                        </a>
-                        <ul class="treeview-menu">
-
-                            <li class=" {{$active_admin_d}}">
-                                <a href="{{ url('/admin/departments') }}">
-                                    <i class="fa fa-bank"></i> <span> @lang('blade.sidebar_dep')</span>
-                                </a>
-                            </li>
-                            <li class=" {{$active_admin_r}}">
-                                <a href="{{ url('/admin/roles') }}">
-                                    <i class="fa fa-wrench"></i> <span>Role</span>
-                                </a>
-                            </li>
-                            <li class=" {{$active_admin_u}}">
-                                <a href="{{ url('/admin/users') }}">
-                                    <i class="fa fa-users"></i> <span>@lang('blade.sidebar_users')</span>
-                                </a>
-                            </li>
-                            <li class=" {{$active_admin_i}}">
-                                <a href="{{ route('it-admin-ip-networks') }}">
-                                    <i class="fa fa-laptop"></i> <span>Ip networks</span>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </li>
-                    <li class="treeview">
-                        <a href="#"><i class="fa fa-database"></i> <span>Control DB</span><span
-                                    class="pull-right-container">
+                                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li>
+                            <a href="{{ url('/user-message-control') }}">
+                                <i class="fa fa-envelope-o"></i> <span> User Mes Control</span>
+                                <span class="pull-right-container">
+                            <small class="label pull-right bg-green">new</small>
                             </span>
-                                        <span class="pull-right-container">
-                            <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/monitoring-message') }}">
+                                <i class="fa fa-envelope"></i> <span> Message Control</span>
+                                <span class="pull-right-container">
+                            <small class="label pull-right bg-green">new</small>
                             </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li>
-                                <a href="{{ url('/user-message-control') }}">
-                                    <i class="fa fa-envelope-o"></i> <span> User Mes Control</span>
-                                    <span class="pull-right-container">
-                                <small class="label pull-right bg-green">new</small>
-                                </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url('/monitoring-message') }}">
-                                    <i class="fa fa-envelope"></i> <span> Message Control</span>
-                                    <span class="pull-right-container">
-                                <small class="label pull-right bg-green">new</small>
-                                </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url('/message-users-delete') }}">
-                                    <i class="fa fa-users"></i> <span> Message Users</span>
-                                    <span class="pull-right-container">
-                                <small class="label pull-right bg-green">new</small>
-                                </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url('/file-control') }}">
-                                    <i class="fa fa-file"></i> <span> File Control</span>
-                                    <span class="pull-right-container">
-                                <small class="label pull-right bg-green">new</small>
-                                </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @break
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/message-users-delete') }}">
+                                <i class="fa fa-users"></i> <span> Message Users</span>
+                                <span class="pull-right-container">
+                            <small class="label pull-right bg-green">new</small>
+                            </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/file-control') }}">
+                                <i class="fa fa-file"></i> <span> File Control</span>
+                                <span class="pull-right-container">
+                            <small class="label pull-right bg-green">new</small>
+                            </span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>            
+            @elseif(in_array("branch_admin", json_decode(Auth::user()->roles)))
+                <li>
+                    <a href="{{ url('/admin/users') }}">
+                        <i class="fa fa-users"></i> <span>@lang('blade.sidebar_users')</span>
+                        <span class="pull-right-container">
+                        <small class="label pull-right bg-green">new</small>
+                    </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/ip-networks') }}">
+                        <i class="fa fa-laptop"></i> <span>Ip networks</span>
+                        <span class="pull-right-container">
+                        <small class="label pull-right bg-green">new</small>
+                    </span>
+                    </a>
+                </li>
+                <li class=" {{$active_admin_d}}">
+                    <a href="{{ url('/admin/departments') }}">
+                        <i class="fa fa-bank"></i> <span> @lang('blade.sidebar_dep')</span>
+                    </a>
+                </li>
+            @elseif(in_array("it_admin", json_decode(Auth::user()->roles)))
+                <li>
+                    <a href="{{ route('it-admin-ip-networks') }}">
+                        <i class="fa fa-laptop"></i> <span> IP Networks</span>
+                        <span class="pull-right-container">
+                        <small class="label pull-right bg-green">new</small>
+                    </span>
+                    </a>
+                </li>
+            @elseif(in_array("accountant", json_decode(Auth::user()->roles)))
+                <li>
+                    <a href="https://online.turonbank.uz:3347/bank-user" target="_blank">
+                        <i class="fa fa-user"></i> <span>Online App</span>
+                        <span class="pull-right-container">
+                        <small class="label pull-right bg-green">Yangi</small>
+                    </span>
+                    </a>
+                </li>
+            @elseif(in_array("control", json_decode(Auth::user()->roles)))
+                <li>
+                    <a href="{{ url('/control') }}">
+                        <i class="fa fa-check-square-o"></i> <span>Nazoratdagi xatlar</span>
+                        <span class="pull-right-container">
+                        <small class="label pull-right bg-green">yangi</small>
+                    </span>
+                    </a>
+                </li>
+            @endif
 
-                    @case('it_admin')
-                    <li>
-                        <a href="{{ route('it-admin-ip-networks') }}">
-                            <i class="fa fa-laptop"></i> <span> IP Networks</span>
-                            <span class="pull-right-container">
-                          <small class="label pull-right bg-green">new</small>
-                        </span>
-                        </a>
-                    </li>
-                    @break
-                    @case('branch_admin')
-                    <li>
-                        <a href="{{ url('/admin/users') }}">
-                            <i class="fa fa-users"></i> <span>@lang('blade.sidebar_users')</span>
-                            <span class="pull-right-container">
-                          <small class="label pull-right bg-green">new</small>
-                        </span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url('/ip-networks') }}">
-                            <i class="fa fa-laptop"></i> <span>Ip networks</span>
-                            <span class="pull-right-container">
-                          <small class="label pull-right bg-green">new</small>
-                        </span>
-                        </a>
-                    </li>
-                    @break
-                    @case('accountant')
-                    <li>
-                        <a href="https://online.turonbank.uz:3347/bank-user" target="_blank">
-                            <i class="fa fa-user"></i> <span>Online App</span>
-                            <span class="pull-right-container">
-                          <small class="label pull-right bg-green">Yangi</small>
-                        </span>
-                        </a>
-                    </li>
-                    @break
-                    @case('control')
-                    <li>
-                        <a href="{{ url('/control') }}">
-                            <i class="fa fa-check-square-o"></i> <span>Nazoratdagi xatlar</span>
-                            <span class="pull-right-container">
-                          <small class="label pull-right bg-green">yangi</small>
-                        </span>
-                        </a>
-                    </li>
-                    @break
-                @endswitch
-            @endforeach
 
             @switch(Auth::user()->uwUsers())
                 @case('super_admin')

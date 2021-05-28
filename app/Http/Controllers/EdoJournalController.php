@@ -21,12 +21,13 @@ class EdoJournalController extends Controller
     {
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
         # If user kanc or helper
-        switch ($edoUsers->role_id) {
-            case 2:
-            case 4:
-            case 17:
-            case 18:
-            case 19:
+        switch (Auth::user()->edoUsers()) {
+            case 'office':
+            case 'helper':
+            case 'director_department':
+            case 'deputy_of_director':
+            case 'guide_manager':
+            case 'dep_helper':
 
                 $models = EdoJournals::where('depart_id', $edoUsers->department_id)->orderBy('id', 'DESC')->get();
 
@@ -42,58 +43,76 @@ class EdoJournalController extends Controller
     }
 
 
-    public function viewTasks($id)
+    public function viewTasks(Request $request,$id)
     {
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status',1)->firstOrFail();
-        # If user kanc or helper
-        if($edoUsers->role_id === 2){
+        
+        switch(Auth::user()->edoUsers()){
+            case 'guide':
+            case 'office':
+            case 'helper':
+            case 'director_department':
+            case 'admin':
+            case 'deputy_of_director':
+            case 'dep_helper':
+            case 'guide_manager':
 
-            $journal = EdoJournals::where('id', $id)->first();
+                $journal = EdoJournals::where('id', $id)->first();
+                
+                $u = $request->input("u");
+                $t = $request->input("t");
+                
+                $s_start = $request->input("s_start");
+                $s_end = $request->input("s_end");
+                
+                if($u || $t || $s_start || $s_end){
+                    
+                    // search filter
+                    $search = EdoMessageJournal::where('edo_journal_id', $id)->where('depart_id', Auth::user()->department->depart_id);
 
-            $r   = Input::get ( 'r');
-            $i_r = Input::get ( 'i_r');
-            $t   = Input::get ( 't');
-            
-            $search = EdoMessageJournal::where('edo_journal_id', $id);
-            
-            if($r) {
-                $search->where('in_number', 'like', '%'.$r.'%');
-            } 
+                    if($u)  $search->where('to_user_id', $u);
 
+                    if ($t){
+                        $search->whereHas('message', function ($query) use ($t) {
+                            $query->where('from_name', 'like', '%' . $t . '%');
+                            $query->orWhere('title', 'like', '%' . $t . '%');
+                            $query->orWhere('in_number', 'like', '%' . $t . '%');
+                            $query->orWhere('out_number', 'like', '%' . $t . '%');
+                            $query->orWhere(DB::raw('CONCAT_WS("", in_number, in_number_a)'), 'like', '%' . $t . '%');
+                        });
+                    }
+                    if($s_start || $s_end){
+                        $search->whereHas('message', function($query) use($s_start,$s_end){
+                            $query->whereBetween('in_date', [$s_start.' 00:00:00', $s_end.' 23:59:59'] );
+                        });
+                    }
 
-            if($i_r){
-                $search->whereHas('message', function($query) use($i_r){
-                    $query->where('out_number', 'like', '%'.$i_r.'%');
-                });
-            }
+                    $models = $search->orderBy('created_at', 'DESC')->paginate(25);
 
-            if($t){
-                $search->whereHas('message', function($query) use($t){
-                    $query->where('from_name', 'like', '%'.$t.'%');
-                });
-            }
+                    $models->appends ( array (
+                        'u'       => $u,
+                        't'       => $t,
+                        's_start' => $s_start,
+                        's_end'   => $s_end
+                    ) );
+                    return view('edo.edo-journals.viewTasks',compact('models','journal','id','u','t','s_start','s_end'))
+                    ->with('i', (request()->input('page', 1) - 1) * 25);
+                }
+        
+                $models = EdoMessageJournal::where('edo_journal_id', $id)
+                    ->where('depart_id', Auth::user()->department->depart_id)
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(25);
 
-            //
-            $models = $search->orderBy('created_at', 'DESC')->paginate(25);
+                return view('edo.edo-journals.viewTasks',compact('models','journal','id'))
+                    ->with('i', (request()->input('page', 1) - 1) * 25);
+                break;
 
-
-            $models->appends ( array (
-                'r'     => $r,
-                'i_r'   => $i_r,
-                't'     => $t,
-            ) );
-
-
-            if (empty($models)) {
+            default:
                 return response()->view('errors.' . '404', [], 404);
-            }
+                break;
+        }
 
-            return view('edo.edo-journals.viewTasks',compact('models','journal','r','i_r','t','id'))
-                ->with('i', (request()->input('page', 1) - 1) * 25);
-        }
-        else{
-            return response()->view('errors.' . '404', [], 404);
-        }
     }
 
     public function getExecutors(Request $request){

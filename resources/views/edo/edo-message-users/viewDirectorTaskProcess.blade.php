@@ -633,7 +633,7 @@
                         <?php $key = 1; ?>
                             @foreach($perfSubUsers as $user)
                                 @if( $user->depart_id == Auth::user()->department->depart_id)
-                                    @switch($user->signatureUserRole->role_id)
+                                    @switch($user->signatureUserRole->role_id??'')
                                         @case(4)
                                         @case(11)
                                         @case(12)

@@ -17,7 +17,7 @@
                 {{ $message }}
             </div>
         @endif
-    <!-- Display Validation Errors -->
+        <!-- Display Validation Errors -->
         @if (count($errors) > 0)
             <div class="alert alert-danger">
                 <strong>Xatolik!</strong> Ma`lumotlarni qaytadan tekshiring.<br><br>
@@ -134,21 +134,18 @@
 
                                 @break
                                 @case('branch_admin')
-                                <div class="form-group">
-                                    <label>Filial MFO</label>
-                                    <input type="text" name="branch_code" class="form-control"
-                                           value="{{$user->branch_code}}" disabled>
-                                </div>
+                                <div class="col-md-6">
 
-                                <div class="form-group">
-                                    <label>Bo`limni tanlang</label>
-                                    <select class="form-control select2" name="depart_id" style="width: 100%;">
-                                        <option selected="selected"
-                                                value="{{$department->depart_id}}">{{$department->depart_id}}</option>
-                                        @foreach($departments as $department)
-                                            <option value="{{$department->id}}">{{$department->title}}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="form-group">
+                                        <label>Bo`limni tanlang</label>
+                                        <select class="form-control select2" name="parent_id" style="width: 100%;">
+                                            <option selected="selected"
+                                                    value="{{$parent->id}}">{{$parent->title}}</option>
+                                            @foreach($departments as $department)
+                                                <option value="{{$department->id}}">{{$department->title}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                                 @break
                             @endswitch

@@ -37,8 +37,7 @@ class EdoMessageJournal extends Model
     // for office sent
     public function toUser()
     {
-        return $this->belongsTo('App\User', 'to_user_id')
-            ->select(DB::raw('CONCAT(lname, " ", fname) AS full_name'));
+        return $this->belongsTo('App\User', 'to_user_id')->select(DB::raw('CONCAT(lname, " ", fname) AS full_name'));
     }
 
     // for depart d task

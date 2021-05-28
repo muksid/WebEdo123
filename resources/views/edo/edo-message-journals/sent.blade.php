@@ -17,7 +17,7 @@
             <li class="active">@lang('blade.groups_table')</li>
         </ol>
 
-    <!-- Message Succes -->
+        <!-- Message Succes -->
         @if ($message = Session::get('success'))
             <div class="modal fade in" id="myModal" role="dialog" style="display: block">
                 <div class="modal-dialog">
@@ -40,7 +40,7 @@
             </div>
 
         @endif
-    <!-- Display Validation Errors -->
+        <!-- Display Validation Errors -->
         @if (count($errors) > 0)
             <div class="alert alert-danger">
                 <strong>@lang('blade.error')</strong> @lang('blade.error_check').<br><br>
