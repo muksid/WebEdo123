@@ -415,6 +415,8 @@ Route::group(['middleware' => ['auth']], function() {
     // my protocols emp
     Route::get('/edo/my-protocols', 'EdoManagementProtocolsController@myProtocol')->name('edo-my-protocols');
 
+    Route::post('/edo/edit-report-protocols', 'EdoManagementProtocolsController@editReport')->name('edo-edit-report-protocols');
+
     // QrCode Message
     Route::resource('edo-qr-messages','EdoQrMessagesController');
 

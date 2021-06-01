@@ -26,3 +26,4 @@ yarn-error.log
 config/app.php
 config/database.php
 composer.lock
+composer.json

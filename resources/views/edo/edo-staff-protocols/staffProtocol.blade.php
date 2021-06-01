@@ -239,13 +239,11 @@
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($model->created_at??'')->format('d.m.Y H:i') }}</td>
                                     <td>
-                                        @if($memberStatus == 0)
-                                            <a href="{{ route('edit-stf-protocol',
-                                            ['id' => $model->id,
-                                            'hash' => $model->protocol_hash]) }}" class="btn btn-info btn-flat">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                        @endif
+                                        <a href="{{ route('edit-stf-protocol',
+                                        ['id' => $model->id,
+                                        'hash' => $model->protocol_hash]) }}" class="btn btn-info btn-flat">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
                                         @if($model->status == 1 || $model->status == -1)
                                             <a href="{{ route('delete-stf-protocol', ['id' => $model->id ] ) }}" class="btn btn-danger btn-flat">
                                                 <i class="fa fa-trash"></i>
