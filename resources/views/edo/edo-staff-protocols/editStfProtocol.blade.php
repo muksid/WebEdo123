@@ -64,7 +64,7 @@
                                     </div>
                                     <div class="clone hide">
                                         <div class="control-group input-group" style="margin-top:10px">
-                                            <input type="file" name="protocol   _file[]" class="form-control" multiple>
+                                            <input type="file" name="protocol_file[]" class="form-control" multiple>
                                             <div class="input-group-btn">
                                                 <button class="btn btn-danger" type="button">
                                                     <i class="glyphicon glyphicon-trash"></i> @lang('blade.delete')
@@ -122,11 +122,12 @@
                                                                 )</i>
 
                                                         </td>
-                                                        @if($model->status == 1 || $model->status == -1)
                                                         <td style="padding-left: 50px">
-                                                            <a href="{{ url('prt-fileRemove', ['id' => $file->id]) }}" class="text-bold text-red"> <i class="fa fa-trash fa-lg"></i></a>
+                                                            <a href="{{ url('prt-fileRemove', ['id' => $file->id]) }}" class="text-bold text-red"
+                                                                onclick="return confirm('@lang('blade.are_you_sure_delete')')"> 
+                                                                <i class="fa fa-trash fa-lg"></i>
+                                                            </a>
                                                         </td>
-                                                        @endif
                                                     </tr>
 
                                             @endforeach
@@ -139,7 +140,6 @@
                                 </div>
                                 @endif
 
-
                                 <div class="form-group">
                                     <div class="box-body box-profile">
                                         <ul class="list-group list-group-unbordered" id="selectedUsers">
@@ -151,8 +151,22 @@
                                                         <img class="img-circle img-bordered-sm" src="{{ asset("/admin-lte/dist/img/user.png") }}" alt="user">
                                                         <span class="pull-right btn-box-tool user_role" style="display: block;">
                                                             <select class="form-control" name="user_role[]">
+                                                                @switch($user->user_role)
+                                                                    @case(1)
+                                                                        <option value="1" selected>@lang('blade.head_role')</option>
+                                                                        @break
+                                                                    @case(3)
+                                                                        <option value="3" selected>@lang('blade.confirming_person')</option>
+                                                                        @break
+                                                                    @case(4)
+                                                                        <option value="4" selected>@lang('blade.suggested_member')</option>
+                                                                        @break
+                                                                    @default
+                                                                        <option value="2" selected>@lang('blade.members')</option>
+                                                                        @break
+                                                                @endswitch
                                                                 @if($user->user_sort == 1)
-                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="1">@lang('blade.head_role')</option>
                                                                     <option value="2">@lang('blade.members')</option>
                                                                     <option value="4">@lang('blade.suggested_member')</option>
                                                                 @else
@@ -160,7 +174,7 @@
                                                                         <option value="3">@lang('blade.confirming_person')</option>
                                                                     @endif
                                                                     <option value="2">@lang('blade.members')</option>
-                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="1">@lang('blade.head_role')</option>
                                                                     <option value="4">@lang('blade.suggested_member')</option>
                                                                 @endif
 
@@ -221,14 +235,21 @@
                             <!-- /.col-->
                             <div class="col-md-12">
                                 <div class="alert alert-warning">
-                                    <i class="fa fa-info"></i> Vazifaga o`zgartirish kiritilganda Boshqaruv a`zolariga qaytadan yuboriladi!
+                                    <i class="fa fa-info"></i> Vazifaga o`zgartirish kiritilganda a`zolariga qaytadan yuboriladi!
                                 </div>
                                 <div class="form-group">
                                     <div class="col-md-6">
                                         <a href="{{ route('edo-staff-protocols') }}" class="btn btn-flat btn-default">@lang('blade.cancel') </a>
-                                        <button type="submit" class="btn btn-flat btn-primary"><i class="fa fa-save"></i> @lang('blade.update')</button>
+                                        @if($model->status != 1)
+                                            <button id="updateButton" type="button" class="btn btn-info btn-md" data-toggle="modal" data-target="#myModal" data-status="{{ $model->status }}">
+                                                @lang('blade.update')
+                                            </button>                                    
+                                        @else
+                                            <button id="updateButtonGeneral" type="button" class="btn btn-info btn-md">
+                                                @lang('blade.update')
+                                            </button>
+                                        @endif
                                     </div>
-
                                 </div>
                             </div>
                             <!-- /.col -->
@@ -241,6 +262,14 @@
                                 <h3 class="box-title">@lang('blade.members')</h3>
                             </div>
                             <!-- /.box-header -->
+
+                            <div class="form-group has-success has-feedback">
+                                <input type="text" id="userSearch" class="form-control" onkeyup="subUserSearchFunction()"
+                                    placeholder="@lang('blade.search_executors')">
+                                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                                <span class="help-block">@lang('blade.at_least_3_letters')</span>
+                            </div>
+                            
                             <div class="box-body">
                                 <div class="box-tools">
                                     <div class="form-group">
@@ -294,6 +323,27 @@
             </div>
             <!-- /.row -->
         </div>
+
+            <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title text-center">@lang('blade.are_you_sure_edit') @lang('blade.reason')?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" name="protocol_id" id="report_protocol_id" value="{{ $model->id }}" hidden>
+                        <textarea id="reportText" rows="10" cols="35" style="resize: none;" placeholder=" @lang('blade.comment')..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">@lang('blade.no')</button>
+                        <button id="reportButton" type="button" class="btn btn-success">@lang('blade.yes')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
         <!-- Select2 -->
         <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
 
@@ -305,12 +355,64 @@
         <script src="{{ asset ("/ckeditor/samples/js/sample.js") }}"></script>
 
         <script type="text/javascript">
+
+            let CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
             $(function () {
                 //Initialize Select2 Elements
                 $(".select2").select2();
-            });
+
+            })
+
+            $('#updateButtonGeneral').on('click', function(){
+                $('#frm').submit()
+            })
+
+            $('#reportButton').on('click', function(){
+
+                let protocol_id = $('#report_protocol_id').val()
+                let report_text = $('#reportText').val()
+
+                if(report_text){
+
+                    $.ajax({
+                        url: '/edo/edit-report-protocols',
+                        type: 'POST',
+                        data: {
+                            _token:     CSRF_TOKEN,
+                            protocol_id:protocol_id,
+                            comment:    report_text,
+                        },
+                        dataType: 'JSON',
+                        success: function (data) {
+                            $('#frm').submit()
+                        },
+                        error: function () {
+
+                            console.log(data);
+                        }
+                    });
+                }else{
+                    $('#reportText').css('border-color', 'red')
+                }
+            })
 
             initSample();
+
+            function subUserSearchFunction() {
+                var input = document.getElementById("userSearch");
+                var filter = input.value.toLowerCase();
+                var nodes = document.getElementsByClassName('select-user');
+
+                for (i = 0; i < nodes.length; i++) {
+                    if (nodes[i].innerText.toLowerCase().includes(filter)) {
+                        nodes[i].style.display = "block";
+                    } else {
+                        nodes[i].style.display = "none";
+                    }
+                }
+            }
+
             // limit message title
             $('#messageTitle').keyup(function () {
 
@@ -390,6 +492,8 @@
                 fileCount += files.length;
                 showFileCount();
             });
+
+
 
         </script>
 

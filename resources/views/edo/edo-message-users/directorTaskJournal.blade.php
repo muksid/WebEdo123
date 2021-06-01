@@ -51,36 +51,27 @@
                         <form action="{{route('d-tasks-journal')}}" method="POST" role="search">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-md-1">
+                                <div class="col-md-4">
                                     <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="ofc" value="{{ $ofc }}"
-                                               placeholder="Деп №">
+                                        <input type="text" class="form-control" name="search_t" value="{{ $search_t??'' }}"
+                                               placeholder="@lang('blade.text')">
                                     </div>
                                 </div>
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="r" value="{{ $r }}"
-                                               placeholder="Kanc №">
-                                    </div>
-                                </div>
+                                
                                 <div class="col-md-2">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="f" value="{{ $f }}"
-                                               placeholder="@lang('blade.sender_organization')">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-default" id="daterange-btn">
+                                                    <span>
+                                                        <i class="fa fa-calendar"></i> Davr oraliq
+                                                    </span>
+                                                <i class="fa fa-caret-down"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="t" value="{{ $t }}"
-                                               placeholder="@lang('blade.doc_name')">
-                                    </div>
-                                </div>
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="d" value="{{ $d }}"
-                                               placeholder="Исх. №">
-                                    </div>
-                                </div>
+                                <input name="s_start" id="s_start" value="{{$s_start??''}}" hidden>
+                                <input name="s_end" id="s_end" value="{{$s_end??''}}" hidden>
                                 
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -116,10 +107,9 @@
                            @if($models->count())
                             @foreach ($models as $key => $model)
                                 <tr>
-
-                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $models->firstItem() + $key }} </td>
                                     <td class="text-bold text-left" style="min-width: 90px">
-                                        <span id="post_id_{{ $model->id }}">{{ $model->in_number.$model->in_number_a  }}</span>
+                                        <span id="post_id_{{ $model->id }}">{{ $model->in_number.$model->in_number_a  }} </span>
 
                                         <a href="javascript:void(0)" id="edit-post" data-id="{{ $model->id }}"> <i
                                                     class="fa fa-pencil text-green"></i></a>
@@ -254,6 +244,12 @@
         <script src="{{ asset ("/admin-lte/plugins/jQuery/jquery-2.2.3.min.js") }}"></script>
         <!-- AdminLTE for demo purposes -->
         <script src="{{ asset ("/js/jquery.validate.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/daterangepicker.js") }}"></script>
+        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
+
 
         <script>
 
@@ -300,6 +296,52 @@
                         }
                     });
                 });
+
+
+                 //Date picker
+                 $('#datepicker').datepicker({
+                    autoclose: true
+                });
+               
+                $('.input-datepicker').datepicker({
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+                $('.input-daterange').datepicker({
+                    todayBtn: 'linked',
+                    forceParse: false,
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+
+                //Date range as a button
+                $('#daterange-btn').daterangepicker(
+                    {
+                        ranges: {
+                            'Bugun': [moment(), moment()],
+                            'Kecha': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Ohirgi 7 kun': [moment().subtract(6, 'days'), moment()],
+                            'Ohirgi 30 kun': [moment().subtract(29, 'days'), moment()],
+                            'Bu oyda': [moment().startOf('month'), moment().endOf('month')],
+                            'O`tgan oyda': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment().subtract(29, 'days'),
+                        endDate: moment()
+                    },
+                    function (start, end) {
+                        var s_start = start.format('YYYY-MM-DD');
+
+                        var s_end = end.format('YYYY-MM-DD');
+
+                        $('#s_start').val(s_start);
+                        $('#s_end').val(s_end);
+
+                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                    }
+                );
             });
 
             if ($("#postForm").length > 0) {

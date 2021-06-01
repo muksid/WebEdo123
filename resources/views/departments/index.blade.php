@@ -88,7 +88,7 @@
                                         <a href="{{ route('departments.edit', $department->id) }}"><i class="fa fa-pencil"></i></a>
                                     </td>
                                     <td>
-                                        <form action="{{ url('departments/'.$department->id) }}" method="POST" style="display: inline-block">
+                                        <form action="{{ url('/admin/departments/'.$department->id) }}" method="POST" style="display: inline-block">
                                             {{ csrf_field() }}
                                             {{ method_field('DELETE') }}
 

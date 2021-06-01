@@ -466,4 +466,14 @@ return [
     // UW lang
     'previous'  => 'олдинга',
     'next'  => 'кейинги',
+
+    // Are you sure you want to delete text
+    'are_you_sure_delete'   => 'Ҳақиқатан ҳам ўчиришни хоҳлайсизми?',
+    'are_you_sure_edit'     => 'Ҳақиқатдан ҳам ўзгартиришни хоҳлайсизми?',
+    'reason'                => 'Сабаби',
+    'head_role'             => 'Асосий',
+    'yes'                   => 'Ҳа',
+    'no'                    => 'Йўқ',
+
+
 ];

@@ -150,14 +150,6 @@
                                                    class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
                                        </a>
                                    </li>
-                                   @if(Auth::user()->edoUsers === 'office')
-                                       <li> |</li>
-                                       <li class="pull-right">
-                                           <button class="btn btn-xs btn-danger deleteFile" data-id="{{ $file->id }}">
-                                               <i class="fa fa-trash"></i> @lang('blade.delete')
-                                           </button>
-                                       </li>
-                                   @endif
                                </ul>
                             <i class="text-red">({{ $file->size($file->file_size)??'' }}
                                 )</i><br><br>

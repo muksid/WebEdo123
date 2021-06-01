@@ -123,19 +123,19 @@
 
                                     @break
                                     @case('branch_admin')
-                                    <div class="form-group">
+                                    <div class="form-group" hidden>
                                         <label>Filial MFO</label>
-                                        <input type="text" name="branch_code" class="form-control"
-                                               value="{{Auth::user()->branch_code}}">
+                                        <input type="hidden" name="branch_code" class="form-control" value="{{Auth::user()->branch_code}}">
                                     </div>
                                     <div class="form-group">
                                         <label>Bo`limni tanlang</label>
-                                        <select class="form-control select2" name="depart_id" style="width: 100%;">
+                                        <select class="form-control select2" name="parent_id" style="width: 100%;">
                                             @foreach($departments as $department)
                                                 <option value="{{$department->id}}">{{$department->title}}</option>
                                             @endforeach
                                         </select>
                                     </div>
+                                    
                                 @break
                             @endswitch
                         @endforeach

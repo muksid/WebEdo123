@@ -464,4 +464,12 @@ return [
     'next'  => 'следующий',
     'clear'  => 'следующий',
 
+    // Are you sure you want to delete text
+    'are_you_sure_delete'   => 'Вы дейстивтельно хотите удалить?',
+    'are_you_sure_edit'     => 'Вы дейстивтельно хотите изменить?',
+    'reason'                => 'Причина',
+    'head_role'             => 'Главное лицо',
+    'yes'                   => 'Да',
+    'no'                    => 'Нет',
+
 ];

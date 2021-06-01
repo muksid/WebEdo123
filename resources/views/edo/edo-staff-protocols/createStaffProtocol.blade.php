@@ -139,6 +139,14 @@
                                 <h3 class="box-title">@lang('blade.select_members')</h3>
                             </div>
                             <!-- /.box-header -->
+
+                            <div class="form-group has-success has-feedback">
+                                <input type="text" id="userSearch" class="form-control" onkeyup="subUserSearchFunction()"
+                                    placeholder="@lang('blade.search_executors')">
+                                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                                <span class="help-block">@lang('blade.at_least_3_letters')</span>
+                            </div>
+
                             <div class="box-body">
                                 <div class="box-tools">
                                     <div class="form-group">
@@ -157,7 +165,7 @@
                                                         <span class="pull-right btn-box-tool user_role">
                                                             <select class="form-control" name="user_role[]">
                                                                 @if($value->user_sort == 1)
-                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="1">@lang('blade.head_role')</option>
                                                                     <option value="2">@lang('blade.members')</option>
                                                                     <option value="4">@lang('blade.suggested_member')</option>
                                                                 @else
@@ -165,7 +173,7 @@
                                                                         <option value="3">@lang('blade.confirming_person')</option>
                                                                     @endif
                                                                     <option value="2">@lang('blade.members')</option>
-                                                                    <option value="1">@lang('blade.management_guide')</option>
+                                                                    <option value="1">@lang('blade.head_role')</option>
                                                                     <option value="4">@lang('blade.suggested_member')</option>
                                                                 @endif
 
@@ -216,6 +224,21 @@
             });
 
             initSample();
+
+            function subUserSearchFunction() {
+                var input = document.getElementById("userSearch");
+                var filter = input.value.toLowerCase();
+                var nodes = document.getElementsByClassName('select-user');
+
+                for (i = 0; i < nodes.length; i++) {
+                    if (nodes[i].innerText.toLowerCase().includes(filter)) {
+                        nodes[i].style.display = "block";
+                    } else {
+                        nodes[i].style.display = "none";
+                    }
+                }
+            }
+            
             // limit message title
             $('#messageTitle').keyup(function () {
 

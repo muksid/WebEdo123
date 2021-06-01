@@ -86,17 +86,17 @@ class EdoMessageController extends Controller
     public function create()
     {
         $edoUsers = EdoUsers::where('user_id', Auth::id())->where('status', 1)->firstOrFail();
-        # If user kanc or helper
-        switch($edoUsers->role_id){
 
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 6:
-            case 17:
-            case 18:
-            case 19:
+        switch(Auth::user()->edoUsers()){
+            case 'guide':
+            case 'office':
+            case 'helper':
+            case 'director_department':
+            case 'admin':
+            case 'deputy_of_director':
+            case 'dep_helper':
+            case 'guide_manager':
+
             $users = EdoUsers::select('edo_users.*', DB::raw('CONCAT(branch_code, " - ", lname, " ", fname) AS full_name'), 'r.title as roleName')
                 ->join('users as u', 'edo_users.user_id', '=', 'u.id')
                 ->join('edo_user_roles as r', 'edo_users.role_id', '=', 'r.id')

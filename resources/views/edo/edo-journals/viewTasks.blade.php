@@ -38,7 +38,7 @@
                 </div>
             </div>
         @endif
-    <!-- Display Validation Errors -->
+        <!-- Display Validation Errors -->
         @if (count($errors) > 0)
             <div class="alert alert-danger">
                 <strong>@lang('blade.error')</strong> @lang('blade.error_check').<br><br>
@@ -62,25 +62,50 @@
                         <form action="{{route('edo-journals.viewTasks' ,$id)}}" method="POST" role="search">
                             {{ csrf_field() }}
                             <div class="row">
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="r" value="{{$r}}"
-                                                placeholder="@lang('blade.in_num')">
+                                <div class="col-md-2 has-success">
+                                    <div class="form-group">
+                                        <select name="u" class="form-control" style="width: 100%;">                                                
+                                            @if(($u??'') == '')
+                                                <option selected="selected" value=""> @lang('blade.to_whom') </option>
+                                            @else
+                                                @php
+                                                    $edo_user = \App\EdoUsers::where('user_id', $u)->first();
+                                                @endphp
+                                                <option value="{{$edo_user->user_id}}" selected="selected">{{$edo_user->user->substrUserName($edo_user->user_id)??'' }}</option>
+                                            @endif
+                                            
+                                            @foreach($models as $key => $value)
+                                                <option class="{{ (($value->director->status??1) != 1) ? 'text-red':'' }}" value="{{$value->to_user_id}}">
+                                                    {{ $value->director->full_name??'' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-2">
                                     <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="t" value="{{$t}}"
-                                                placeholder="@lang('blade.sender_organization')">
+                                        <input type="text" class="form-control" name="t" value="{{$t??''}}"
+                                                placeholder="@lang('blade.text')">
                                     </div>
                                 </div>
-                                <div class="col-md-1">
-                                    <div class="form-group has-success">
-                                        <input type="text" class="form-control" name="i_r" value="{{$i_r}}"
-                                                placeholder="@lang('blade.out_num')">
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-default" id="daterange-btn">
+                                                    <span>
+                                                        <i class="fa fa-calendar"></i> Davr oraliq
+                                                    </span>
+                                                <i class="fa fa-caret-down"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                                <input name="s_start" id="s_start" value="{{$s_start??''}}" hidden>
+                                <input name="s_end" id="s_end" value="{{$s_end??''}}" hidden>
+
+                                
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <button type="button" class="btn btn-default" onclick="location.href='/edo-journals.viewTasks/{{$id}}';"><i class="fa fa-refresh"></i> @lang('blade.reset')</button>
@@ -105,7 +130,6 @@
                                 <th class="text-center" style="vertical-align: inherit;">@lang('blade.sender_organization')</th>
                                 <th class="text-center" style="max-width: 100px;">       @lang('blade.incoming_num_doc')</th>
                                 <th class="text-center" style="max-width: 100px;">       @lang('blade.incoming_date_doc')</th>
-                                <th class="text-center" style="vertical-align: inherit;">@lang('blade.status')</th>
                                 <th class="text-center" style="vertical-align: inherit;">@lang('blade.to_whom')</th>
                                 <th class="text-center" style="vertical-align: inherit;">@lang('blade.status')</th>
                                 <th class="text-center" style="vertical-align: inherit;">@lang('blade.sent_date_time')  </th>
@@ -176,17 +200,13 @@
                                         </a>
                                     </td>
                                     <td class="text-left">
-                                        <b>№ {{ $model->message->out_number??''}}</b>
+                                        <b> {{ $model->message->out_number??''}}</b>
                                     </td>
                                     <td class="text-sm text-center">
                                         {{ \Carbon\Carbon::parse($model->message->out_date)->format('d.m.Y')}} 
                                     </td>
                                     <td class="text-maroon">
                                         {{ $model->toUser->full_name??'' }}
-                                    </td>
-                                    <td class="text-green">
-                                        <button type="button" value="{{ $model->edo_message_id }}" class="btn btn-sm btn-success btn-flat get_users">
-                                            <i class="fa fa-user"></i></button>
                                     </td>
                                     <td>
                                         @switch($model->status)
@@ -281,6 +301,12 @@
         <script src="/admin-lte/plugins/datatables/dataTables.bootstrap.min.js"></script>
         <!-- AdminLTE for demo purposes -->
         <script src="/js/jquery.validate.js"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/moment.min.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/daterangepicker/daterangepicker.js") }}"></script>
+        <script src="{{ asset ("/admin-lte/bootstrap/js/bootstrap-datepicker.js") }}"></script>
+        <script src="{{ asset("/admin-lte/plugins/select2/select2.full.min.js") }}"></script>
+
+        
 
         <script>
 
@@ -335,6 +361,51 @@
 
             $(function () {
                 $("#example1").DataTable();
+
+                //Date picker
+                $('#datepicker').datepicker({
+                    autoclose: true
+                });
+               
+                $('.input-datepicker').datepicker({
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+                $('.input-daterange').datepicker({
+                    todayBtn: 'linked',
+                    forceParse: false,
+                    todayHighlight: true,
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+
+                //Date range as a button
+                $('#daterange-btn').daterangepicker(
+                    {
+                        ranges: {
+                            'Bugun': [moment(), moment()],
+                            'Kecha': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Ohirgi 7 kun': [moment().subtract(6, 'days'), moment()],
+                            'Ohirgi 30 kun': [moment().subtract(29, 'days'), moment()],
+                            'Bu oyda': [moment().startOf('month'), moment().endOf('month')],
+                            'O`tgan oyda': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment().subtract(29, 'days'),
+                        endDate: moment()
+                    },
+                    function (start, end) {
+                        var s_start = start.format('YYYY-MM-DD');
+
+                        var s_end = end.format('YYYY-MM-DD');
+
+                        $('#s_start').val(s_start);
+                        $('#s_end').val(s_end);
+
+                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                    }
+                );
             });
 
             // close Modal

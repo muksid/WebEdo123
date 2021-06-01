@@ -18,20 +18,31 @@ class DepartmentController extends Controller
 
     public function index(Request $request)
     {
-        $departments = Department::orderBy('id','ASC')->get();
-
-        $allDepartments = Department::all();
-
+        $user = Auth::user();
+        if(in_array("admin", json_decode(Auth::user()->roles))){
+            
+            $departments = Department::orderBy('id','ASC')->get();            
+            
+            $allDepartments = Department::all();
+            
+        }else{
+            
+            $user_department = Department::where('id', $user->depart_id)->orderBy('id','ASC')->first();
+            $departments = Department::where('depart_id', $user_department->depart_id)->orderBy('id','ASC')->get();
+        
+        }
         // count() //
         @include('count_message.php');
 
-        return view('departments.index',compact('departments','allDepartments',
-            'inbox_count','sent_count','all_inbox_count'));
-
+        return view('departments.index',compact('departments','inbox_count','sent_count','all_inbox_count'));
     }
 
     public function create()
     {
+        $user = Auth::user();
+
+        $user_department = Department::where('id', $user->depart_id)->orderBy('id','ASC')->first();
+        $departments = Department::where('depart_id', $user_department->depart_id)->orderBy('id','ASC')->get();
 
         $filial = Department::where('parent_id', 0)
             ->where('status', '=', 1)
@@ -40,7 +51,7 @@ class DepartmentController extends Controller
         // count() //
         @include('count_message.php');
 
-        return view('departments.create',compact('filial',
+        return view('departments.create',compact('filial','departments',
             'inbox_count','sent_count','all_inbox_count'));
 
     }
@@ -104,9 +115,11 @@ class DepartmentController extends Controller
             'branch_code' => 'required',
         ]);
 
+
         $input = $request->all();
         $input['parent_id'] = empty($input['parent_id']) ? 0 : $input['parent_id'];
         $d = Department::where('id',$request['parent_id'])->first();
+
         // If a new created department is in 'Bosh Bank' and is a department
         if($request['branch_code'] == '09011' && $d->id == 1){
             $lastId = Department::orderBy('id', 'DESC')->first();
@@ -132,14 +145,21 @@ class DepartmentController extends Controller
 
     public function edit(Department $department)
     {
-
+        // dd($department);
         $filials = Department::where('parent_id', '=', 0)->where('status', '=', 1)->orderBy('id','ASC')->get();
 
         $departments = Department::where('status', '=', 1)->where('parent_id', '=', 0)->get();
 
-        // count() //
+        $parent = Department::where('id', $department->parent_id)->first();
+
         @include('count_message.php');
-        return view('departments.edit',compact('filials', 'department','departments',
+
+        if(in_array("branch_admin", json_decode(Auth::user()->roles))){
+            $departments = Department::where('branch_code', Auth::user()->branch_code)->where('status', 1)->get();
+        }
+        // count() //
+
+        return view('departments.edit',compact('filials','parent', 'department','departments',
             'inbox_count','sent_count','all_inbox_count'));
     }
 
@@ -149,6 +169,12 @@ class DepartmentController extends Controller
             'title' => 'required',
             'title_ru' => 'required',
         ]);
+        // dd($request->all());
+
+        if(in_array("branch_admin", json_decode(Auth::user()->roles))){
+            $department->update($request->all());
+            return redirect()->route('departments.index')->with('success','Department updated successfully.');
+        }
 
         $d = Department::where('id',$request['parent_id'])->first();
 

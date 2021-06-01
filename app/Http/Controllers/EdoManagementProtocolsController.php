@@ -7,6 +7,7 @@ use App\EdoManagementProtocolMembers;
 use App\EdoManagementProtocols;
 use App\EdoProtocolFiles;
 use App\EdoUsers;
+use App\EdoProtocolsEditReport;
 use App\User;
 use Carbon\Carbon;
 use Response;
@@ -1148,6 +1149,23 @@ class EdoManagementProtocolsController extends Controller
             return back()->with('error', 'Protocol Not Found');
         }
 
+    }
+
+    public function editReport(Request $request)
+    {
+        $this->validate($request, [
+            'protocol_id'   => 'required',
+            'comment'       => 'required',
+        ]);
+
+        $model              = new EdoProtocolsEditReport();
+        $model->user_id     = Auth::id();
+        $model->protocol_id = $request->input('protocol_id');
+        $model->comment     = $request->input('comment');
+        $model->save();
+
+        $success = 'Successfully reported';
+        return response()->json([ $success]);
     }
 
 }
