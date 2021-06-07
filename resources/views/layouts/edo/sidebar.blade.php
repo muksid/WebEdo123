@@ -881,6 +881,14 @@
                         <i class="glyphicon glyphicon-forward"></i> <span> Yo`naltirilgan xatlar</span>
                     </a>
                 </li>
+                @if(Auth::user()->protocolMember)
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols/11') }}"><i class="fa fa-reorder"></i>
+                        @lang('blade.hr_orders')<span class="pull-right-container">
+                        <small class="label pull-right bg-red"> {{ Auth::user()->countHRProtocols() }}</small></span>
+                    </a>
+                </li>
+                @endif
                 @break
                 @case('filial_director')
                 <li>
@@ -898,6 +906,14 @@
                         <i class="glyphicon glyphicon-folder-close"></i> <span>@lang('blade.closed')</span>
                     </a>
                 </li>
+                @if(Auth::user()->protocolMember)
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols/11') }}"><i class="fa fa-reorder"></i>
+                        @lang('blade.hr_orders')<span class="pull-right-container">
+                        <small class="label pull-right bg-red"> {{ Auth::user()->countHRProtocols() }}</small></span>
+                    </a>
+                </li>
+                @endif
                 @break
                 @case('filial_emp')
                 <li>
@@ -915,6 +931,14 @@
                         <i class="glyphicon glyphicon-folder-close"></i> <span>@lang('blade.closed')</span>
                     </a>
                 </li>
+                @if(Auth::user()->protocolMember)
+                <li>
+                    <a href="{{ url('/edo/hr-member-protocols/11') }}"><i class="fa fa-reorder"></i>
+                        @lang('blade.hr_orders')<span class="pull-right-container">
+                        <small class="label pull-right bg-red"> {{ Auth::user()->countHRProtocols() }}</small></span>
+                    </a>
+                </li>
+                @endif
                 @break
                 @case('filial_admin')
                 <li>
