@@ -128,7 +128,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>@lang('blade.outgoing_num')</label><sup class="text-red"> *</sup>
-                                                <input type="text" name="out_number" maxlength="25" class="form-control"
+                                                <input type="text" name="out_number" maxlength="50" class="form-control"
                                                        placeholder="@lang('blade.enter_num')" required>
                                             </div>
                                         </div>

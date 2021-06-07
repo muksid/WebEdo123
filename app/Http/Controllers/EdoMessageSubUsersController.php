@@ -9,6 +9,7 @@ use App\EdoMessageSubUsers;
 use App\EdoMessageUsers;
 use App\EdoReplyMessage;
 use App\EdoTypeMessages;
+use App\EdoMessageFile;
 use App\EdoUserRoles;
 use App\EdoUsers;
 use App\User;
@@ -272,8 +273,6 @@ class EdoMessageSubUsersController extends Controller
 
         // model message
         $model = EdoMessage::where('message_hash', $slug)->firstOrFail();
-
-
 
         // performer users
         $perfUsers = DB::table('edo_type_messages as a')

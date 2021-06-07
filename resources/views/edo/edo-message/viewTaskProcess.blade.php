@@ -181,9 +181,10 @@
                                         </li>
                                     @endif
                                 </ul>
-                                <i class="text-red">({{ $file->size($file->file_size)??'' }}
-                                    )</i><br><br>
-                            </div><br>
+                                <i class="text-red">({{ $file->size($file->file_size)??'' }})</i>
+                                <br><br>
+                            </div>
+                            <br>
 
                         @endforeach
 

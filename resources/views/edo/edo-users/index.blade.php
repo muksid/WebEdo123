@@ -107,7 +107,7 @@
                             @foreach ($models as $key => $model)
                                 <tr>
                                     <td>{{ $i++ }}</td>
-                                    <td>{{ $model->user->username??'' }}</td>
+                                    <td>{{ $model->user->username??'' }} {{$model->user_id}}</td>
                                     <td>{{ $model->user->lname??''}} {{ $model->user->fname??'' }}</td>
                                     <td class="text-sm text-muted"><sup>{{ $model->user->branch_code??'' }}</sup> {{ $model->department->title ?? 'null' }}</td>
                                     <td class="text-sm text-muted">{{ $model->user->job_title??'' }}</td>
@@ -129,7 +129,7 @@
                                             {{ csrf_field() }}
                                             {{ method_field('DELETE') }}
 
-                                            <button type="submit" id="delete-group-{{ $model->id }}" class="btn btn-danger">
+                                            <button onclick="return confirm('@lang('blade.are_you_sure_delete')')" type="submit" id="delete-group-{{ $model->id }}" class="btn btn-danger">
                                                 <i class="fa fa-btn fa-trash"></i>
                                             </button>
                                         </form>
