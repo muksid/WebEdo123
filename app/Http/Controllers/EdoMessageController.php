@@ -1221,7 +1221,7 @@ class EdoMessageController extends Controller
     public function fileDownload($id)
     {
         //
-        $model = EdoMessageFile::find($id);
+        $model = EdoMessageFile::findOrFail($id);
 
         $path = '/'.$model->file_path.$model->file_hash;
 
