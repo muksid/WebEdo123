@@ -758,7 +758,7 @@ class EdoManagementProtocolsController extends Controller
 
             if($reg_num)    $search->where('stf_number', 'like', '%'.$reg_num.'%');
 
-            if($title)      $search->where('title', '%'.$title.'%');
+            if($title)      $search->where('title','like', '%'.$title.'%');
 
             if($date)       $search->where('stf_date', $date);
 
