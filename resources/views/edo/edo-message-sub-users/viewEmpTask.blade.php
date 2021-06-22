@@ -151,8 +151,8 @@
                                        </a>
                                    </li>
                                </ul>
-                            <i class="text-red">({{ $file->size($file->file_size)??'' }}
-                                )</i><br><br>
+                            <i class="text-red">({{ $file->size($file->file_size)??'' }})</i>
+                            <br><br>
                         @endforeach
                         <hr>
                         <p class="text-bold text-center">{{ $model->title??'' }}</p>

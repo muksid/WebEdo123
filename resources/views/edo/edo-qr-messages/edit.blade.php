@@ -151,22 +151,27 @@
                                             <div class="col-md-12">
                                                 <div class="box-body">
                                                     <div class="col-md-3">
-                                                        @foreach ($modelFiles as $file)
-                                                            <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}"
-                                                               class="text-info text-bold"
-                                                               target="_blank" class="mailbox-attachment-name"
-                                                               onclick="window.open('<?php echo('/edoPreView/' . $file->file_hash); ?>',
-                                                                       'modal',
-                                                                       'width=800,height=900,top=30,left=500');
-                                                                       return false;"> <i
-                                                                        class="fa fa-search-plus"></i> {{ $file->file_name }}
+                                                    
+                                                        @foreach (modelFiles as $file)
+                                                            <a href="#"
+                                                                class="text-info text-bold mailbox-attachment-name"
+                                                                target="_blank"
+                                                                onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
+                                                                        'modal',
+                                                                        'width=800,height=900,top=30,left=500');
+                                                                        return false;">
+                                                                <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
                                                             </a>
-                                                            <a href="{{ route('edo-qr-file-delete',['file'=>$file->id]) }}"
-                                                               class="pull-right text-red"><i
-                                                                        class="fa fa-trash"></i> @lang('blade.delete')
-                                                            </a>
-                                                            <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }}
-                                                                )</i><br><br>
+                                                            <ul class="list-inline pull-right">
+                                                                <li>
+                                                                    <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                                                                        class="link-black text-sm"><i
+                                                                                class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                            <i class="text-red">({{ $file->size($file->file_size)??'' }})</i>
+                                                            <br><br>
                                                         @endforeach
 
                                                     </div>
