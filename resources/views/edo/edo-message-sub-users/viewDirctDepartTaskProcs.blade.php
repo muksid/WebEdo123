@@ -201,22 +201,27 @@
                                 <p>{{ $reply->text }}... <a href="#">@lang('blade.more')</a></p>
 
                                 <!-- Attachment -->
-                                @if(!empty($reply->files))
-                                <div class="attachment-block clearfix">
-                                    @foreach($reply->files as $file)
-                                        <div class="attachment-heading">
-                                            <a href="{{ route('edoPreView',['preViewFile'=>$file->file_hash]) }}" class="text-info text-bold"
-                                               target="_blank" class="mailbox-attachment-name"
-                                               onclick="window.open('<?php echo ('/edoPreView/'. $file->file_hash); ?>',
-                                                       'modal',
-                                                       'width=800,height=900,top=30,left=500');
-                                                       return false;"> <i class="fa fa-search-plus"></i> {{ $file->file_name }}</a>
-                                            <a href="{{ route('edo-reply-load',['file'=>$file->file_hash]) }}" class="pull-right"><i class="fa fa-cloud-download text-primary"></i> @lang('blade.download')</a>
-                                            <i class="text-red">({{ \App\Message::formatSizeUnits($file->file_size) }})</i><br><br>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @endif
+                                @foreach ($model->files as $file)
+                                    <a href="#"
+                                        class="text-info text-bold mailbox-attachment-name"
+                                        target="_blank"
+                                        onclick="window.open('<?php echo('/edo-fileView/' . $file->id); ?>',
+                                                'modal',
+                                                'width=800,height=900,top=30,left=500');
+                                                return false;">
+                                        <i class="fa fa-search-plus"></i> {{ \Illuminate\Support\Str::limit($file->file_name, 35,'...') }}
+                                    </a>
+                                    <ul class="list-inline pull-right">
+                                        <li>
+                                            <a href="{{ url('edo-fileDownload',['id'=>$file->id]) }}"
+                                                class="link-black text-sm"><i
+                                                        class="fa fa-cloud-download text-primary"></i> @lang('blade.download')
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <i class="text-red">({{ $file->size($file->file_size)??'' }})</i>
+                                    <br><br>
+                                @endforeach
                                 <!-- /.attachment-block -->
 
                                 @if($reply->status == 0 && (Auth::user()->edoUsers() == 'director_department' || Auth::user()->edoUsers() == 'deputy_of_director'))

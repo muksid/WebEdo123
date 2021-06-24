@@ -277,13 +277,12 @@ class EdoMessageController extends Controller
         //
         $model = EdoMessage::where('message_hash', $id)->firstOrFail();
 
-        $users = EdoUsers::select('edo_users.*', 'r.title as roleName')
-            ->join('edo_user_roles as r', 'edo_users.role_id', '=', 'r.id')
-            ->where('edo_users.status', 1)
-            ->whereIn('r.role_code', ['guide', 'guide_manager','director_department', 'all_dep_director'])
-            ->orderBy('edo_users.sort', 'ASC')
+        $users = EdoUsers::whereHas('userRole', function($query){
+                $query->whereIn('role_code', ['guide', 'guide_manager','director_department', 'all_dep_director']);
+            })
+            ->where('status', 1)
+            ->orderBy('sort', 'ASC')
             ->get();
-
 
         $filial_users = DB::table('edo_users as a')
             ->join('users as u', 'a.user_id', '=', 'u.id')
@@ -677,7 +676,7 @@ class EdoMessageController extends Controller
             }
 
         }
-
+        
 
         if ($request->input('to_user_id') != null) {
 
@@ -1221,7 +1220,7 @@ class EdoMessageController extends Controller
     public function fileDownload($id)
     {
         //
-        $model = EdoMessageFile::find($id);
+        $model = EdoMessageFile::findOrFail($id);
 
         $path = '/'.$model->file_path.$model->file_hash;
 

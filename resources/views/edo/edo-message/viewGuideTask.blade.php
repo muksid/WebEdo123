@@ -396,8 +396,7 @@
                                                 <label>@lang('blade.deadline')</label>
                                                 <div class="input-group date">
                                                     <div class="input-group input-daterange">
-                                                        <input type="text" name="term_date" class="form-control"
-                                                               readonly/>
+                                                        <input type="text" name="term_date" class="form-control" readonly/>
                                                     </div>
                                                     <div id="resetTermDate" class="input-group-addon">
                                                         <i class="fa fa-remove text-maroon"></i>
@@ -644,21 +643,17 @@
                                                     <select class="form-control" name="performer_user[]">
                                                         @foreach($perfUserTypes as $key => $type)
 
-                                                            <option value="{{ $type->id }}"><label
-                                                                        for="txt206451"></label>{{ $type->title_ru }}</option>
+                                                            <option value="{{ $type->id }}"><label for="txt206451"></label>{{ $type->title_ru }}</option>
 
                                                         @endforeach
                                                     </select>
                                                 </span>
                                                 <div class="username">
-                                                    @if($value->user->id === 1134)
-                                                        {{$value->user->sname??''}} {{ $value->user->lname??''}} {{$value->user->fname??'' }}
-                                                    @else
-                                                        {{ mb_substr($value->user->fname??'', 0 ,1).'.'.mb_substr($value->user->sname??'', 0 ,1).'.'.$value->user->lname??'' }}
-                                                    @endif
+                                                    
+                                                    {{ mb_substr($value->user->fname??'', 0 ,1).'.'.mb_substr($value->user->sname??'', 0 ,1).'.'.$value->user->lname??'' }}
+                                                    
                                                     <input value="{{ $value->user_id }}" name="to_user_id[]" hidden/>
-                                                    <input value="{{ $value->department_id }}" name="depart_id[]"
-                                                           hidden/>
+                                                    <input value="{{ $value->user->department->id }}" name="depart_id[]" hidden/>
                                                 </div>
                                                 <div class="description">{{ $value->department->title??'' }}
                                                     - {{ $value->user->job_title??'' }}</div>

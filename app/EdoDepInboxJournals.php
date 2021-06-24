@@ -28,7 +28,7 @@ class EdoDepInboxJournals extends Model
     // department director
     public function director()
     {
-        return $this->hasOne(User::class, 'id','director_id')->where('status', 1);
+        return $this->hasOne(User::class, 'id','director_id');
     }
 
     // department director
