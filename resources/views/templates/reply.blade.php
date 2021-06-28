@@ -21,9 +21,9 @@
                     <input name="to_users[]" value="{{$model->user_id}}" hidden />
 
                     <div class="form-group">
-                        <label>@lang('blade.subject')</label>
+                        <label>@lang('blade.subject') <span class="text-red">*</span></label>
 
-                        <input type="text" name="subject" class="form-control" placeholder="@lang('blade.subject')">
+                        <input type="text" name="subject" class="form-control" placeholder="@lang('blade.subject')" required>
 
                     </div>
 
