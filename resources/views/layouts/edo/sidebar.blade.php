@@ -742,6 +742,44 @@
                         <i class="glyphicon glyphicon-hourglass"></i> <span>@lang('blade.on_process')</span>
                     </a>
                 </li>
+                @if(Auth::user()->protocolMember)
+                    <li>
+                        <a href="{{ url('/edo/hr-member-protocols/11') }}"><i class="fa fa-reorder"></i>
+                            @lang('blade.hr_orders')<span class="pull-right-container">
+                            <small class="label pull-right bg-red"> {{ Auth::user()->countHRProtocols() }}</small></span>
+                        </a>
+                    </li>
+                @endif
+                @if(Auth::user()->protocolMember)
+                    <li>
+                        <a href="{{ url('/edo/hr-member-protocols/3') }}">
+                            <i class="fa fa-reorder"></i> @lang('blade.protocol_management')
+                            <span class="pull-right-container">
+                                <small class="label pull-right bg-red"> {{ Auth::user()->countApparatProtocols() }}</small>
+                            </span>
+                        </a>
+                    </li>
+                @endif
+                @if(Auth::user()->protocolMember)
+                    <li>
+                        <a href="{{ url('/edo/hr-member-protocols/24') }}"><i class="fa fa-reorder"></i>
+                            @lang('blade.strategy_orders')
+                            <span class="pull-right-container">
+                                <small class="label pull-right bg-red"> {{ Auth::user()->countStrategyProtocols() }}</small>
+                            </span>
+                        </a>
+                    </li>
+                @endif
+                @if(Auth::user()->protocolMember)
+                    <li>
+                        <a href="{{ url('/edo/hr-member-protocols/20') }}"><i class="fa fa-reorder"></i>
+                            @lang('blade.kazna_protocols')
+                            <span class="pull-right-container">
+                                <small class="label pull-right bg-red"> {{ Auth::user()->countKaznaProtocols() }}</small>
+                            </span>
+                        </a>
+                    </li>
+                @endif
                 <li>
                     <a href="{{ route('e-tasks-closed') }}">
                         <i class="glyphicon glyphicon-folder-close"></i> <span>@lang('blade.closed')</span>
